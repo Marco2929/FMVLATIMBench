@@ -13,7 +13,7 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 def get_api_key() -> str:
-    with open('../.env', 'r') as f:
+    with open('.env', 'r') as f:
         for line in f:
             key, value = line.strip().split('=', 1)
             os.environ[key] = value
@@ -24,7 +24,7 @@ def get_api_key() -> str:
 
 def parse_ground_truth(json_path:Path) -> str:
     '''Example:
-{
+
   "version": "TIM2",
   "title": "OBJ_REC1",
   "description": "Identify the object.",
