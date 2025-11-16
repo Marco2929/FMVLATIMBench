@@ -1,0 +1,33 @@
+{
+  "version": "TIM2",
+  "title": "OBJ_REC5",
+  "description": "Identify the object.",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "MAGNIFYING_GLASS",
+      "position": {
+        "x": 188,
+        "y": 105
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 40,
+        "width_2": 18,
+        "height_2": 40
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED"
+      ]
+    }
+  ]
+}

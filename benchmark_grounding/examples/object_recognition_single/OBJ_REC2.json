@@ -1,0 +1,33 @@
+{
+  "version": "TIM2",
+  "title": "OBJ_REC2",
+  "description": "Identify the object.",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "RED_BRICK_WALL",
+      "position": {
+        "x": 200,
+        "y": 136
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 16,
+        "width_2": 32,
+        "height_2": 16
+      },
+      "flags_3": [
+        "LOCKED",
+        "WALL_PART"
+      ]
+    }
+  ]
+}

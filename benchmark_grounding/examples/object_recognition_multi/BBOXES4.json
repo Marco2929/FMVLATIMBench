@@ -1,0 +1,189 @@
+{
+  "version": "TIM2",
+  "title": "BBOXES4",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 9
+  },
+  "parts": [
+    {
+      "part_type": "UNKNOWN_44",
+      "position": {
+        "x": 485,
+        "y": 167
+      },
+      "size": {
+        "width_1": 16,
+        "height_1": 15,
+        "width_2": 15,
+        "height_2": 15
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "UNKNOWN_28",
+      "position": {
+        "x": 458,
+        "y": 164
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 18,
+        "width_2": 18,
+        "height_2": 18
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "SUPER_BALL",
+      "position": {
+        "x": 386,
+        "y": 164
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "BASKETBALL",
+      "position": {
+        "x": 222,
+        "y": 151
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 32,
+        "width_2": 32,
+        "height_2": 32
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "UNKNOWN_68",
+      "position": {
+        "x": 305,
+        "y": 153
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 32,
+        "width_2": 32,
+        "height_2": 32
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "POOL_BALL",
+      "position": {
+        "x": 190,
+        "y": 162
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_PROGRAM_ICON",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "PROGRAMMABLE_BALL",
+      "position": {
+        "x": 422,
+        "y": 156
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 27,
+        "width_2": 27,
+        "height_2": 27
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_PROGRAM_ICON",
+        "SHOW_SOLUTION_ICON"
+      ],
+      "appearance": 5,
+      "programmable_ball_data": {
+        "density": 2832,
+        "elasticity": 128,
+        "friction": 16,
+        "gravity_buoyancy": 269,
+        "mass": 200,
+        "appearance_2": 5
+      }
+    },
+    {
+      "part_type": "BOWLING_BALL",
+      "position": {
+        "x": 264,
+        "y": 151
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 32,
+        "width_2": 32,
+        "height_2": 32
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "UNKNOWN_43",
+      "position": {
+        "x": 350,
+        "y": 162
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    }
+  ]
+}

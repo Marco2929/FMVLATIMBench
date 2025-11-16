@@ -1,0 +1,34 @@
+{
+  "version": "TIM2",
+  "title": "OBJ_REC1",
+  "description": "Identify the object.",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 1
+  },
+  "parts": [
+    {
+      "part_type": "BASKETBALL",
+      "position": {
+        "x": 186,
+        "y": 108
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 32,
+        "width_2": 32,
+        "height_2": 32
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "version": "TIM2",
+  "title": "OBJ_REC4",
+  "description": "Identify the object.",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 1
+  },
+  "parts": [
+    {
+      "part_type": "POOL_BALL",
+      "position": {
+        "x": 182,
+        "y": 111
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_PROGRAM_ICON",
+        "SHOW_SOLUTION_ICON"
+      ]
+    }
+  ]
+}

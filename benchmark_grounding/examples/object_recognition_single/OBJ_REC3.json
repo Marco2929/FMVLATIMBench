@@ -1,0 +1,40 @@
+{
+  "version": "TIM2",
+  "title": "OBJ_REC3",
+  "description": "Identify the object.",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "TEETER_TOTTER",
+      "position": {
+        "x": 192,
+        "y": 128
+      },
+      "size": {
+        "width_1": 88,
+        "height_1": 40,
+        "width_2": 81,
+        "height_2": 40
+      },
+      "flags_3": [
+        "LOCKED"
+      ],
+      "rope_1_connection": {
+        "x": 5,
+        "y": 26
+      },
+      "rope_2_connection": {
+        "x": 72,
+        "y": 2
+      }
+    }
+  ]
+}
