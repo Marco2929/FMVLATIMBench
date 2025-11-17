@@ -1,5 +1,12 @@
-SYSTEM_PROMPT = """Analyze the image and identify the object that is inside the blue game play area according to their properties.
-Respond only with one object name from the given list and nothing else.
+SYSTEM_PROMPT = """Analyze the image and identify the objects that are inside the blue game play area according to their properties.
+Respond only with one object name from the given list according to the TASK_DESCRIPTION under the list and nothing else.
 
 Possible objects:
-BOWLING_BALL,BASKETBALL,SOCCER_BALL,PINBALL,SUPER_BALL,PROGRAMMABLE_BALL,BASEBALL,TENNIS_BALL,YELLOW_BRICK_WALL,CINDER_BLOCK_WALL,GRECO_ROMAN_WALL,WOODEN_WALL,LOG_WALL,CAUTION_WALL,GRASS_FLOOR,SAND_WALL,PIPE_WALL,CURVED_PIPE_WALL,T_CONNECTOR,LARGE_CURVED_PIPE,ACCELERATOR_TUBE,LATTICE_ARCHWAY,SCAFFOLD_BARRIER,WOODEN_BARRIER,ARCHWAY,BRICK_INCLINE,YELLOW_BRICK_INCLINE,GRANITE_INCLINE,WOOD_INCLINE,LOG_INCLINE,GRASS_INCLINE,POOL_TABLE_WALL,POOL_CUE,TRAP_DOOR,BALLOON,HOT_AIR_BALLOON,BLIMP,TEETER_TOTTER,TIPPY_TRAILER,PULLEY,BOAT_CLEAT,TIN_SNIPS,CAPTAIN_Z_SUPER_PHASER,BUCKET,LEAKY_BUCKET,LAUNDRY_BASKET,FLASHLIGHT,LAVA_LAMP,MAGNIFYING_GLASS,CANDLE,ALADDINS_LAMP,FINT_AND_STARTER,MATCH_ON_A_SPRING,CANNON,DYNAMITE,ROCKET,FIREWORKS,MISSILE,NITROGYRECINE,CAN_OPENER,ELECTRIC_MIXER,COFFEE_POT,ELECTRIC_FAN,VACUUM,EGG_TIMER,ELECTRIC_MOTOR,ELECTRIC_SWITCH_AND_OUTLET,ELECTRICAL_OUTLET,SOLAR_PANEL,LASER_ACTIVATED_PLUG,RED_LASER,GREEN_LASER,BLUE_LASER,LASER_MIXER,ANGLED_MIRROR,LASER_DETECTOR,MOUSE_MOTOR,MANDRILL_MOTOR,CONVEYOR_BELT,BELT,GEAR,TINY_GEAR,PINWHEEL,TRANS_ROTO_MATIC,ROTO_TRANS_CONVERTER,BIKE_PUMP,ANTI_GRAVITY_PAD,PINBALL_BUMPER,PINBALL_FLIPPER,BOXING_GLOVE,MELS_HOUSE,MOUSE_HOLE,CHEESE,NEWTON_MOUSE,CURIE_CAT,FISH_TANK,ALLIGATOR,MEL_SCHLEMMINGTON,BOXES,MESSAGE_COMPUTER"""
+Bowling Ball - This bowling ball is real heavy and doesn't bounce much.
+Basketball - This basketball is medium weight and very bouncy.
+Soccer Ball - This soccer ball is medium in both weight and bounciness.
+Pinball - This pinball is very hard and heavy and doesn't bounce much.
+Super Ball - This super ball gains height with every bounce. The harder it's hit, the further it will roll. It's not affected by gravity. You can program it to show any number on its surface.
+Programmable Ball - This ball can be programmed to vary in appearance, mass, elasticity, density, and friction.
+Baseball - This baseball is pretty light and not very bouncy.
+Tennis Ball - This tennis ball or floor can be stretched vertically or horizontally to any length you need. It's not as slippery as a caution wall. Explosives will blow it up."""

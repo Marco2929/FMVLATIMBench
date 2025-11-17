@@ -37,7 +37,7 @@
       }
     },
     {
-      "part_type": "RED_BRICK_WALL",
+      "part_type": "CANDLE",
       "position": {
         "x": 344,
         "y": 184
@@ -50,7 +50,7 @@
       },
       "flags_3": [
         "LOCKED",
-        "WALL_PART"
+        "UNKNOWN_0x8"
       ]
     },
     {

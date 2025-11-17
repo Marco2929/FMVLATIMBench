@@ -1,0 +1,1 @@
+SYSTEM_PROMPT = """TASK_DESCRIPTION: Which ball has the highest elasticity"""
