@@ -1,26 +1,10 @@
-import base64
 import json
 from pathlib import Path
 from openai import OpenAI
 import argparse
-import os
+from FMVLATIMBench.utils import get_api_key, encode_image
 
 from benchmark1_grounding.system_prompts.qwen3vl_single_bbox import SYSTEM_PROMPT
-
-def encode_image(image_path):
-    """Encode the image to base64."""
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
-
-def get_api_key() -> str:
-    with open('.env', 'r') as f:
-        for line in f:
-            key, value = line.strip().split('=', 1)
-            os.environ[key] = value
-    API_KEY = os.getenv("OPENROUTER_API_KEY")
-    if not API_KEY:
-        raise ValueError("Please set the OPENROUTER_API_KEY environment variable (e.g. in .env)")
-    return API_KEY
 
 def parse_ground_truth(json_path:Path) -> str:
     '''Example:
