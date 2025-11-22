@@ -1,10 +1,11 @@
 import json
 from pathlib import Path
+from pprint import pprint
 from openai import OpenAI
 import argparse
-from FMVLATIMBench.utils import get_api_key, encode_image
+from utils import get_api_key, encode_image, pad_image
 
-from benchmark1_grounding.system_prompts.qwen3vl_single_bbox import SYSTEM_PROMPT
+from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTEM_PROMPT
 
 def parse_ground_truth(json_path:Path) -> str:
     '''Example:
@@ -77,7 +78,7 @@ def parse_ground_truth_bbox(json_path:Path) -> tuple[str|None, list[int]]:
 
 def generate_model_response(image_path:Path, api_key:str, additional_user_prompt="", model_name="qwen/qwen3-vl-8b-instruct", base_url="https://openrouter.ai/api/v1"):
     client = OpenAI(api_key=api_key, base_url=base_url)
-    base64_image = encode_image(image_path)
+    base64_image = encode_image(pad_image(image_path, 28))
     data_url = f"data:image/jpeg;base64,{base64_image}"
     user_prompt = []
     if additional_user_prompt:
@@ -98,8 +99,9 @@ def generate_model_response(image_path:Path, api_key:str, additional_user_prompt
             "content": user_prompt
         }
     ]
-    response = client.chat.completions.create(model=model_name, messages=messages)
+    response = client.chat.completions.create(model=model_name, messages=messages, temperature=0.1)
     part_name = response.choices[0].message.content
+    pprint(response.model_dump())
     print(f"Model Response: {part_name}")
     return part_name
 
@@ -111,7 +113,6 @@ def parse_model_response_bbox(response: str) -> tuple[str|None, list[int]]:
     PNG_HEIGHT = 441
     response_text = response.strip()
     try:
-        print("Model response:", response_text)
         bbox_data = json.loads(response_text)
         bbox = bbox_data.get("bbox")
         if bbox is None:
@@ -138,6 +139,19 @@ def parse_model_response_bbox(response: str) -> tuple[str|None, list[int]]:
         print("Raw response:", response_text)
         return (None, [])
 
+def parse_model_response_uitars(response: str) -> tuple[int, int]:
+    response_text = response.strip()
+    for line in response_text.splitlines():
+        if line.startswith("Action:"):
+            # regex Action: click(start_box='(230,131)')
+            import re
+            match = re.search(r"click\(.*='\(\s*(\d+)\s*,\s*(\d+)\s*\)'", line)
+            if match:
+                x = int(match.group(1))
+                y = int(match.group(2))
+                return (x, y)
+    return (-1, -1)
+
 def evaluate_response(ground_truth: str, response: str):
     return ground_truth == response
 
@@ -159,9 +173,14 @@ def evaluate_response_bbox(ground_truth: tuple[str|None, list[int]], response: t
     iou = interArea / float(boxAArea + boxBArea - interArea)
     return iou
 
+def evaluate_response_point(ground_truth: tuple[int, int], response: tuple[int, int]):
+    gt_x, gt_y = ground_truth
+    resp_x, resp_y = response
+    distance = ((gt_x - resp_x) ** 2 + (gt_y - resp_y) ** 2) ** 0.5
+    return distance
+
 def calculate_benchmark_results():
     pass
-
     
     
 if __name__ == "__main__":
@@ -183,9 +202,13 @@ if __name__ == "__main__":
     ground_truth_bbox = parse_ground_truth_bbox(input_json)
     # response = generate_model_response(input_png, model_name="qwen/qwen3-vl-30b-a3b-instruct") or ""
     # response = generate_model_response(input_png, api_key=API_KEY, model_name="qwen/qwen3-vl-235b-a22b-instruct") or ""
-    response_bbox = generate_model_response(input_png, api_key=API_KEY, additional_user_prompt=ground_truth_bbox[0], model_name="qwen/qwen3-vl-235b-a22b-instruct") or ""
-    response_bbox = parse_model_response_bbox(response_bbox)
-    score = evaluate_response_bbox(ground_truth_bbox, response_bbox)
+    # response_bbox = generate_model_response(input_png, api_key=API_KEY, additional_user_prompt=ground_truth_bbox[0], model_name="qwen/qwen3-vl-235b-a22b-instruct") or ""
+    additional_user_prompt = f"Click the {ground_truth_bbox[0].lower()}" if ground_truth_bbox[0] else "Click the object"
+    response_bbox = generate_model_response(input_png, api_key=API_KEY, additional_user_prompt=additional_user_prompt, model_name="bytedance/ui-tars-1.5-7b") or ""
+    # response_bbox = parse_model_response_bbox(response_bbox)
+    response_bbox = parse_model_response_uitars(response_bbox)
+    # score = evaluate_response_bbox(ground_truth_bbox, response_bbox)
+    score = evaluate_response_point(((ground_truth_bbox[1][0] + ground_truth_bbox[1][2]) // 2, (ground_truth_bbox[1][1] + ground_truth_bbox[1][3]) // 2), response_bbox)
     print(f"Ground Truth: {ground_truth_bbox}")
     print(f"Response: {response_bbox}")
     print(f"Evaluation Score: {score}")

@@ -233,3 +233,4 @@ Temporary Items
 **/*/__pycache__
 
 # End of https://www.toptal.com/developers/gitignore/api/macos
+__pycache__
