@@ -26,7 +26,7 @@ def pad_image(image_path: Path, grid_size) -> Path:
 
     padded_image = Image.new("RGB", (new_width, new_height))
     padded_image.paste(image, (0, 0))
-    padded_image_path = image_path.with_name(image_path.stem + "_padded.png")
+    padded_image_path = image_path.with_name(image_path.stem + ".g.png")
     padded_image.save(padded_image_path)
     return padded_image_path
 
