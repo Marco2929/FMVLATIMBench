@@ -6,6 +6,13 @@ Setup
 3. `uv sync`
 4. `python main_grounding_dominik.py --input benchmark1_grounding/examples/object_recognition_single/OBJ_REC1`
 
+Command collection
+==================
+
+- Run multiple benchmarks: `for i in {1..5}; do
+    python main_grounding_dominik.py --input benchmark1_grounding/examples/object_recognition_single/OBJ_REC"$i" --saveresults --model qwen3 --benchmark localize
+done`
+
 Models
 ======
 

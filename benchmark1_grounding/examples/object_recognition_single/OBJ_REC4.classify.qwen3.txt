@@ -1,0 +1,3 @@
+Ground Truth: ('POOL_BALL', [182, 111, 206, 134])
+Response: BOWLING_BALL
+Evaluation Score: False

@@ -5,7 +5,9 @@ from openai import OpenAI
 import argparse
 from utils import get_api_key, encode_image, pad_image
 
-from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTEM_PROMPT
+from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTEM_PROMPT as UITARS_LOCALIZE_SYSTEM_PROMPT
+from benchmark1_grounding.system_prompts.qwen3vl_object_recognition import SYSTEM_PROMPT as QWEN3_CLASSIFY_SYSTEM_PROMPT
+from benchmark1_grounding.system_prompts.qwen3vl_single_bbox import SYSTEM_PROMPT as QWEN3_LOCALIZE_SYSTEM_PROMPT
 
 def parse_ground_truth(json_path:Path) -> str:
     '''Example:
@@ -76,7 +78,7 @@ def parse_ground_truth_bbox(json_path:Path) -> tuple[str|None, list[int]]:
     y_max = y_min + height
     return (part_type, [x_min, y_min, x_max, y_max])
 
-def generate_model_response(image_path:Path, api_key:str, additional_user_prompt="", model_name="qwen/qwen3-vl-8b-instruct", base_url="https://openrouter.ai/api/v1"):
+def generate_model_response(image_path:Path, api_key:str, system_prompt:str, additional_user_prompt="", model_name="qwen/qwen3-vl-8b-instruct", base_url="https://openrouter.ai/api/v1"):
     client = OpenAI(api_key=api_key, base_url=base_url)
     base64_image = encode_image(pad_image(image_path, 28))
     data_url = f"data:image/jpeg;base64,{base64_image}"
@@ -92,7 +94,7 @@ def generate_model_response(image_path:Path, api_key:str, additional_user_prompt
     messages = [
         {
             "role": "system",
-            "content": SYSTEM_PROMPT
+            "content": system_prompt,
         },
         {
             "role": "user",
@@ -186,6 +188,9 @@ def calculate_benchmark_results():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Benchmark Grounding Model Evaluation")
     parser.add_argument("--input", required=True, type=str, metavar="FILE", help="Path to the input test that expects .PNG and .json files.")
+    parser.add_argument("--saveresults", action="store_true", help="Flag to save the results in <input>.txt")
+    parser.add_argument("--model", type=str, default="qwen3", help="Model name to use for evaluation. Possible values: qwen3, uitars")
+    parser.add_argument("--benchmark", type=str, default="classify", help="Benchmark type. Possible values: classify, localize, multilocalize")
 
     args = parser.parse_args()
 
@@ -198,17 +203,40 @@ if __name__ == "__main__":
 
     API_KEY = get_api_key()
 
-    # ground_truth = parse_ground_truth(input_json)
+    ground_truth = parse_ground_truth(input_json)
     ground_truth_bbox = parse_ground_truth_bbox(input_json)
-    # response = generate_model_response(input_png, model_name="qwen/qwen3-vl-30b-a3b-instruct") or ""
-    # response = generate_model_response(input_png, api_key=API_KEY, model_name="qwen/qwen3-vl-235b-a22b-instruct") or ""
-    # response_bbox = generate_model_response(input_png, api_key=API_KEY, additional_user_prompt=ground_truth_bbox[0], model_name="qwen/qwen3-vl-235b-a22b-instruct") or ""
-    additional_user_prompt = f"Click the {ground_truth_bbox[0].lower()}" if ground_truth_bbox[0] else "Click the object"
-    response_bbox = generate_model_response(input_png, api_key=API_KEY, additional_user_prompt=additional_user_prompt, model_name="bytedance/ui-tars-1.5-7b") or ""
-    # response_bbox = parse_model_response_bbox(response_bbox)
-    response_bbox = parse_model_response_uitars(response_bbox)
-    # score = evaluate_response_bbox(ground_truth_bbox, response_bbox)
-    score = evaluate_response_point(((ground_truth_bbox[1][0] + ground_truth_bbox[1][2]) // 2, (ground_truth_bbox[1][1] + ground_truth_bbox[1][3]) // 2), response_bbox)
+
+    response = None
+    score = None
+    if args.model == "qwen3":
+        model_name = "qwen/qwen3-vl-30b-a3b-instruct"
+        if args.benchmark == "classify":
+            response = generate_model_response(input_png, api_key=API_KEY, system_prompt=QWEN3_CLASSIFY_SYSTEM_PROMPT, model_name=model_name) or ""
+            response = parse_model_response(response)
+            score = evaluate_response(ground_truth, response)
+        elif args.benchmark in ["localize", "multilocalize"]:
+            assert ground_truth_bbox[0] is not None
+            additional_user_prompt = f"Locate the {ground_truth_bbox[0].lower()}"
+            response = generate_model_response(input_png, api_key=API_KEY, system_prompt=QWEN3_LOCALIZE_SYSTEM_PROMPT, additional_user_prompt=additional_user_prompt, model_name=model_name) or ""
+            response = parse_model_response_bbox(response)
+            score = evaluate_response_bbox(ground_truth_bbox, response)
+    elif args.model == "uitars":
+        model_name = "bytedance/ui-tars-1.5-7b"
+        assert ground_truth_bbox[0] is not None
+        additional_user_prompt = f"Click the {ground_truth_bbox[0].lower()}"
+        response = generate_model_response(input_png, api_key=API_KEY, system_prompt=UITARS_LOCALIZE_SYSTEM_PROMPT, additional_user_prompt=additional_user_prompt, model_name=model_name) or ""
+        response = parse_model_response_uitars(response)
+        score = evaluate_response_point(((ground_truth_bbox[1][0] + ground_truth_bbox[1][2]) // 2, (ground_truth_bbox[1][1] + ground_truth_bbox[1][3]) // 2), response)
+
+    if score is not None:
+        if args.saveresults:
+            results_path = Path(args.input).with_suffix(f".{args.benchmark}.{args.model}.txt")
+            with open(results_path, "w") as f:
+                f.write(f"Ground Truth: {ground_truth_bbox}\n")
+                f.write(f"Response: {response}\n")
+                f.write(f"Evaluation Score: {score}\n")
+            print(f"Results saved to {results_path}")
+
     print(f"Ground Truth: {ground_truth_bbox}")
-    print(f"Response: {response_bbox}")
+    print(f"Response: {response}")
     print(f"Evaluation Score: {score}")

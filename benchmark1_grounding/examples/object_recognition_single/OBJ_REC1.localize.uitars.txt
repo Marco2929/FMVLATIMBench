@@ -1,0 +1,3 @@
+Ground Truth: ('BASKETBALL', [186, 108, 218, 140])
+Response: (227, 123)
+Evaluation Score: 25.019992006393608
