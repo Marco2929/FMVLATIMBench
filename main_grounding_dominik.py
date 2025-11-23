@@ -8,6 +8,7 @@ from utils import get_api_key, encode_image, pad_image
 from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTEM_PROMPT as UITARS_LOCALIZE_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_object_recognition import SYSTEM_PROMPT as QWEN3_CLASSIFY_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_single_bbox import SYSTEM_PROMPT as QWEN3_LOCALIZE_SYSTEM_PROMPT
+from benchmark1_grounding.system_prompts.qwen3vl_multi_bbox import SYSTEM_PROMPT as QWEN3_MULTILOCALIZE_SYSTEM_PROMPT
 
 def parse_ground_truth(json_path:Path) -> str:
     '''Example:
@@ -58,7 +59,7 @@ which converts to: BASKETBALL
     return data
 
 def parse_ground_truth_bbox(json_path:Path) -> tuple[str|None, list[int]]:
-    # example converts to: {"bbox": [186, 108, 218, 140], "label": "BASKETBALL"}
+    # example converts to: ("BASKETBALL", [186, 108, 218, 140])
     with open(json_path, "r") as f:
         data = json.load(f)
     parts = data.get("parts", [])
@@ -77,6 +78,30 @@ def parse_ground_truth_bbox(json_path:Path) -> tuple[str|None, list[int]]:
     x_max = x_min + width
     y_max = y_min + height
     return (part_type, [x_min, y_min, x_max, y_max])
+
+def parse_ground_truth_bboxes(json_path:Path) -> list[tuple[str|None, list[int]]]:
+    # example converts to: [("BASKETBALL", [186, 108, 218, 140])]
+    with open(json_path, "r") as f:
+        data = json.load(f)
+    parts = data.get("parts", [])
+    if not parts:
+        return []
+    results = []
+    for part in parts:
+        part_type = part.get("part_type")
+        position = part.get("position", {})
+        size = part.get("size", {})
+        x_min = position.get("x")
+        y_min = position.get("y")
+        width = size.get("width_1")
+        height = size.get("height_1")
+        if None in (x_min, y_min, width, height):
+            return []
+        x_max = x_min + width
+        y_max = y_min + height
+        results.append((part_type, [x_min, y_min, x_max, y_max]))
+    return results
+
 
 def generate_model_response(image_path:Path, api_key:str, system_prompt:str, additional_user_prompt="", model_name="qwen/qwen3-vl-8b-instruct", base_url="https://openrouter.ai/api/v1"):
     client = OpenAI(api_key=api_key, base_url=base_url)
@@ -101,7 +126,8 @@ def generate_model_response(image_path:Path, api_key:str, system_prompt:str, add
             "content": user_prompt
         }
     ]
-    response = client.chat.completions.create(model=model_name, messages=messages, temperature=0.1)
+    print("Sending request to model...")
+    response = client.chat.completions.create(model=model_name, messages=messages, temperature=0.1, timeout=30, max_tokens=10000)
     part_name = response.choices[0].message.content
     pprint(response.model_dump())
     print(f"Model Response: {part_name}")
@@ -135,11 +161,46 @@ def parse_model_response_bbox(response: str) -> tuple[str|None, list[int]]:
         x_max_px = int((x_max / 1000.0) * PNG_WIDTH)
         y_max_px = int((y_max / 1000.0) * PNG_HEIGHT)
         
-        return (label, [x_min_px, y_min_px, x_max_px, y_max_px])
+        return (label.upper(), [x_min_px, y_min_px, x_max_px, y_max_px])
     except json.JSONDecodeError:
         print("Failed to parse JSON from model response.")
         print("Raw response:", response_text)
         return (None, [])
+    
+def parse_model_response_bboxes(response: str) -> list[tuple[str|None, list[int]]]:
+    PNG_WIDTH = 640
+    PNG_HEIGHT = 441
+    response_text = response.strip()
+    results = []
+    try:
+        bbox_list = json.loads(response_text)
+        if not isinstance(bbox_list, list):
+            raise ValueError("Invalid bounding boxes format.")
+        
+        for bbox_data in bbox_list:
+            bbox = bbox_data.get("bbox")
+            if not isinstance(bbox, list) or len(bbox) != 4:
+                print("Invalid bounding box format, skipping.")
+                continue
+            
+            label = bbox_data.get("label")
+            if not label:
+                print("No label given, skipping.")
+                continue
+            
+            # Convert normalized coordinates (0-1000) to absolute pixels
+            x_min, y_min, x_max, y_max = bbox
+            x_min_px = int((x_min / 1000.0) * PNG_WIDTH)
+            y_min_px = int((y_min / 1000.0) * PNG_HEIGHT)
+            x_max_px = int((x_max / 1000.0) * PNG_WIDTH)
+            y_max_px = int((y_max / 1000.0) * PNG_HEIGHT)
+            
+            results.append((label.upper(), [x_min_px, y_min_px, x_max_px, y_max_px]))
+        return results
+    except json.JSONDecodeError:
+        print("Failed to parse JSON from model response.")
+        print("Raw response:", response_text)
+        return []
 
 def parse_model_response_uitars(response: str) -> tuple[int, int]:
     response_text = response.strip()
@@ -175,6 +236,24 @@ def evaluate_response_bbox(ground_truth: tuple[str|None, list[int]], response: t
     iou = interArea / float(boxAArea + boxBArea - interArea)
     return iou
 
+def evaluate_response_bboxes(ground_truth: list[tuple[str|None, list[int]]], response: list[tuple[str|None, list[int]]]):
+    # calc average IoU for multiple bboxes and compare labels
+    if not ground_truth or not response:
+        return 0.0
+    total_iou = 0.0
+    matched = 0
+    for gt in ground_truth:
+        for resp in response:
+            iou = evaluate_response_bbox(gt, resp)
+            if iou > 0:
+                total_iou += iou
+                matched += 1
+                break
+    if matched == 0:
+        return 0.0
+    average_iou = total_iou / matched
+    return average_iou
+
 def evaluate_response_point(ground_truth: tuple[int, int], response: tuple[int, int]):
     gt_x, gt_y = ground_truth
     resp_x, resp_y = response
@@ -209,24 +288,37 @@ if __name__ == "__main__":
     response = None
     score = None
     if args.model == "qwen3":
-        model_name = "qwen/qwen3-vl-30b-a3b-instruct"
+        model_name = "qwen/qwen3-vl-8b-instruct"
         if args.benchmark == "classify":
             response = generate_model_response(input_png, api_key=API_KEY, system_prompt=QWEN3_CLASSIFY_SYSTEM_PROMPT, model_name=model_name) or ""
             response = parse_model_response(response)
             score = evaluate_response(ground_truth, response)
-        elif args.benchmark in ["localize", "multilocalize"]:
+        elif args.benchmark == "localize":
             assert ground_truth_bbox[0] is not None
             additional_user_prompt = f"Locate the {ground_truth_bbox[0].lower()}"
             response = generate_model_response(input_png, api_key=API_KEY, system_prompt=QWEN3_LOCALIZE_SYSTEM_PROMPT, additional_user_prompt=additional_user_prompt, model_name=model_name) or ""
             response = parse_model_response_bbox(response)
             score = evaluate_response_bbox(ground_truth_bbox, response)
+        elif args.benchmark == "multilocalize":
+            ground_truth_bbox = parse_ground_truth_bboxes(input_json)
+            object_list = ", ".join([gt[0].lower() for gt in ground_truth_bbox if gt[0] is not None])
+            additional_user_prompt = f"Locate the following objects: {object_list}"
+            response = generate_model_response(input_png, api_key=API_KEY, system_prompt=QWEN3_MULTILOCALIZE_SYSTEM_PROMPT, additional_user_prompt=additional_user_prompt, model_name=model_name) or ""
+            response = parse_model_response_bboxes(response)
+            score = evaluate_response_bboxes(ground_truth_bbox, response)
+        else:
+            raise ValueError(f"Unknown benchmark type for model {args.model}: {args.benchmark}")
     elif args.model == "uitars":
+        if args.benchmark != "localize":
+            raise ValueError(f"UITARS model only supports 'localize' benchmark, got: {args.benchmark}")
         model_name = "bytedance/ui-tars-1.5-7b"
         assert ground_truth_bbox[0] is not None
         additional_user_prompt = f"Click the {ground_truth_bbox[0].lower()}"
         response = generate_model_response(input_png, api_key=API_KEY, system_prompt=UITARS_LOCALIZE_SYSTEM_PROMPT, additional_user_prompt=additional_user_prompt, model_name=model_name) or ""
         response = parse_model_response_uitars(response)
         score = evaluate_response_point(((ground_truth_bbox[1][0] + ground_truth_bbox[1][2]) // 2, (ground_truth_bbox[1][1] + ground_truth_bbox[1][3]) // 2), response)
+    else:
+        raise ValueError(f"Unknown model name: {args.model}")
 
     if score is not None:
         if args.saveresults:
