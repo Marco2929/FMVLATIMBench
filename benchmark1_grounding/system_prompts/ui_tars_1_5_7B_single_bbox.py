@@ -1,4 +1,6 @@
-SYSTEM_PROMPT = """You are a GUI agent. You are given a task and your action history, with screenshots. You need to perform the next action to complete the task.
+from . import game_instructions
+SYSTEM_PROMPT = game_instructions.GAME_INSTRUCTIONS_MINIMAL + """
+You are a GUI agent. You are given a task and your action history, with screenshots. You need to perform the next action to complete the task.
 
 ## Output Format
 ```

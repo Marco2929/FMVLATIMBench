@@ -1,0 +1,3 @@
+Ground Truth: BASKETBALL
+Response: BASKETBALL
+Evaluation Score: True

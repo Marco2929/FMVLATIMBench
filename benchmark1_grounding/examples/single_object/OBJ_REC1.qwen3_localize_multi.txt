@@ -1,0 +1,3 @@
+Ground Truth: [('BASKETBALL', [186, 108, 218, 140])]
+Response: [('BASKETBALL', [189, 70, 219, 99])]
+Evaluation Score: 0.0

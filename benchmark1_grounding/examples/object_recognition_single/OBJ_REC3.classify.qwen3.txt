@@ -1,3 +1,0 @@
-Ground Truth: ('TEETER_TOTTER', [192, 128, 280, 168])
-Response: TEETER_TOTTER
-Evaluation Score: True

@@ -1,0 +1,3 @@
+Ground Truth: [('TEETER_TOTTER', [192, 128, 280, 168])]
+Response: [('TEETER_TOTTER', [186, 131, 269, 176])]
+Evaluation Score: 0.6466182478438492

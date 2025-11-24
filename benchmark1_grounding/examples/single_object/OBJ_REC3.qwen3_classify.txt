@@ -1,0 +1,3 @@
+Ground Truth: TEETER_TOTTER
+Response: TEETER_TOTTER
+Evaluation Score: True

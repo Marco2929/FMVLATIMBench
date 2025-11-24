@@ -1,4 +1,6 @@
-SYSTEM_PROMPT = """Analyze the image and identify the object that is inside the blue game play area.
+from . import game_instructions
+SYSTEM_PROMPT = game_instructions.GAME_INSTRUCTIONS_MINIMAL + """
+Analyze the image and identify the object that is inside the blue game play area.
 Respond only with the object name from the given list and nothing else.
 If the object is not found, respond with "NONE".
 
