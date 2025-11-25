@@ -129,8 +129,10 @@ class VGBenchScorer:
 class DistanceTracker:
     def __init__(self, targets):
         """
-        :param targets: Dict of { 'object_name': (target_x, target_y) }
+        :param targets: Dict of { 'object_name': (target_x, target_y) } or { 'object_name': target_value }
                         Example: {'key_key': (200, 300), 'player': (50, 50)}
+                        For single coordinate: {'object_x': 200} or {'object_y': 300}
+                        Use None for coordinates that should be ignored: {'object': (200, None)} for x-only
         """
         self.targets = targets
         self.max_possible_distance = 0 # Optional: for normalization
@@ -140,27 +142,67 @@ class DistanceTracker:
         Calculates how far all objects are from their goals.
         LOWER score is better (0 = Solved).
         
-        :param current_positions: Dict { 'object_name': (x, y) }
+        :param current_positions: Dict { 'object_name': (x, y) } or { 'object_name': value }
         :return: (total_distance, details_dict)
         """
         total_distance = 0
-        details = {}
+        self.details = {}
 
         for obj_name, target_pos in self.targets.items():
             if obj_name in current_positions:
                 curr_pos = current_positions[obj_name]
                 
-                # Euclidean Distance: sqrt((x2-x1)^2 + (y2-y1)^2)
-                # If you care about obstacles (walls), you would use A* pathfinding here instead.
-                dist = math.hypot(target_pos[0] - curr_pos[0], target_pos[1] - curr_pos[1])
+                # Handle single coordinate (scalar value)
+                if isinstance(target_pos, (int, float)) and isinstance(curr_pos, (int, float)):
+                    # Both are scalars - calculate 1D distance
+                    dist = abs(target_pos - curr_pos)
+                
+                # Handle tuple coordinates
+                elif isinstance(target_pos, tuple) and isinstance(curr_pos, tuple):
+                    # Check if we should only consider x or y coordinate
+                    if target_pos[0] is None and target_pos[1] is not None:
+                        # Only y-coordinate matters
+                        dist = abs(target_pos[1] - curr_pos[1])
+                    elif target_pos[1] is None and target_pos[0] is not None:
+                        # Only x-coordinate matters
+                        dist = abs(target_pos[0] - curr_pos[0])
+                    elif target_pos[0] is not None and target_pos[1] is not None:
+                        # Both coordinates matter - Euclidean Distance
+                        dist = math.hypot(target_pos[0] - curr_pos[0], target_pos[1] - curr_pos[1])
+                    else:
+                        # Both are None - invalid
+                        dist = float('inf')
+                
+                # Handle mixed types (tuple vs scalar)
+                elif isinstance(target_pos, tuple) and isinstance(curr_pos, (int, float)):
+                    # Assume curr_pos is x-coordinate if target has x, otherwise y
+                    if target_pos[0] is not None and target_pos[1] is None:
+                        dist = abs(target_pos[0] - curr_pos)
+                    elif target_pos[1] is not None and target_pos[0] is None:
+                        dist = abs(target_pos[1] - curr_pos)
+                    else:
+                        dist = float('inf')
+                
+                elif isinstance(curr_pos, tuple) and isinstance(target_pos, (int, float)):
+                    # Target is scalar, current is tuple - use first non-None value
+                    if curr_pos[0] is not None:
+                        dist = abs(target_pos - curr_pos[0])
+                    elif curr_pos[1] is not None:
+                        dist = abs(target_pos - curr_pos[1])
+                    else:
+                        dist = float('inf')
+                
+                else:
+                    # Unexpected type combination
+                    dist = float('inf')
                 
                 total_distance += dist
-                details[obj_name] = dist
+                self.details[obj_name] = dist
             else:
                 # Penalty if object is missing from screen
-                details[obj_name] = float('inf') 
+                self.details[obj_name] = float('inf') 
 
-        return total_distance, details
+        return total_distance, self.details
 
     def visualize(self, image, current_positions):
         """Draws lines from current position to target position for debugging."""
@@ -177,7 +219,7 @@ class DistanceTracker:
                 # Draw Current (Blue Circle)
                 cv2.circle(debug_img, pos, 5, (255, 0, 0), -1)
                 # Draw Text
-                cv2.putText(debug_img, f"{int(details[name])}px", 
+                cv2.putText(debug_img, f"{int(self.details[name])}px", 
                            (pos[0], pos[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
         return debug_img

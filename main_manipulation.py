@@ -37,7 +37,8 @@ except Exception:
     _have_keyboard = False
 
 from ui_tars_1_5_7B.action_parser import parse_action_to_structure_output, parsing_response_to_pyautogui_code, parsing_response_to_pydirectinput_code
-from utils import get_api_key, encode_image
+from utils import get_api_key, encode_image, DistanceTracker, VisualLocator
+from PIL import Image
 
 # Configuration constants
 MAX_MESSAGE_SIZE = 10  # maximum number of messages to keep in history (including user and assistant messages)
@@ -59,18 +60,59 @@ def get_system_prompt(input_category: str):
     return ""
 
 
-def parse_ground_truth(json_path: Path) -> str:
+def parse_ground_truth(json_path: Path) -> dict:
     """Parse ground truth from JSON file.
     
     Args:
         json_path: Path to the JSON file containing ground truth data
         
     Returns:
-        The ground truth value
+        Dictionary containing:
+            - 'targets': Dict of target positions {'object_name': (x, y)} or single values
+            - 'templates': Dict of template paths {'object_name': 'path/to/template.png'}
+            - 'threshold': Distance threshold for success (default: 10)
+    
+    Expected JSON format:
+    {
+        "targets": {
+            "ball": [200, 300],  // or [200, null] for x-only, or just 200 for scalar
+            "key": [100, 150]
+        },
+        "templates": {
+            "ball": "templates/ball.png",
+            "key": "templates/key.png"
+        },
+        "threshold": 15
+    }
     """
     with open(json_path, "r") as f:
         data = json.load(f)
-    return data.get("solution", "")
+    
+    # Parse targets - convert lists to tuples
+    targets = {}
+    for obj_name, pos in data.get("targets", {}).items():
+        if isinstance(pos, list):
+            # Convert list to tuple, handling None values
+            targets[obj_name] = tuple(pos) if len(pos) == 2 else pos[0]
+        else:
+            # Keep scalar values as-is
+            targets[obj_name] = pos
+    
+    # Get templates - ensure paths are relative to the JSON file location
+    templates = {}
+    json_dir = json_path.parent
+    for obj_name, template_path in data.get("templates", {}).items():
+        # Make template path absolute if it's relative
+        template_path = Path(template_path)
+        if not template_path.is_absolute():
+            template_path = json_dir / template_path
+        templates[obj_name] = str(template_path)
+    
+    return {
+        "targets": targets,
+        "templates": templates,
+        "threshold": data.get("threshold", 10)
+    }
 
 
 def get_initial_message(image_path: Path, SYSTEM_PROMPT: str, instruct_prompt: str):
@@ -139,22 +181,50 @@ def parse_model_response(response: str):
     return parsed_dict
 
 
-def evaluate_response(ground_truth: str, response: str):
-    """Evaluate model response against ground truth.
+def evaluate_response(ground_truth_data: dict, screenshot_path: str = None, screenshot_image: Image.Image = None):
+    """Evaluate model response against ground truth using visual matching.
     
     Args:
-        ground_truth: Expected correct answer
-        response: Model's response
+        ground_truth_data: Dictionary containing:
+            - 'targets': Dict of target positions {'object_name': (x, y)} or {'object_name': value}
+            - 'templates': Dict of template paths {'object_name': 'path/to/template.png'}
+            - 'threshold': Optional distance threshold for success (default: 10 pixels)
+        screenshot_path: Path to the screenshot to evaluate (optional if screenshot_image provided)
+        screenshot_image: PIL Image object of the screenshot (optional if screenshot_path provided)
         
     Returns:
-        Boolean indicating if response matches ground truth
+        Tuple of (success: bool, total_distance: float, details: dict)
     """
-    return ground_truth == response
-
-
-def calculate_benchmark_results():
-    """Calculate and display benchmark results."""
-    pass
+    if screenshot_image is None and screenshot_path is None:
+        raise ValueError("Either screenshot_path or screenshot_image must be provided")
+    
+    if screenshot_image is None:
+        screenshot_image = Image.open(screenshot_path)
+    
+    # Extract ground truth parameters
+    targets = ground_truth_data.get('targets', {})
+    templates = ground_truth_data.get('templates', {})
+    threshold = ground_truth_data.get('threshold', 10)
+    
+    # Initialize VisualLocator with templates
+    locator = VisualLocator(templates)
+    
+    # Locate objects in the screenshot
+    current_positions = locator.locate_objects(screenshot_image)
+    print(f"Located objects: {current_positions}")
+    
+    # Initialize DistanceTracker with target positions
+    tracker = DistanceTracker(targets)
+    
+    # Calculate distances
+    total_distance, details = tracker.calculate_progress(current_positions)
+    print(f"Total distance: {total_distance:.2f} pixels")
+    print(f"Per-object distances: {details}")
+    
+    # Determine success based on threshold
+    success = total_distance <= threshold and all(d != float('inf') for d in details.values())
+    
+    return success, total_distance, details
 
 
 def _wait_for_start():
@@ -200,10 +270,9 @@ def _screenshot_to_base64():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Benchmark Manipulation Model Evaluation")
-    parser.add_argument("--input", required=False, type=str, metavar="FILE",
-                        help="Path to the input test messages JSON file.",
-                        default="./benchmark4_manipulation/test_messages_uitars_tim.json")
-    parser.add_argument("--category", type=str, default="manipulation",
+    parser.add_argument("--input", required=True, type=str, metavar="FILE",
+                        help="Path to the input test messages JSON file.")
+    parser.add_argument("--category", type=str, default="manipul_cot",
                         help="Category of manipulation task")
     
     args = parser.parse_args()
@@ -211,9 +280,9 @@ if __name__ == "__main__":
     input_png = Path(args.input).with_suffix(".png")
     if not input_png.exists():
         raise FileNotFoundError(f"Input image file not found: {input_png}")
-    # input_json = Path(args.input).with_suffix(".json")
-    # if not input_json.exists():
-    #     raise FileNotFoundError(f"Input Json file not found: {input_json}")
+    input_json = Path(args.input).with_suffix(".json")
+    if not input_json.exists():
+        raise FileNotFoundError(f"Input Json file not found: {input_json}")
     input_py = Path(args.input).with_suffix(".py")
     if not input_py.exists():
         raise FileNotFoundError(f"Input Python file not found: {input_py}")
@@ -224,11 +293,11 @@ if __name__ == "__main__":
     if input_category not in allowed_categories:
         raise ValueError(f"Category {input_category} is not supported.")
     
-    input_file = Path(args.input)
-    if not input_file.exists():
-        raise FileNotFoundError(f"Input file not found: {input_file}")
-    
     SYSTEM_PROMPT = get_system_prompt(input_category)
+    
+    # Parse ground truth data
+    ground_truth_data = parse_ground_truth(input_json)
+    print(f"Ground truth loaded: {len(ground_truth_data['targets'])} targets, {len(ground_truth_data['templates'])} templates")
     
     API_KEY = get_api_key()
     
@@ -288,6 +357,9 @@ if __name__ == "__main__":
         )
         print(f"Generated code:\n{parsed_pyautogui_code}")
         
+        if parsed_pyautogui_code == "DONE":
+            _screenshot_to_base64()
+            break
         exec(parsed_pyautogui_code)
         
         # Append the assistant response to chat history
@@ -317,3 +389,43 @@ if __name__ == "__main__":
         # print message to file for debugging
         with open("benchmark4_manipulation/debug/debug_message.json", "w") as f:
             json.dump(message, f, indent=4)
+    
+    # After the loop ends, evaluate the final result
+    print("\n" + "="*50)
+    print("EVALUATION RESULTS")
+    print("="*50)
+    
+    # Get the final screenshot for evaluation
+    final_screenshot_path = "benchmark4_manipulation/debug/debug_screenshot.png"
+    
+    if os.path.exists(final_screenshot_path):
+        success, total_distance, details = evaluate_response(
+            ground_truth_data=ground_truth_data,
+            screenshot_path=final_screenshot_path
+        )
+        
+        print(f"\nSuccess: {success}")
+        print(f"Total Distance: {total_distance:.2f} pixels")
+        print(f"Threshold: {ground_truth_data['threshold']} pixels")
+        print(f"\nPer-object distances:")
+        for obj_name, distance in details.items():
+            status = "✓" if distance != float('inf') and distance <= ground_truth_data['threshold'] else "✗"
+            dist_str = f"{distance:.2f}" if distance != float('inf') else "NOT FOUND"
+            print(f"  {status} {obj_name}: {dist_str} pixels")
+        
+        # Save evaluation results
+        eval_results = {
+            "success": success,
+            "total_distance": total_distance,
+            "threshold": ground_truth_data['threshold'],
+            "details": {k: (v if v != float('inf') else "inf") for k, v in details.items()},
+            "ground_truth": ground_truth_data
+        }
+        
+        with open(f"benchmark4_manipulation/debug/evaluation_results_{input_category}.json", "w") as f:
+            json.dump(eval_results, f, indent=4)
+        
+        print(f"\nEvaluation results saved to: benchmark4_manipulation/debug/evaluation_results_{input_category}.json")
+    else:
+        print(f"Warning: Final screenshot not found at {final_screenshot_path}")
+        print("Skipping evaluation.")
