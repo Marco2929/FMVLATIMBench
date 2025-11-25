@@ -1,0 +1,3 @@
+Ground Truth: RED_BRICK_WALL
+Response: NONE
+Evaluation Score: False

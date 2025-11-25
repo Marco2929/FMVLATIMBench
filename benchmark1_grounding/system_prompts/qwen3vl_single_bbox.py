@@ -1,4 +1,6 @@
-SYSTEM_PROMPT = """Analyze the image and detect the bounding box of the given object in the user prompt.
+from . import game_instructions
+SYSTEM_PROMPT = game_instructions.GAME_INSTRUCTIONS_MINIMAL + """
+Analyze the image and detect the bounding box of the given object in the user prompt.
 Return only a JSON object in this exact format: {"bbox": [x_min, y_min, x_max, y_max], "label": "string"} without markdown,
 where the coordinates are normalized values from 0 to 1000 (representing 0% to 100% of image dimensions),
 assuming the top-left corner is (0,0). Do not include any other text.

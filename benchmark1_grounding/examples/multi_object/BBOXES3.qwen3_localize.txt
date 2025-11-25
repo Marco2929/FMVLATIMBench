@@ -1,0 +1,3 @@
+Ground Truth: [('RED_BRICK_WALL', [520, 280, 552, 296]), ('MAGNIFYING_GLASS', [198, 80, 222, 120]), ('TEETER_TOTTER', [192, 80, 280, 120]), ('BASKETBALL', [237, 47, 269, 79]), ('POOL_BALL', [530, 219, 554, 242])]
+Response: (None, [])
+Evaluation Score: 0.0

@@ -1,0 +1,3 @@
+Ground Truth: POOL_BALL
+Response: BOWLING_BALL
+Evaluation Score: False
