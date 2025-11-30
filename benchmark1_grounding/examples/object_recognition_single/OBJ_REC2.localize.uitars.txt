@@ -1,3 +1,0 @@
-Ground Truth: ('RED_BRICK_WALL', [200, 136, 232, 152])
-Response: (250, 141)
-Evaluation Score: 34.132096331752024

@@ -1,0 +1,3 @@
+Ground Truth: [('UNKNOWN_44', [485, 167, 501, 182]), ('UNKNOWN_28', [458, 164, 482, 182]), ('SUPER_BALL', [386, 164, 410, 187]), ('BASKETBALL', [222, 151, 254, 183]), ('UNKNOWN_68', [305, 153, 337, 185]), ('POOL_BALL', [190, 162, 214, 185]), ('PROGRAMMABLE_BALL', [422, 156, 454, 183]), ('BOWLING_BALL', [264, 151, 296, 183]), ('UNKNOWN_43', [350, 162, 374, 185])]
+Response: (None, [])
+Evaluation Score: 0.0

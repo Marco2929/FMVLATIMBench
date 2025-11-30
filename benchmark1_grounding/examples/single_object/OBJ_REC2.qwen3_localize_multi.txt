@@ -1,0 +1,3 @@
+Ground Truth: [('RED_BRICK_WALL', [200, 136, 232, 152])]
+Response: []
+Evaluation Score: 0.0

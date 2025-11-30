@@ -1,3 +1,0 @@
-Ground Truth: ('MAGNIFYING_GLASS', [188, 105, 212, 145])
-Response: ('MAGNIFYING_GLASS', [30, 104, 49, 139])
-Evaluation Score: 0.0

@@ -1,3 +1,0 @@
-Ground Truth: ('POOL_BALL', [182, 111, 206, 134])
-Response: (251, 123)
-Evaluation Score: 57.0087712549569

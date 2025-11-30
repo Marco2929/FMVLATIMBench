@@ -1,0 +1,1 @@
+GAME_INSTRUCTIONS_MINIMAL = """The left menu is for options in the puzzle editor. The right menu holds items that may be placed. The blue area in between is the game canvas."""
