@@ -1,0 +1,9 @@
+{
+    "targets": {
+        "brickwall": [1600, null]
+    },
+    "templates": {
+        "brickwall": "templates/brickwall.png"
+    },
+    "threshold": 15
+}

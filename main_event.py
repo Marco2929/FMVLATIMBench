@@ -47,9 +47,10 @@ def evaluate_response_deep_eval(openrouter_llm: DeepEvalBaseLLM, input: str, exp
                                 retrieval_context: List[str]):
     # Initialize Metric with the custom model
     metric = ContextualPrecisionMetric(
-        threshold=0.7,
-        model=openrouter_llm,  # Pass the custom wrapper instance here
-        include_reason=True
+        threshold=0.9,
+        model=openrouter_llm,
+        include_reason=True,
+        strict_mode = True
     )
 
     test_case = LLMTestCase(
