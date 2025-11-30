@@ -279,7 +279,8 @@ def parse_action_to_structure_output(text,
 def parsing_response_to_pyautogui_code(responses,
                                        image_height: int,
                                        image_width: int,
-                                       input_swap: bool = True) -> str:
+                                       input_swap: bool = True,
+                                       y_offset_factor: float = 0.0) -> str:
     '''
     将M模型的输出解析为OSWorld中的action，生成pyautogui代码字符串
     参数:
@@ -292,6 +293,8 @@ def parsing_response_to_pyautogui_code(responses,
                 "end_box": None
             }
         }
+        y_offset_factor: Linear correction factor for y-axis offset (default: 0.0)
+                        Applied as: corrected_y = y + (y * y_offset_factor)
     返回:
         生成的pyautogui代码字符串
     '''
@@ -430,10 +433,12 @@ def parsing_response_to_pyautogui_code(responses,
                     start_box)  # Assuming box is in [x1, y1, x2, y2]
                 sx = round(float((x1 + x2) / 2) * image_width, 3)
                 sy = round(float((y1 + y2) / 2) * image_height, 3)
+                sy = round(sy + (sy * y_offset_factor), 3)  # Apply y-axis offset correction
                 x1, y1, x2, y2 = eval(
                     end_box)  # Assuming box is in [x1, y1, x2, y2]
                 ex = round(float((x1 + x2) / 2) * image_width, 3)
                 ey = round(float((y1 + y2) / 2) * image_height, 3)
+                ey = round(ey + (ey * y_offset_factor), 3)  # Apply y-axis offset correction
                 pyautogui_code += (
                     f"\npyautogui.moveTo({sx}, {sy})\n"
                     f"\npyautogui.dragTo({ex}, {ey}, duration=1.0)\n")
@@ -446,6 +451,7 @@ def parsing_response_to_pyautogui_code(responses,
                     start_box)  # Assuming box is in [x1, y1, x2, y2]
                 x = round(float((x1 + x2) / 2) * image_width, 3)
                 y = round(float((y1 + y2) / 2) * image_height, 3)
+                y = round(y + (y * y_offset_factor), 3)  # Apply y-axis offset correction
 
                 # # 先点对应区域，再滚动
                 # pyautogui_code += f"\npyautogui.click({x}, {y}, button='left')"
@@ -481,6 +487,7 @@ def parsing_response_to_pyautogui_code(responses,
                     y2 = y1
                 x = round(float((x1 + x2) / 2) * image_width, 3)
                 y = round(float((y1 + y2) / 2) * image_height, 3)
+                y = round(y + (y * y_offset_factor), 3)  # Apply y-axis offset correction
                 if action_type == "left_single" or action_type == "click":
                     pyautogui_code += f"\npyautogui.click({x}, {y}, button='left')"
                 elif action_type == "left_double":
@@ -502,7 +509,8 @@ def parsing_response_to_pyautogui_code(responses,
 def parsing_response_to_pydirectinput_code(responses,
                                            image_height: int,
                                            image_width: int,
-                                           input_swap: bool = True) -> str:
+                                           input_swap: bool = True,
+                                           y_offset_factor: float = 0.0) -> str:
     '''
     将模型的输出解析为pydirectinput代码字符串
     参数:
@@ -515,6 +523,8 @@ def parsing_response_to_pydirectinput_code(responses,
                 "end_box": None
             }
         }
+        y_offset_factor: Linear correction factor for y-axis offset (default: 0.0)
+                        Applied as: corrected_y = y + (y * y_offset_factor)
     返回:
         生成的pydirectinput代码字符串
     '''
@@ -662,10 +672,12 @@ def parsing_response_to_pydirectinput_code(responses,
                     start_box)  # Assuming box is in [x1, y1, x2, y2]
                 sx = int(round(float((x1 + x2) / 2) * image_width))
                 sy = int(round(float((y1 + y2) / 2) * image_height))
+                sy = int(round(sy + (sy * y_offset_factor)))  # Apply y-axis offset correction
                 x1, y1, x2, y2 = eval(
                     end_box)  # Assuming box is in [x1, y1, x2, y2]
                 ex = int(round(float((x1 + x2) / 2) * image_width))
                 ey = int(round(float((y1 + y2) / 2) * image_height))
+                ey = int(round(ey + (ey * y_offset_factor)))  # Apply y-axis offset correction
                 pydirectinput_code += (
                     f"\npydirectinput.moveTo({sx}, {sy})\n"
                     f"\npydirectinput.mouseDown()\n"
@@ -680,6 +692,7 @@ def parsing_response_to_pydirectinput_code(responses,
                     start_box)  # Assuming box is in [x1, y1, x2, y2]
                 x = int(round(float((x1 + x2) / 2) * image_width))
                 y = int(round(float((y1 + y2) / 2) * image_height))
+                y = int(round(y + (y * y_offset_factor)))  # Apply y-axis offset correction
                 pydirectinput_code += f"\npydirectinput.moveTo({x}, {y})"
             direction = action_inputs.get("direction", "")
 
@@ -704,6 +717,7 @@ def parsing_response_to_pydirectinput_code(responses,
                     y2 = y1
                 x = int(round(float((x1 + x2) / 2) * image_width))
                 y = int(round(float((y1 + y2) / 2) * image_height))
+                y = int(round(y + (y * y_offset_factor)))  # Apply y-axis offset correction
                 if action_type == "left_single" or action_type == "click":
                     pydirectinput_code += f"\npydirectinput.click({x}, {y})"
                 elif action_type == "left_double":

@@ -1,1 +1,1 @@
-"Place the wall to the left of the tube."
+"Place the wall next to the left of the tube."

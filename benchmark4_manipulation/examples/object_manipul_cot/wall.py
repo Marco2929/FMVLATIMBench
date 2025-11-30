@@ -1,1 +1,1 @@
-"Move the brick wall to the right of the screen."
+"Move the brick wall to the right of the screen. Tell me how to do that"

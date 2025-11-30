@@ -37,7 +37,7 @@ except Exception:
     _have_keyboard = False
 
 from ui_tars_1_5_7B.action_parser import parse_action_to_structure_output, parsing_response_to_pyautogui_code, parsing_response_to_pydirectinput_code
-from utils import get_api_key, encode_image, DistanceTracker, VisualLocator
+from utils import get_api_key, encode_image, DistanceTracker, VisualLocator, calculate_iou
 from PIL import Image
 
 # Configuration constants
@@ -71,18 +71,27 @@ def parse_ground_truth(json_path: Path) -> dict:
             - 'targets': Dict of target positions {'object_name': (x, y)} or single values
             - 'templates': Dict of template paths {'object_name': 'path/to/template.png'}
             - 'threshold': Distance threshold for success (default: 10)
+            - 'use_iou': Boolean flag to enable IoU evaluation (default: False)
+            - 'target_boxes': Optional dict of target bounding boxes (only used if use_iou=True)
+            - 'iou_threshold': Optional IoU threshold for success (default: 0.5)
     
     Expected JSON format:
     {
         "targets": {
-            "ball": [200, 300],  // or [200, null] for x-only, or just 200 for scalar
+            "ball": [200, 300],
             "key": [100, 150]
         },
         "templates": {
             "ball": "templates/ball.png",
             "key": "templates/key.png"
         },
-        "threshold": 15
+        "threshold": 15,
+        "use_iou": true,
+        "target_boxes": {
+            "ball": [180, 280, 220, 320],
+            "key": [80, 130, 120, 170]
+        },
+        "iou_threshold": 0.5
     }
     """
     with open(json_path, "r") as f:
@@ -108,10 +117,23 @@ def parse_ground_truth(json_path: Path) -> dict:
             template_path = json_dir / template_path
         templates[obj_name] = str(template_path)
     
+    # Check if IoU evaluation is enabled
+    use_iou = data.get("use_iou", False)
+    
+    # Parse target boxes if IoU is enabled and boxes are provided
+    target_boxes = {}
+    if use_iou:
+        for obj_name, box in data.get("target_boxes", {}).items():
+            if isinstance(box, list) and len(box) == 4:
+                target_boxes[obj_name] = tuple(box)
+    
     return {
         "targets": targets,
         "templates": templates,
-        "threshold": data.get("threshold", 10)
+        "threshold": data.get("threshold", 10),
+        "use_iou": use_iou,
+        "target_boxes": target_boxes,
+        "iou_threshold": data.get("iou_threshold", 0.5)
     }
 
 
@@ -189,11 +211,14 @@ def evaluate_response(ground_truth_data: dict, screenshot_path: str = None, scre
             - 'targets': Dict of target positions {'object_name': (x, y)} or {'object_name': value}
             - 'templates': Dict of template paths {'object_name': 'path/to/template.png'}
             - 'threshold': Optional distance threshold for success (default: 10 pixels)
+            - 'use_iou': Boolean flag to enable IoU evaluation
+            - 'target_boxes': Optional dict of target bounding boxes (only used if use_iou=True)
+            - 'iou_threshold': Optional IoU threshold for success (default: 0.5)
         screenshot_path: Path to the screenshot to evaluate (optional if screenshot_image provided)
         screenshot_image: PIL Image object of the screenshot (optional if screenshot_path provided)
         
     Returns:
-        Tuple of (success: bool, total_distance: float, details: dict)
+        Tuple of (success: bool, total_distance: float, distance_details: dict, iou_scores: dict, mean_iou: float)
     """
     if screenshot_image is None and screenshot_path is None:
         raise ValueError("Either screenshot_path or screenshot_image must be provided")
@@ -205,26 +230,65 @@ def evaluate_response(ground_truth_data: dict, screenshot_path: str = None, scre
     targets = ground_truth_data.get('targets', {})
     templates = ground_truth_data.get('templates', {})
     threshold = ground_truth_data.get('threshold', 10)
+    use_iou = ground_truth_data.get('use_iou', False)
+    target_boxes = ground_truth_data.get('target_boxes', {})
+    iou_threshold = ground_truth_data.get('iou_threshold', 0.5)
     
     # Initialize VisualLocator with templates
     locator = VisualLocator(templates)
     
-    # Locate objects in the screenshot
-    current_positions = locator.locate_objects(screenshot_image)
-    print(f"Located objects: {current_positions}")
+    # Locate objects - get boxes if IoU is enabled
+    if use_iou:
+        detected_objects = locator.locate_objects(screenshot_image, return_boxes=True)
+        current_positions = {name: obj['center'] for name, obj in detected_objects.items()}
+        detected_boxes = {name: obj['box'] for name, obj in detected_objects.items()}
+        print(f"Located objects with boxes: {current_positions}")
+    else:
+        current_positions = locator.locate_objects(screenshot_image, return_boxes=False)
+        detected_boxes = {}
+        print(f"Located objects: {current_positions}")
     
-    # Initialize DistanceTracker with target positions
+    # Calculate distance-based metrics
     tracker = DistanceTracker(targets)
-    
-    # Calculate distances
-    total_distance, details = tracker.calculate_progress(current_positions)
+    total_distance, distance_details = tracker.calculate_progress(current_positions)
     print(f"Total distance: {total_distance:.2f} pixels")
-    print(f"Per-object distances: {details}")
+    print(f"Per-object distances: {distance_details}")
     
-    # Determine success based on threshold
-    success = total_distance <= threshold and all(d != float('inf') for d in details.values())
+    # Calculate IoU scores if enabled
+    iou_scores = {}
+    mean_iou = 0.0
     
-    return success, total_distance, details
+    if use_iou and target_boxes:
+        total_iou = 0.0
+        num_objects = 0
+        
+        for obj_name, target_box in target_boxes.items():
+            if obj_name in detected_boxes:
+                detected_box = detected_boxes[obj_name]
+                iou = calculate_iou(target_box, detected_box)
+                iou_scores[obj_name] = iou
+                total_iou += iou
+                num_objects += 1
+            else:
+                # Object not found
+                iou_scores[obj_name] = 0.0
+        
+        if num_objects > 0:
+            mean_iou = total_iou / num_objects
+        
+        print(f"Mean IoU: {mean_iou:.4f}")
+        print(f"Per-object IoU scores: {iou_scores}")
+    
+    # Determine success based on thresholds
+    distance_success = total_distance <= threshold and all(d != float('inf') for d in distance_details.values())
+    
+    if use_iou and target_boxes:
+        iou_success = mean_iou >= iou_threshold and all(iou >= iou_threshold for iou in iou_scores.values() if iou > 1e-6)
+        success = distance_success and iou_success
+    else:
+        success = distance_success
+    
+    return success, total_distance, distance_details, iou_scores, mean_iou
 
 
 def _wait_for_start():
@@ -353,7 +417,8 @@ if __name__ == "__main__":
         parsed_pyautogui_code = parsing_response_to_pydirectinput_code(
             responses=parsed_dict,
             image_height=original_image_height,
-            image_width=original_image_width
+            image_width=original_image_width,
+            y_offset_factor=-441/4800
         )
         print(f"Generated code:\n{parsed_pyautogui_code}")
         
@@ -399,7 +464,7 @@ if __name__ == "__main__":
     final_screenshot_path = "benchmark4_manipulation/debug/debug_screenshot.png"
     
     if os.path.exists(final_screenshot_path):
-        success, total_distance, details = evaluate_response(
+        success, total_distance, details, iou_scores, mean_iou = evaluate_response(
             ground_truth_data=ground_truth_data,
             screenshot_path=final_screenshot_path
         )
@@ -407,11 +472,21 @@ if __name__ == "__main__":
         print(f"\nSuccess: {success}")
         print(f"Total Distance: {total_distance:.2f} pixels")
         print(f"Threshold: {ground_truth_data['threshold']} pixels")
-        print(f"\nPer-object distances:")
+        
+        # Display IoU metrics if enabled
+        if ground_truth_data.get('use_iou', False) and iou_scores:
+            print(f"\nIoU Evaluation: ENABLED")
+            print(f"Mean IoU: {mean_iou:.4f}")
+            print(f"IoU Threshold: {ground_truth_data.get('iou_threshold', 0.5):.2f}")
+        else:
+            print(f"\nIoU Evaluation: DISABLED")
+        
+        print("\nPer-object distances:")
         for obj_name, distance in details.items():
             status = "✓" if distance != float('inf') and distance <= ground_truth_data['threshold'] else "✗"
             dist_str = f"{distance:.2f}" if distance != float('inf') else "NOT FOUND"
-            print(f"  {status} {obj_name}: {dist_str} pixels")
+            iou_str = f" | IoU: {iou_scores[obj_name]:.4f}" if obj_name in iou_scores else ""
+            print(f"  {status} {obj_name}: {dist_str} pixels{iou_str}")
         
         # Save evaluation results
         eval_results = {
@@ -419,6 +494,10 @@ if __name__ == "__main__":
             "total_distance": total_distance,
             "threshold": ground_truth_data['threshold'],
             "details": {k: (v if v != float('inf') else "inf") for k, v in details.items()},
+            "use_iou": ground_truth_data.get('use_iou', False),
+            "iou_scores": iou_scores,
+            "mean_iou": mean_iou,
+            "iou_threshold": ground_truth_data.get('iou_threshold', 0.5),
             "ground_truth": ground_truth_data
         }
         

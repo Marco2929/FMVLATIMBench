@@ -1,6 +1,6 @@
 {
     "targets": {
-        "brickwall": [1600, null]
+        "brickwall": [737, 547]
     },
     "templates": {
         "brickwall": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\brickwall.png"
@@ -8,7 +8,7 @@
     "threshold": 15,
     "use_iou": true,
     "target_boxes": {
-        "brickwall": [1600, 0, 1200, 1920]
+        "brickwall": [617, 485, 827, 616]
     },
     "iou_threshold": 0.5
 }

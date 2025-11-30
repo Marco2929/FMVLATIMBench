@@ -49,6 +49,38 @@ def get_api_key() -> str:
             raise ValueError("Please set the OPENROUTER_API_KEY environment variable (e.g. in .env)")
     return API_KEY
 
+def calculate_iou(box1, box2):
+    """
+    Calculate Intersection over Union (IoU) for two bounding boxes.
+    
+    :param box1: Tuple (x1, y1, x2, y2) for first box
+    :param box2: Tuple (x1, y1, x2, y2) for second box
+    :return: IoU score (0-1)
+    """
+    # Calculate intersection area
+    x1_inter = max(box1[0], box2[0])
+    y1_inter = max(box1[1], box2[1])
+    x2_inter = min(box1[2], box2[2])
+    y2_inter = min(box1[3], box2[3])
+    
+    # Check if there's an intersection
+    if x2_inter < x1_inter or y2_inter < y1_inter:
+        return 0.0
+    
+    intersection_area = (x2_inter - x1_inter) * (y2_inter - y1_inter)
+    
+    # Calculate union area
+    box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
+    box2_area = (box2[2] - box2[0]) * (box2[3] - box2[1])
+    union_area = box1_area + box2_area - intersection_area
+    
+    # Calculate IoU
+    if union_area == 0:
+        return 0.0
+    
+    iou = intersection_area / union_area
+    return iou
+
 class VGBenchScorer:
     def __init__(self, checkpoint_folder, threshold=12):
         """
@@ -225,42 +257,61 @@ class DistanceTracker:
         return debug_img
 
 class VisualLocator:
-    def __init__(self, templates):
+    def __init__(self, templates, match_threshold=0.8):
         """
         :param templates: Dict { 'object_name': 'path/to/icon.png' }
+        :param match_threshold: Confidence threshold for template matching (0-1)
         """
         self.templates = {}
+        self.template_sizes = {}
+        self.match_threshold = match_threshold
+        
         for name, path in templates.items():
             if os.path.exists(path):
                 # Load in grayscale for robustness
-                self.templates[name] = cv2.imread(path, 0) 
+                template = cv2.imread(path, 0)
+                self.templates[name] = template
+                # Store template dimensions
+                h, w = template.shape
+                self.template_sizes[name] = (w, h)
             else:
                 print(f"Warning: Template {path} not found")
 
-    def locate_objects(self, screenshot):
+    def locate_objects(self, screenshot, return_boxes=False):
         """
         Finds objects in the full screenshot.
         :param screenshot: PIL Image or path
-        :return: Dict { 'object_name': (center_x, center_y) }
+        :param return_boxes: If True, return bounding boxes; if False, return centers only
+        :return: If return_boxes=False: Dict { 'object_name': (center_x, center_y) }
+                 If return_boxes=True: Dict { 'object_name': {'center': (x, y), 'box': (x1, y1, x2, y2), 'confidence': float} }
         """
         # Convert PIL to OpenCv Grayscale
         img_cv = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2GRAY)
         found_positions = {}
 
         for name, template in self.templates.items():
-            w, h = template.shape[::-1]
+            w, h = self.template_sizes[name]
             
             # Match Template
             res = cv2.matchTemplate(img_cv, template, cv2.TM_CCOEFF_NORMED)
-            threshold = 0.8 # 80% confidence match
             
             # Get location of best match
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            _, max_val, _, max_loc = cv2.minMaxLoc(res)
             
-            if max_val >= threshold:
-                # max_loc is top-left corner. We want the center.
-                center_x = max_loc[0] + w // 2
-                center_y = max_loc[1] + h // 2
-                found_positions[name] = (center_x, center_y)
+            if max_val >= self.match_threshold:
+                # max_loc is top-left corner
+                x1, y1 = max_loc
+                x2, y2 = x1 + w, y1 + h
+                center_x = x1 + w // 2
+                center_y = y1 + h // 2
+                
+                if return_boxes:
+                    found_positions[name] = {
+                        'center': (center_x, center_y),
+                        'box': (x1, y1, x2, y2),
+                        'confidence': float(max_val)
+                    }
+                else:
+                    found_positions[name] = (center_x, center_y)
             
         return found_positions
