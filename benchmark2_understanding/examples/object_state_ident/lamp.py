@@ -1,0 +1,1 @@
+SYSTEM_PROMPT = """TASK_DESCRIPTION: Is the lamp on?"""

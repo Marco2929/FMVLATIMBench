@@ -1,12 +1,16 @@
 import base64
+import json
 import os
 from pathlib import Path
 from PIL import Image
+from openai import OpenAI
+
 
 def encode_image(image_path):
     """Encode the image to base64."""
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
+
 
 def pad_image(image_path: Path, grid_size) -> Path:
     """Pad the image to make its dimensions multiples of grid_size.
@@ -30,6 +34,7 @@ def pad_image(image_path: Path, grid_size) -> Path:
     padded_image.save(padded_image_path)
     return padded_image_path
 
+
 def get_api_key() -> str:
     API_KEY = os.getenv("OPENROUTER_API_KEY")
     if API_KEY:
@@ -44,3 +49,46 @@ def get_api_key() -> str:
         except FileNotFoundError:
             raise ValueError("Please set the OPENROUTER_API_KEY environment variable (e.g. in .env)")
     return API_KEY
+
+
+def parse_ground_truth(json_path: Path) -> str:
+    with open(json_path, "r") as f:
+        data = json.load(f)
+    return data["solution"]
+
+def generate_model_response(image_path: Path, api_key: str, SYSTEM_PROMPT: str, instruct_prompt: str,
+                            model_name="qwen/qwen3-vl-8b-instruct",
+                            base_url="https://openrouter.ai/api/v1"):
+    client = OpenAI(api_key=api_key, base_url=base_url)
+    base64_image = encode_image(image_path)
+    data_url = f"data:image/jpeg;base64,{base64_image}"
+    messages = [
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT + instruct_prompt
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": data_url
+                    }
+                }
+            ]
+        }
+    ]
+    response = client.chat.completions.create(model=model_name, messages=messages)
+    part_name = response.choices[0].message.content
+    print(f"Model Response: {part_name}")
+    return part_name
+
+def parse_response(response: str):
+    normalized_response = response.upper().replace(" ", "_")
+
+    return normalized_response.strip()
+
+
+def evaluate_response(ground_truth: str, response: str):
+    return ground_truth == response
