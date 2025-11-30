@@ -1,47 +1,72 @@
 import json
 from pathlib import Path
-import argparse
-from enum import Enum
+from typing import override
 
 from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTEM_PROMPT as UITARS_LOCALIZE_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_object_recognition import SYSTEM_PROMPT as QWEN3_CLASSIFY_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_single_bbox import SYSTEM_PROMPT as QWEN3_LOCALIZE_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_multi_bbox import SYSTEM_PROMPT as QWEN3_MULTILOCALIZE_SYSTEM_PROMPT
-from src.basics import get_api_key, get_base_url
+from src.bechmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
 from src.llm_wrapper import BoundingBox, Qwen3VLLLMWrapper, UiTarsLLMWrapper
 
 
-class BenchmarkType(Enum):
+class GroundingBenchmarkType(BenchmarkBase):
     QWEN3_CLASSIFY = 'qwen3_classify'
     QWEN3_LOCALIZE = 'qwen3_localize'
     QWEN3_LOCALIZE_MULTI = 'qwen3_localize_multi'
     UITARS_LOCALIZE = 'uitars_localize'
 
+    @override
     def get_model_name(self) -> str:
         match self:
-            case BenchmarkType.QWEN3_CLASSIFY | BenchmarkType.QWEN3_LOCALIZE | BenchmarkType.QWEN3_LOCALIZE_MULTI:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
                 # return "qwen/qwen3-vl-8b-instruct"
                 return "qwen/qwen3-vl-235b-a22b-instruct"
-            case BenchmarkType.UITARS_LOCALIZE:
+            case GroundingBenchmarkType.UITARS_LOCALIZE:
                 return "bytedance/ui-tars-1.5-7b"
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
 
+    @override
     def get_system_prompt(self) -> str:
         match self:
-            case BenchmarkType.QWEN3_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY:
                 return QWEN3_CLASSIFY_SYSTEM_PROMPT
-            case BenchmarkType.QWEN3_LOCALIZE:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE:
                 return QWEN3_LOCALIZE_SYSTEM_PROMPT
-            case BenchmarkType.QWEN3_LOCALIZE_MULTI:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
                 return QWEN3_MULTILOCALIZE_SYSTEM_PROMPT
-            case BenchmarkType.UITARS_LOCALIZE:
+            case GroundingBenchmarkType.UITARS_LOCALIZE:
                 return UITARS_LOCALIZE_SYSTEM_PROMPT
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
 
-def parse_ground_truth(json_path:Path, benchmark_type: BenchmarkType):
+    @override
+    def get_relevant_files(self) -> list[Path]:
+        base_path = Path("benchmark1_grounding/examples")
+        single_object = base_path / "single_object"
+        multi_object = base_path / "multi_object"
+        
+        match self:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY:
+                folders = [single_object]
+            case GroundingBenchmarkType.QWEN3_LOCALIZE:
+                folders = [single_object, multi_object]
+            case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
+                folders = [single_object, multi_object]
+            case GroundingBenchmarkType.UITARS_LOCALIZE:
+                folders = [single_object, multi_object]
+            case _:
+                raise ValueError(f"Benchmark type not implemented: {self}")
+        
+        file_paths = []
+        for folder in folders:
+            file_paths.extend([p for p in folder.glob("*.json")])
+        return sorted(file_paths)
+
+
+def parse_ground_truth(json_path:Path, benchmark_type: GroundingBenchmarkType):
     '''Takes a benchmark type and a json file and converts it into all possible benchmark results that 
     Example:
 {
@@ -88,10 +113,10 @@ which converts to:
     parts: list[BoundingBox] = []
     for part in data.get("parts", []):
         match benchmark_type:
-            case BenchmarkType.QWEN3_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY:
                 part_name = parse_classification(part)
                 return part_name if part_name else "NONE"
-            case BenchmarkType.QWEN3_LOCALIZE | BenchmarkType.UITARS_LOCALIZE | BenchmarkType.QWEN3_LOCALIZE_MULTI:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.UITARS_LOCALIZE | GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
                 bbox = parse_bbox(part)
                 if bbox:
                     assert 'UNKNOWN' not in bbox.label, "Ground truth contains UNKNOWN label. Model won't be able to predict it."
@@ -162,46 +187,11 @@ def evaluate_response_point(ground_truth: tuple[int, int], response: tuple[int, 
     distance = ((gt_x - resp_x) ** 2 + (gt_y - resp_y) ** 2) ** 0.5
     return distance
 
-def get_relevant_files(benchmark_type: BenchmarkType) -> list[Path]:
-    base_path = Path("benchmark1_grounding/examples")
-    single_object = base_path / "single_object"
-    multi_object = base_path / "multi_object"
-    
-    match benchmark_type:
-        case BenchmarkType.QWEN3_CLASSIFY:
-            folders = [single_object]
-        case BenchmarkType.QWEN3_LOCALIZE:
-            folders = [single_object, multi_object]
-        case BenchmarkType.QWEN3_LOCALIZE_MULTI:
-            folders = [single_object, multi_object]
-        case BenchmarkType.UITARS_LOCALIZE:
-            folders = [single_object, multi_object]
-        case _:
-            raise ValueError(f"Benchmark type not implemented: {benchmark_type}")
-    
-    file_paths = []
-    for folder in folders:
-        file_paths.extend([p for p in folder.glob("*.json")])
-    return sorted(file_paths)
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Benchmark Grounding Model Evaluation")
-    parser.add_argument("--save", action="store_true", help="Flag to save the results in <input>.txt")
-    parser.add_argument(
-        "--benchmark",
-        type=str,
-        choices=[bt.value for bt in BenchmarkType],
-        required=True,
-        help="Benchmark type with combination of model and task."
-    )
+    cli = BenchmarkCli(description="Run Benchmark 1: Grounding Tasks", benchmark_types=list(GroundingBenchmarkType))
+    benchmark = GroundingBenchmarkType(cli.benchmark)
 
-    args = parser.parse_args()
-    benchmark = BenchmarkType(args.benchmark)
-
-    API_KEY = get_api_key()
-    BASE_URL = get_base_url()
-
-    benchmark_files = get_relevant_files(benchmark)
+    benchmark_files = benchmark.get_relevant_files()
     
     for file_path in benchmark_files:
         input_png = file_path.with_suffix(".png")
@@ -214,37 +204,37 @@ if __name__ == "__main__":
         response = None
         score = None
         match benchmark:
-            case BenchmarkType.QWEN3_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY:
                 assert isinstance(ground_truth, str)
-                model = Qwen3VLLLMWrapper(api_key=API_KEY, base_url=BASE_URL, model_name=benchmark.get_model_name())
+                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
                 response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt()) or ""
                 response = model.parse_response_text(response)
                 score = evaluate_response(ground_truth, response)
-            case BenchmarkType.QWEN3_LOCALIZE:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE:
                 assert isinstance(ground_truth, list)
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
                 additional_user_prompt = f"Locate the {ground_truth_bbox.label}"
-                model = Qwen3VLLLMWrapper(api_key=API_KEY, base_url=BASE_URL, model_name=benchmark.get_model_name())
+                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
                 response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt) or ""
                 response = model.parse_response_bbox(response, image_width=image_width, image_height=image_height)
                 score = 0 if response is None else evaluate_response_bbox(ground_truth_bbox, response)
-            case BenchmarkType.QWEN3_LOCALIZE_MULTI:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
                 assert isinstance(ground_truth, list)
                 ground_truth_bbox = ground_truth
                 assert len(ground_truth_bbox) >= 1
                 object_list = ", ".join([gt.label for gt in ground_truth_bbox if gt.label is not None])
                 additional_user_prompt = f"Locate the following objects: {object_list}"
-                model = Qwen3VLLLMWrapper(api_key=API_KEY, base_url=BASE_URL, model_name=benchmark.get_model_name())
+                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
                 response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt) or ""
                 response = model.parse_response_bboxes(response, image_height=image_height, image_width=image_width)
                 score = evaluate_response_bboxes(ground_truth_bbox, response)
-            case BenchmarkType.UITARS_LOCALIZE:
+            case GroundingBenchmarkType.UITARS_LOCALIZE:
                 assert isinstance(ground_truth, list)
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
                 additional_user_prompt = f"Click the {ground_truth_bbox.label}"
-                model = UiTarsLLMWrapper(api_key=API_KEY, base_url=BASE_URL, model_name=benchmark.get_model_name())
+                model = UiTarsLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
                 response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt) or ""
                 response = model.parse_response_point(response)
                 score = evaluate_response_point(ground_truth_bbox.center(), response)
@@ -252,7 +242,7 @@ if __name__ == "__main__":
                 raise ValueError(f"Benchmark type not implemented: {benchmark}")
 
         if score is not None:
-            if args.save:
+            if cli.save:
                 results_path = file_path.with_suffix(f".{benchmark.value}.txt")
                 with open(results_path, "w") as f:
                     f.write(f"Ground Truth: {ground_truth}\n")
