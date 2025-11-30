@@ -1,7 +1,10 @@
 import base64
+import json
 import os
 from pathlib import Path
 from PIL import Image
+from openai import OpenAI
+
 import imagehash
 import math
 import cv2
@@ -33,6 +36,22 @@ def pad_image(image_path: Path, grid_size) -> Path:
     padded_image_path = image_path.with_name(image_path.stem + ".g.png")
     padded_image.save(padded_image_path)
     return padded_image_path
+
+def draw_bounding_box(image_path: Path, bbox: list[int]) -> Path:
+    '''Draw bounding box on the image and save it.
+    bbox is absolute pixel coordinates [x_min, y_min, x_max, y_max]
+    '''
+    image = cv2.imread(str(image_path))
+    if image is None:
+        raise FileNotFoundError(f"Image not found: {image_path}")
+    x_min = int(bbox[0])
+    y_min = int(bbox[1])
+    x_max = int(bbox[2])
+    y_max = int(bbox[3])
+    cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 0, 255), 2)
+    output_path = image_path.with_name(image_path.stem + "_bbox.g").with_suffix(image_path.suffix)
+    cv2.imwrite(str(output_path), image)
+    return output_path
 
 def get_api_key() -> str:
     API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -81,27 +100,100 @@ def calculate_iou(box1, box2):
     iou = intersection_area / union_area
     return iou
 
+def parse_ground_truth(json_path: Path) -> str:
+    with open(json_path, "r") as f:
+        data = json.load(f)
+    return data["solution"]
+
+def parse_model_response_bbox_qwen3(response: str) -> tuple[str|None, list[int]]:
+    PNG_WIDTH = 640
+    PNG_HEIGHT = 441
+    response_text = response.strip().replace('```json', '').replace('```', '')
+    try:
+        bbox_data = json.loads(response_text)
+        bbox = bbox_data.get("bbox")
+        if bbox is None:
+            print("No bowlingball detected.")
+            return (None, [])
+        if not isinstance(bbox, list) or len(bbox) != 4:
+            raise ValueError("Invalid bounding box format.")
+        
+        label = bbox_data.get("label")
+        if not label:
+            print("No label given.")
+            return (None, [])
+        
+        # Convert normalized coordinates (0-1000) to absolute pixels
+        x_min, y_min, x_max, y_max = bbox
+        x_min_px = int((x_min / 1000.0) * PNG_WIDTH)
+        y_min_px = int((y_min / 1000.0) * PNG_HEIGHT)
+        x_max_px = int((x_max / 1000.0) * PNG_WIDTH)
+        y_max_px = int((y_max / 1000.0) * PNG_HEIGHT)
+        
+        return (label.upper(), [x_min_px, y_min_px, x_max_px, y_max_px])
+    except json.JSONDecodeError:
+        print("Failed to parse JSON from model response.")
+        print("Raw response:", response_text)
+        return (None, [])
+
+def generate_model_response(image_path: Path, api_key: str, SYSTEM_PROMPT: str, instruct_prompt: str,
+                            model_name="qwen/qwen3-vl-8b-instruct",
+                            base_url="https://openrouter.ai/api/v1"):
+    client = OpenAI(api_key=api_key, base_url=base_url)
+    base64_image = encode_image(image_path)
+    data_url = f"data:image/jpeg;base64,{base64_image}"
+    messages = [
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT + instruct_prompt
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": data_url
+                    }
+                }
+            ]
+        }
+    ]
+    response = client.chat.completions.create(model=model_name, messages=messages)
+    part_name = response.choices[0].message.content
+    print(f"Model Response: {part_name}")
+    return part_name
+
+def parse_response(response: str):
+    normalized_response = response.upper().replace(" ", "_")
+
+    return normalized_response.strip()
+
+
+def evaluate_response(ground_truth: str, response: str):
+    return ground_truth == response
+
 class VGBenchScorer:
     def __init__(self, checkpoint_folder, threshold=12):
         """
         initializes the scorer with reference images.
-        
+
         :param checkpoint_folder: Path to folder containing '1.png', '2.png', etc.
-        :param threshold: Hamming distance tolerance. 
-                          0 = exact match. 
+        :param threshold: Hamming distance tolerance.
+                          0 = exact match.
                           < 5 = extremely similar.
                           < 15 = similar structure (tolerant to minor shifts/artifacts).
         """
         self.threshold = threshold
         self.checkpoints = {}  # Dict to store loaded hashes: {1: hash_obj, 2: hash_obj}
         self.current_checkpoint_index = 0 # We start before the first checkpoint
-        
+
         self._load_checkpoints(checkpoint_folder)
 
     def _load_checkpoints(self, folder):
         """Loads and pre-hashes all checkpoint images for speed."""
         print(f"Loading checkpoints from {folder}...")
-        
+
         if not os.path.exists(folder):
             raise FileNotFoundError(f"Folder {folder} not found.")
 
@@ -113,7 +205,7 @@ class VGBenchScorer:
             # Extract the number "1" from "1.png"
             cp_num = int(os.path.splitext(f)[0])
             img_path = os.path.join(folder, f)
-            
+
             with Image.open(img_path) as img:
                 # We use phash (Perceptual Hash) as per the VGBench paper.
                 # It is robust against resizing and minor color shifts.
@@ -124,18 +216,18 @@ class VGBenchScorer:
     def update(self, current_screen_image):
         """
         Takes the current game screen, hashes it, and checks against upcoming checkpoints.
-        
+
         :param current_screen_image: A PIL Image object of the current game frame.
         :return: (found_new_checkpoint, checkpoint_number, distance)
         """
         # 1. Generate Perceptual Hash of current screen
         #    (The paper uses a 64-bit hash usually represented as a hex string)
         current_hash = imagehash.phash(current_screen_image)
-        
+
         # 2. Optimization: Only check the *next* few checkpoints.
         #    We don't want to accidentally match Checkpoint 10 if we haven't passed Checkpoint 2.
         #    (Allowing a window of 3 lets the agent skip a minor intermediate checkpoint if it was missed)
-        search_window = 3 
+        search_window = 3
         start_search = self.current_checkpoint_index + 1
         end_search = start_search + search_window
 
@@ -145,11 +237,11 @@ class VGBenchScorer:
                 continue
 
             target_hash = self.checkpoints[cp_num]
-            
+
             # 3. Calculate Hamming Distance
             #    This counts how many bits differ between the two hashes.
             distance = current_hash - target_hash
-            
+
             if distance <= self.threshold:
                 # MATCH FOUND!
                 self.current_checkpoint_index = cp_num
@@ -173,7 +265,7 @@ class DistanceTracker:
         """
         Calculates how far all objects are from their goals.
         LOWER score is better (0 = Solved).
-        
+
         :param current_positions: Dict { 'object_name': (x, y) } or { 'object_name': value }
         :return: (total_distance, details_dict)
         """
@@ -183,12 +275,12 @@ class DistanceTracker:
         for obj_name, target_pos in self.targets.items():
             if obj_name in current_positions:
                 curr_pos = current_positions[obj_name]
-                
+
                 # Handle single coordinate (scalar value)
                 if isinstance(target_pos, (int, float)) and isinstance(curr_pos, (int, float)):
                     # Both are scalars - calculate 1D distance
                     dist = abs(target_pos - curr_pos)
-                
+
                 # Handle tuple coordinates
                 elif isinstance(target_pos, tuple) and isinstance(curr_pos, tuple):
                     # Check if we should only consider x or y coordinate
@@ -204,7 +296,7 @@ class DistanceTracker:
                     else:
                         # Both are None - invalid
                         dist = float('inf')
-                
+
                 # Handle mixed types (tuple vs scalar)
                 elif isinstance(target_pos, tuple) and isinstance(curr_pos, (int, float)):
                     # Assume curr_pos is x-coordinate if target has x, otherwise y
@@ -214,7 +306,7 @@ class DistanceTracker:
                         dist = abs(target_pos[1] - curr_pos)
                     else:
                         dist = float('inf')
-                
+
                 elif isinstance(curr_pos, tuple) and isinstance(target_pos, (int, float)):
                     # Target is scalar, current is tuple - use first non-None value
                     if curr_pos[0] is not None:
@@ -223,16 +315,16 @@ class DistanceTracker:
                         dist = abs(target_pos - curr_pos[1])
                     else:
                         dist = float('inf')
-                
+
                 else:
                     # Unexpected type combination
                     dist = float('inf')
-                
+
                 total_distance += dist
                 self.details[obj_name] = dist
             else:
                 # Penalty if object is missing from screen
-                self.details[obj_name] = float('inf') 
+                self.details[obj_name] = float('inf')
 
         return total_distance, self.details
 
@@ -251,7 +343,7 @@ class DistanceTracker:
                 # Draw Current (Blue Circle)
                 cv2.circle(debug_img, pos, 5, (255, 0, 0), -1)
                 # Draw Text
-                cv2.putText(debug_img, f"{int(self.details[name])}px", 
+                cv2.putText(debug_img, f"{int(self.details[name])}px",
                            (pos[0], pos[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
         return debug_img

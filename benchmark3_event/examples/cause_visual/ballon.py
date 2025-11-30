@@ -1,0 +1,1 @@
+SYSTEM_PROMPT = "TASK_DESCRIPTION: Mark the object that causes the balloon to burst."
