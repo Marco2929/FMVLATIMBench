@@ -1,0 +1,1 @@
+SYSTEM_PROMPT = "TASK_DESCRIPTION: Mark the object that lights up when the flashlight is activated."
