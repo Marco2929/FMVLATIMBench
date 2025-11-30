@@ -4,7 +4,7 @@ from pprint import pprint
 from openai import OpenAI
 import argparse
 from enum import Enum
-from utils import get_api_key, encode_image, pad_image
+from utils import get_api_key, encode_image, pad_image, parse_model_response_bbox_qwen3
 
 from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTEM_PROMPT as UITARS_LOCALIZE_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_object_recognition import SYSTEM_PROMPT as QWEN3_CLASSIFY_SYSTEM_PROMPT
@@ -152,36 +152,6 @@ def generate_model_response(image_path:Path, api_key:str, system_prompt:str, add
 def parse_model_response(response: str):
     return response.strip()
 
-def parse_model_response_bbox(response: str) -> tuple[str|None, list[int]]:
-    PNG_WIDTH = 640
-    PNG_HEIGHT = 441
-    response_text = response.strip().replace('```json', '').replace('```', '')
-    try:
-        bbox_data = json.loads(response_text)
-        bbox = bbox_data.get("bbox")
-        if bbox is None:
-            print("No bowlingball detected.")
-            return (None, [])
-        if not isinstance(bbox, list) or len(bbox) != 4:
-            raise ValueError("Invalid bounding box format.")
-        
-        label = bbox_data.get("label")
-        if not label:
-            print("No label given.")
-            return (None, [])
-        
-        # Convert normalized coordinates (0-1000) to absolute pixels
-        x_min, y_min, x_max, y_max = bbox
-        x_min_px = int((x_min / 1000.0) * PNG_WIDTH)
-        y_min_px = int((y_min / 1000.0) * PNG_HEIGHT)
-        x_max_px = int((x_max / 1000.0) * PNG_WIDTH)
-        y_max_px = int((y_max / 1000.0) * PNG_HEIGHT)
-        
-        return (label.upper(), [x_min_px, y_min_px, x_max_px, y_max_px])
-    except json.JSONDecodeError:
-        print("Failed to parse JSON from model response.")
-        print("Raw response:", response_text)
-        return (None, [])
     
 def parse_model_response_bboxes(response: str) -> list[tuple[str|None, list[int]]]:
     PNG_WIDTH = 640
@@ -337,7 +307,7 @@ if __name__ == "__main__":
                 assert ground_truth_bbox[0] is not None
                 additional_user_prompt = f"Locate the {ground_truth_bbox[0]}"
                 response = generate_model_response(input_png, api_key=API_KEY, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt, model_name=benchmark.get_model_name()) or ""
-                response = parse_model_response_bbox(response)
+                response = parse_model_response_bbox_qwen3(response)
                 score = evaluate_response_bbox(ground_truth_bbox, response)
             case BenchmarkType.QWEN3_LOCALIZE_MULTI:
                 assert isinstance(ground_truth, list)

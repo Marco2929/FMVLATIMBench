@@ -37,6 +37,22 @@ def pad_image(image_path: Path, grid_size) -> Path:
     padded_image.save(padded_image_path)
     return padded_image_path
 
+def draw_bounding_box(image_path: Path, bbox: list[int]) -> Path:
+    '''Draw bounding box on the image and save it.
+    bbox is absolute pixel coordinates [x_min, y_min, x_max, y_max]
+    '''
+    image = cv2.imread(str(image_path))
+    if image is None:
+        raise FileNotFoundError(f"Image not found: {image_path}")
+    x_min = int(bbox[0])
+    y_min = int(bbox[1])
+    x_max = int(bbox[2])
+    y_max = int(bbox[3])
+    cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 0, 255), 2)
+    output_path = image_path.with_name(image_path.stem + "_bbox.g").with_suffix(image_path.suffix)
+    cv2.imwrite(str(output_path), image)
+    return output_path
+
 def get_api_key() -> str:
     API_KEY = os.getenv("OPENROUTER_API_KEY")
     if API_KEY:
@@ -57,6 +73,37 @@ def parse_ground_truth(json_path: Path) -> str:
     with open(json_path, "r") as f:
         data = json.load(f)
     return data["solution"]
+
+def parse_model_response_bbox_qwen3(response: str) -> tuple[str|None, list[int]]:
+    PNG_WIDTH = 640
+    PNG_HEIGHT = 441
+    response_text = response.strip().replace('```json', '').replace('```', '')
+    try:
+        bbox_data = json.loads(response_text)
+        bbox = bbox_data.get("bbox")
+        if bbox is None:
+            print("No bowlingball detected.")
+            return (None, [])
+        if not isinstance(bbox, list) or len(bbox) != 4:
+            raise ValueError("Invalid bounding box format.")
+        
+        label = bbox_data.get("label")
+        if not label:
+            print("No label given.")
+            return (None, [])
+        
+        # Convert normalized coordinates (0-1000) to absolute pixels
+        x_min, y_min, x_max, y_max = bbox
+        x_min_px = int((x_min / 1000.0) * PNG_WIDTH)
+        y_min_px = int((y_min / 1000.0) * PNG_HEIGHT)
+        x_max_px = int((x_max / 1000.0) * PNG_WIDTH)
+        y_max_px = int((y_max / 1000.0) * PNG_HEIGHT)
+        
+        return (label.upper(), [x_min_px, y_min_px, x_max_px, y_max_px])
+    except json.JSONDecodeError:
+        print("Failed to parse JSON from model response.")
+        print("Raw response:", response_text)
+        return (None, [])
 
 def generate_model_response(image_path: Path, api_key: str, SYSTEM_PROMPT: str, instruct_prompt: str,
                             model_name="qwen/qwen3-vl-8b-instruct",

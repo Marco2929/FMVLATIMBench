@@ -21,7 +21,7 @@ from benchmark3_event.system_prompts.qwen3vl_effect_text import \
 from benchmark3_event.system_prompts.qwen3vl_effect_visual import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_VISUAL
 
-from utils import get_api_key, generate_model_response, parse_ground_truth
+from utils import draw_bounding_box, get_api_key, generate_model_response, parse_ground_truth, parse_model_response_bbox_qwen3
 
 allowed_categories = ["outcome_text", "outcome_visual", "effect_text", "effect_visual", "cause_text",
                       "cause_visual"]
@@ -120,7 +120,9 @@ if __name__ == "__main__":
     # response = generate_model_response(input_png, model_name="qwen/qwen3-vl-30b-a3b-instruct") or ""
     response = generate_model_response(input_png, api_key=API_KEY, SYSTEM_PROMPT=SYSTEM_PROMPT,
                                        instruct_prompt=instruct_prompt,
-                                       model_name=model_name)
+                                       model_name=model_name) or ''
+    response = parse_model_response_bbox_qwen3(response)
+    image_with_bbox_path = draw_bounding_box(input_png, response[1])
     print(f"Task: {instruct_prompt}")
     print(f"Ground Truth: {ground_truth}")
     print(f"Parsed Response: {response}")
