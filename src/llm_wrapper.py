@@ -10,6 +10,14 @@ from openai import OpenAI
 from .image_processing import b64encode_image, convert_to_webp, pad_image
 
 @dataclass
+class Point:
+    x: int
+    y: int
+    
+    def euclidian_distance_to(self, other: 'Point') -> float:
+        return ((self.x - other.x) ** 2 + (self.y - other.y) ** 2) ** 0.5
+
+@dataclass
 class BoundingBox:
     label: str
     x_min: int
@@ -17,10 +25,10 @@ class BoundingBox:
     x_max: int
     y_max: int
 
-    def center(self):
+    def center(self) -> Point:
         center_x = (self.x_min + self.x_max) // 2
         center_y = (self.y_min + self.y_max) // 2
-        return (center_x, center_y)
+        return Point(x=center_x, y=center_y)
     def width(self): return abs(self.x_max - self.x_min)
     def height(self): return abs(self.y_max - self.y_min)
     def area(self): return self.width() * self.height()

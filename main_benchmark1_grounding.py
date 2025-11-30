@@ -1,4 +1,5 @@
 import json
+import csv
 from pathlib import Path
 from typing import override
 
@@ -8,7 +9,8 @@ from benchmark1_grounding.system_prompts.qwen3vl_single_bbox import SYSTEM_PROMP
 from benchmark1_grounding.system_prompts.qwen3vl_multi_bbox import SYSTEM_PROMPT as QWEN3_MULTILOCALIZE_SYSTEM_PROMPT
 from src.bechmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
-from src.llm_wrapper import BoundingBox, Qwen3VLLLMWrapper, UiTarsLLMWrapper
+from src.llm_wrapper import BoundingBox, Point, Qwen3VLLLMWrapper, UiTarsLLMWrapper
+from src.results_model import SingleTaskResult
 
 
 class GroundingBenchmarkType(BenchmarkBase):
@@ -192,6 +194,8 @@ if __name__ == "__main__":
     benchmark = GroundingBenchmarkType(cli.benchmark)
 
     benchmark_files = benchmark.get_relevant_files()
+
+    results: list[SingleTaskResult] = []
     
     for file_path in benchmark_files:
         input_png = file_path.with_suffix(".png")
@@ -203,6 +207,8 @@ if __name__ == "__main__":
 
         response = None
         score = None
+        result: SingleTaskResult
+
         match benchmark:
             case GroundingBenchmarkType.QWEN3_CLASSIFY:
                 assert isinstance(ground_truth, str)
@@ -210,6 +216,20 @@ if __name__ == "__main__":
                 response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt()) or ""
                 response = model.parse_response_text(response)
                 score = evaluate_response(ground_truth, response)
+
+                result = SingleTaskResult(
+                    benchmark_type=benchmark.value,
+                    model=benchmark.get_model_name(),
+                    final_score=score,
+                    iou=None,
+                    classification_correct=score,
+                    distance=None,
+                    score_formula="exact match",
+                    input_file=str(file_path),
+                    ground_truth=ground_truth,
+                    response=response
+                )
+
             case GroundingBenchmarkType.QWEN3_LOCALIZE:
                 assert isinstance(ground_truth, list)
                 assert len(ground_truth) >= 1
@@ -217,8 +237,22 @@ if __name__ == "__main__":
                 additional_user_prompt = f"Locate the {ground_truth_bbox.label}"
                 model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
                 response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt) or ""
-                response = model.parse_response_bbox(response, image_width=image_width, image_height=image_height)
-                score = 0 if response is None else evaluate_response_bbox(ground_truth_bbox, response)
+                parsed_response = model.parse_response_bbox(response, image_width=image_width, image_height=image_height)
+                score = 0 if parsed_response is None else evaluate_response_bbox(ground_truth_bbox, parsed_response)
+
+                result = SingleTaskResult(
+                    benchmark_type=benchmark.value,
+                    model=benchmark.get_model_name(),
+                    final_score=score,
+                    iou=score,
+                    classification_correct=None,
+                    distance=None,
+                    score_formula="IoU",
+                    input_file=str(file_path),
+                    ground_truth=ground_truth_bbox,
+                    response=parsed_response if parsed_response is not None else response
+                )
+
             case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
                 assert isinstance(ground_truth, list)
                 ground_truth_bbox = ground_truth
@@ -229,6 +263,20 @@ if __name__ == "__main__":
                 response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt) or ""
                 response = model.parse_response_bboxes(response, image_height=image_height, image_width=image_width)
                 score = evaluate_response_bboxes(ground_truth_bbox, response)
+
+                result = SingleTaskResult(
+                    benchmark_type=benchmark.value,
+                    model=benchmark.get_model_name(),
+                    final_score=score,
+                    iou=score,
+                    classification_correct=None,
+                    distance=None,
+                    score_formula="average IoU",
+                    input_file=str(file_path),
+                    ground_truth=ground_truth_bbox,
+                    response=response
+                )
+
             case GroundingBenchmarkType.UITARS_LOCALIZE:
                 assert isinstance(ground_truth, list)
                 assert len(ground_truth) >= 1
@@ -236,10 +284,27 @@ if __name__ == "__main__":
                 additional_user_prompt = f"Click the {ground_truth_bbox.label}"
                 model = UiTarsLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
                 response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt) or ""
-                response = model.parse_response_point(response)
-                score = evaluate_response_point(ground_truth_bbox.center(), response)
+                parsed_response_tuple = model.parse_response_point(response)
+                parsed_response = Point(x=parsed_response_tuple[0], y=parsed_response_tuple[1])
+                score = ground_truth_bbox.center().euclidian_distance_to(parsed_response)
+
+                result = SingleTaskResult(
+                    benchmark_type=benchmark.value,
+                    model=benchmark.get_model_name(),
+                    final_score=score,
+                    iou=None,
+                    classification_correct=None,
+                    distance=score,
+                    score_formula="euclidean distance",
+                    input_file=str(file_path),
+                    ground_truth=ground_truth_bbox,
+                    response=parsed_response
+                )
+
             case _:
                 raise ValueError(f"Benchmark type not implemented: {benchmark}")
+
+        results.append(result)
 
         if score is not None:
             if cli.save:
@@ -253,3 +318,13 @@ if __name__ == "__main__":
         print(f"Ground Truth: {ground_truth}")
         print(f"Response: {response}")
         print(f"Evaluation Score: {score}")
+
+    # Save all results to CSV
+    if results and cli.save:
+        csv_path = Path("benchmark1_grounding_results.csv")
+        with open(csv_path, "w", newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=SingleTaskResult.get_fieldnames())
+            writer.writeheader()
+            for result in results:
+                writer.writerow(result.to_dict())
+        print(f"\nAll results saved to {csv_path}")
