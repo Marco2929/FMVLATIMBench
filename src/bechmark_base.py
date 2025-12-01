@@ -32,7 +32,7 @@ class BenchmarkCli:
         assert ' ' not in name, "name should not contain spaces"
         self.name = name
         self.parser = argparse.ArgumentParser(description=name)
-        self.parser.add_argument("--save", action="store_true", help="Flag to save the results in <input>.txt")
+        self.parser.add_argument("--nosave", action="store_true", help="Flag to not save the results in results/*.csv at the end.")
         self.parser.add_argument(
             "--benchmark",
             type=str,
@@ -51,7 +51,7 @@ class BenchmarkCli:
         self.args = args
         self.benchmark = args.benchmark
         assert isinstance(self.benchmark, str)
-        self.save = args.save
+        self.save = not args.nosave
         assert isinstance(self.save, bool)
 
         self.API_KEY = get_api_key()
