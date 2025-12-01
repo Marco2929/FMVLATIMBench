@@ -7,7 +7,7 @@ from typing import override
 
 from openai import OpenAI
 
-from .image_processing import b64encode_image, convert_to_webp, pad_image
+from .image_processing import b64encode_image, convert_to_webp, get_image_dimensions, pad_image
 
 @dataclass
 class Point:
@@ -57,7 +57,12 @@ class LLMWrapperBase:
         self.model_name = model_name
     
     def encode_image(self, image_path: Path) -> str:
-        return b64encode_image(convert_to_webp(image_path))
+        width, height = get_image_dimensions(image_path)
+        # webp has effects only for large images
+        if width*height > 1024*1024:
+            webp_image_path = convert_to_webp(image_path)
+            return b64encode_image(webp_image_path)
+        return b64encode_image(image_path)
 
     def parse_response_text(self, response: str) -> str:
         return response.strip()
