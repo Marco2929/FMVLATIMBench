@@ -1,1 +1,0 @@
-SYSTEM_PROMPT = "TASK_DESCRIPTION: What led to the ballons burst?"

@@ -49,7 +49,7 @@ def draw_bounding_box(image_path: Path, bbox: list[int]) -> Path:
     x_max = int(bbox[2])
     y_max = int(bbox[3])
     cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 0, 255), 2)
-    output_path = image_path.with_name(image_path.stem + "_bbox.g").with_suffix(image_path.suffix)
+    output_path = image_path.with_name(image_path.stem + "_bbox").with_suffix('.g' + image_path.suffix)
     cv2.imwrite(str(output_path), image)
     return output_path
 

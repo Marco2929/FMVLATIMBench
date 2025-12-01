@@ -1,1 +1,0 @@
-SYSTEM_PROMPT = "TASK_DESCRIPTION: Mark the area where the football will land when starting the machine and waiting until it comes to rest."

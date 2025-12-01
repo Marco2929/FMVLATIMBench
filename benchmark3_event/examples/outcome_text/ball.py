@@ -1,1 +1,0 @@
-SYSTEM_PROMPT = "TASK_DESCRIPTION: What happens to the ball when the machine is started?"

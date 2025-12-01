@@ -47,6 +47,8 @@ class BoundingBox:
             return 0.0
         iou = interArea / unionArea
         return iou
+    def bbox_list(self) -> list[int]:
+        return [self.x_min, self.y_min, self.x_max, self.y_max]
 
 
 class LLMWrapperBase:
