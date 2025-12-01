@@ -108,3 +108,8 @@ if __name__ == "__main__":
         #     user_prompt=user_prompt,
         #     response=response,
         # )
+
+        # cli.results.append(result)
+        
+    if cli.save:
+        cli.save_results()

@@ -1,6 +1,5 @@
 from pathlib import Path
-import argparse
-from typing import List
+from typing import List, override
 
 from deepeval import evaluate
 from deepeval.test_case import LLMTestCase
@@ -10,38 +9,60 @@ from deepeval.models.base_model import DeepEvalBaseLLM
 from deepeval_openrouter_utils import OpenRouterLLM
 from benchmark3_event.system_prompts.qwen3vl_outcome_text import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_OUTCOME_TEXT
-from benchmark3_event.system_prompts.qwen3vl_outcome_visual import \
-    SYSTEM_PROMPT as SYSTEM_PROMPT_OUTCOME_VISUAL
-from benchmark3_event.system_prompts.qwen3vl_cause_visual import \
-    SYSTEM_PROMPT as SYSTEM_PROMPT_CAUSE_VISUAL
 from benchmark3_event.system_prompts.qwen3vl_cause_text import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_CAUSE_TEXT
 from benchmark3_event.system_prompts.qwen3vl_effect_text import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_TEXT
-from benchmark3_event.system_prompts.qwen3vl_effect_visual import \
-    SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_VISUAL
 
-from utils import get_api_key, generate_model_response, parse_ground_truth
+from src.bechmark_base import BenchmarkBase, BenchmarkCli
+from src.llm_wrapper import Qwen3VLLLMWrapper
+from src.results_model import SingleTaskResult
+from utils import parse_ground_truth
 
-allowed_categories = ["outcome_text", "outcome_visual", "effect_text", "effect_visual", "cause_text",
-                      "cause_visual"]
-
-PROMPT_MAPPING = {
-    "outcome_text": SYSTEM_PROMPT_OUTCOME_TEXT,
-    "outcome_visual": SYSTEM_PROMPT_OUTCOME_VISUAL,
-    "effect_text": SYSTEM_PROMPT_EFFECT_TEXT,
-    "effect_visual": SYSTEM_PROMPT_EFFECT_VISUAL,
-    "cause_text": SYSTEM_PROMPT_CAUSE_TEXT,
-    "cause_visual": SYSTEM_PROMPT_CAUSE_VISUAL,
-}
-
-
-def get_system_prompt(input_category: str):
-    if input_category in PROMPT_MAPPING:
-        return PROMPT_MAPPING[input_category]
-    else:
-        raise ValueError(f"Invalid category: {input_category}")
-
+class EventBenchmarkType(BenchmarkBase):
+    OUTCOME_TEXT = 'outcome_text'
+    EFFECT_TEXT = 'effect_text'
+    CAUSE_TEXT = 'cause_text'
+    
+    @override
+    def get_model_name(self) -> str:
+        match self:
+            case _:
+                return "qwen/qwen3-vl-235b-a22b-instruct"
+            
+    @override
+    def get_system_prompt(self) -> str:
+        match self:
+            case EventBenchmarkType.OUTCOME_TEXT:
+                return SYSTEM_PROMPT_OUTCOME_TEXT
+            case EventBenchmarkType.EFFECT_TEXT:
+                return SYSTEM_PROMPT_EFFECT_TEXT
+            case EventBenchmarkType.CAUSE_TEXT:
+                return SYSTEM_PROMPT_CAUSE_TEXT
+            case _:
+                raise ValueError(f"Benchmark type not implemented: {self}")
+            
+    @override
+    def get_relevant_files(self) -> list[Path]:
+        base_path = Path("benchmark3_event/examples")
+        outcome_text = base_path / "outcome_text"
+        effect_text = base_path / "effect_text"
+        cause_text = base_path / "cause_text"
+        
+        match self:
+            case EventBenchmarkType.OUTCOME_TEXT:
+                folders = [outcome_text]
+            case EventBenchmarkType.EFFECT_TEXT:
+                folders = [effect_text]
+            case EventBenchmarkType.CAUSE_TEXT:
+                folders = [cause_text]
+            case _:
+                raise ValueError(f"Benchmark type not implemented: {self}")
+        
+        file_paths = []
+        for folder in folders:
+            file_paths.extend([p for p in folder.glob("*.txt")])
+        return sorted(file_paths)
 
 def evaluate_response_deep_eval(openrouter_llm: DeepEvalBaseLLM, input: str, expected_output: str, actual_output: str,
                                 retrieval_context: List[str]):
@@ -65,65 +86,56 @@ def evaluate_response_deep_eval(openrouter_llm: DeepEvalBaseLLM, input: str, exp
     return results.test_results[0].success
 
 
-def calculate_benchmark_results():
-    pass
-
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Benchmark Grounding Model Evaluation")
-    parser.add_argument("--input", required=True, type=str, metavar="FILE",
-                        help="Path to the input test that expects .PNG, .py and .json files.",
-                        )
-    parser.add_argument(
-        "--category",
-        type=str,
-        choices=allowed_categories,
-        help=f"Possible categories are: {allowed_categories}",
-        default=allowed_categories[0]
-    )
+    cli = BenchmarkCli(name="benchmark3_event_visual", benchmark_types=list(EventBenchmarkType))
+    benchmark = EventBenchmarkType(cli.benchmark)
+    benchmark_files = benchmark.get_relevant_files()
 
-    args = parser.parse_args()
-
-    input_category = args.category.lower()
-    if input_category not in allowed_categories:
-        raise ValueError(f"Category {input_category} is not supported.")
-
-    input_png = Path(args.input).with_suffix(".png")
-    if not input_png.exists():
-        raise FileNotFoundError(f"Input image file not found: {input_png}")
-
-    input_py = Path(args.input).with_suffix(".py")
-    if not input_py.exists():
-        raise FileNotFoundError(f"Input Python file not found: {input_py}")
-    else:
-        with open(input_py, 'r') as f:
-            raw_content = f.read()
-            parts =raw_content.split('"')
-            instruct_prompt = parts[1]
-
-    input_json = Path(args.input).with_suffix(".json")
-    if not input_json.exists():
-        raise FileNotFoundError(f"Input Json file not found: {input_json}")
-
-    SYSTEM_PROMPT = get_system_prompt(input_category=input_category)
-
-    API_KEY = get_api_key()
-    model_name = "qwen/qwen3-vl-235b-a22b-instruct"
+    model_name = benchmark.get_model_name()
+    system_prompt = benchmark.get_system_prompt()
 
     openrouter_llm = OpenRouterLLM(
         model_name=model_name,
-        api_key=API_KEY,
+        api_key=cli.API_KEY,
     )
 
-    ground_truth = parse_ground_truth(input_json)
+    model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
 
-    # response = generate_model_response(input_png, model_name="qwen/qwen3-vl-30b-a3b-instruct") or ""
-    response = generate_model_response(input_png, api_key=API_KEY, SYSTEM_PROMPT=SYSTEM_PROMPT,
-                                       instruct_prompt=instruct_prompt,
-                                       model_name=model_name)
-    score = evaluate_response_deep_eval(openrouter_llm=openrouter_llm, input=SYSTEM_PROMPT, expected_output=ground_truth,
-                                        actual_output=response, retrieval_context=[instruct_prompt])
-    print(f"Task: {instruct_prompt}")
-    print(f"Ground Truth: {ground_truth}")
-    print(f"Parsed Response: {response}")
-    print(f"Evaluation Score: {score}")
+    for file_path in benchmark_files:
+        input_png = file_path.with_suffix(".png").resolve()
+        input_json = file_path.with_suffix(".json").resolve()
+        input_prompt = file_path.with_suffix(".txt").resolve()
+
+        with open(input_prompt, 'r') as f:
+            user_prompt = f.read().strip()
+
+
+        ground_truth = parse_ground_truth(input_json)
+
+        # response = generate_model_response(input_png, model_name="qwen/qwen3-vl-30b-a3b-instruct") or ""
+        response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=user_prompt) or ""
+        score = evaluate_response_deep_eval(openrouter_llm=openrouter_llm, input=system_prompt, expected_output=ground_truth,
+                                            actual_output=response, retrieval_context=[user_prompt])
+        print(f"Task: {user_prompt}")
+        print(f"Ground Truth: {ground_truth}")
+        print(f"Parsed Response: {response}")
+        print(f"Evaluation Score: {score}")
+
+        result = SingleTaskResult(
+            benchmark_type=benchmark.value,
+            model=benchmark.get_model_name(),
+            final_score=score,
+            iou=None,
+            classification_correct=score,
+            distance=None,
+            score_formula="exact match",
+            input_file=str(file_path),
+            ground_truth=ground_truth,
+            user_prompt=user_prompt,
+            response=response,
+        )
+        
+        cli.results.append(result)
+        
+    if cli.save:
+        cli.save_results()

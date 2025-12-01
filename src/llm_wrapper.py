@@ -82,7 +82,7 @@ class LLMWrapperBase:
     def parse_response_point(self, response: str) -> tuple[int, int]:
         raise NotImplementedError("This method should be implemented by subclasses.")
 
-    def generate_model_response(self, image_path:Path, system_prompt:str, additional_user_prompt=""):
+    def generate_model_response(self, image_path:Path, system_prompt:str, additional_user_prompt="", logging=False):
         encoded_image = self.encode_image(image_path)
         data_url = f"data:image/webp;base64,{encoded_image}"
         user_prompt = []
@@ -104,11 +104,13 @@ class LLMWrapperBase:
                 "content": user_prompt
             }
         ]
-        print("Sending request to model...")
+        if logging:
+            print("Sending request to model...")
         response = self.client.chat.completions.create(model=self.model_name, messages=messages, temperature=0.1, timeout=30, max_tokens=10000)
         part_name = response.choices[0].message.content
-        pprint(response.model_dump())
-        print(f"Model Response: {part_name}")
+        if logging:
+            pprint(response.model_dump())
+            print(f"Model Response: {part_name}")
         return part_name
 
 class Qwen3VLLLMWrapper(LLMWrapperBase):
