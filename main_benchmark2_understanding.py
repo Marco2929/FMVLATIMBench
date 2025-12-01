@@ -1,10 +1,5 @@
-import base64
-import json
 from pathlib import Path
-from openai import OpenAI
-import argparse
-from typing import List
-import os
+from typing import override
 
 from benchmark2_understanding.system_prompts.qwen3vl_object_property_ident_with_instruct import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_WITH
@@ -12,73 +7,96 @@ from benchmark2_understanding.system_prompts.qwen3vl_object_property_ident_witho
     SYSTEM_PROMPT as SYSTEM_PROMPT_WITHOUT
 from benchmark2_understanding.system_prompts.qwen3vl_object_state_ident import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_STATE_IDENT
-from utils import get_api_key, parse_ground_truth, generate_model_response, parse_response, evaluate_response
+from src.bechmark_base import BenchmarkBase, BenchmarkCli
+from src.llm_wrapper import Qwen3VLLLMWrapper
+from src.results_model import SingleTaskResult
+from utils import parse_ground_truth, parse_response, evaluate_response
 
-allowed_categories = ["with_instruct", "without_instruct", "state_ident"]
+class UnderstandingBenchmarkType(BenchmarkBase):
+    WITH_INSTRUCT = 'with_instruct'
+    WITHOUT_INSTRUCT = 'without_instruct'
+    STATE_IDENT = 'state_ident'
 
+    @override
+    def get_model_name(self) -> str:
+        match self:
+            case _:
+                return "qwen/qwen3-vl-235b-a22b-instruct"
 
-def get_system_prompt(input_category: List[str]):
-    if input_category == allowed_categories[0]:
-        return SYSTEM_PROMPT_WITH
-    elif input_category == allowed_categories[1]:
-        return SYSTEM_PROMPT_WITHOUT
-    else:
-        return SYSTEM_PROMPT_STATE_IDENT
+    @override
+    def get_system_prompt(self) -> str:
+        match self:
+            case UnderstandingBenchmarkType.WITH_INSTRUCT:
+                return SYSTEM_PROMPT_WITH
+            case UnderstandingBenchmarkType.WITHOUT_INSTRUCT:
+                return SYSTEM_PROMPT_WITHOUT
+            case UnderstandingBenchmarkType.STATE_IDENT:
+                return SYSTEM_PROMPT_STATE_IDENT
+            case _:
+                raise ValueError(f"Benchmark type not implemented: {self}")
 
-
-def calculate_benchmark_results():
-    pass
-
+    @override
+    def get_relevant_files(self) -> list[Path]:
+        base_path = Path("benchmark2_understanding/examples")
+        proptery_indent = base_path / "object_property_ident"
+        state_indent = base_path / "object_state_ident"
+        
+        match self:
+            case UnderstandingBenchmarkType.WITH_INSTRUCT:
+                folders = [proptery_indent]
+            case UnderstandingBenchmarkType.WITHOUT_INSTRUCT:
+                folders = [proptery_indent]
+            case UnderstandingBenchmarkType.STATE_IDENT:
+                folders = [state_indent]
+            case _:
+                raise ValueError(f"Benchmark type not implemented: {self}")
+        
+        file_paths = []
+        for folder in folders:
+            file_paths.extend([p for p in folder.glob("*.txt")])
+        return sorted(file_paths)
 
 if __name__ == "__main__":
-    allowed_categories = ["with_instruct", "without_instruct", "state_ident"]
+    cli = BenchmarkCli(name="benchmark2_understanding", benchmark_types=list(UnderstandingBenchmarkType))
+    benchmark = UnderstandingBenchmarkType(cli.benchmark)
+    benchmark_files = benchmark.get_relevant_files()
 
-    parser = argparse.ArgumentParser(description="Benchmark Grounding Model Evaluation")
-    parser.add_argument("--input", required=True, type=str, metavar="FILE",
-                        help="Path to the input test that expects .PNG, .py and .json files.",
-                        )
-    parser.add_argument(
-        "--category",
-        type=str,
-        choices=allowed_categories,
-        help=f"Possible categories are: {allowed_categories}",
-        default=allowed_categories[0]
-    )
+    model_name = benchmark.get_model_name()
+    system_prompt = benchmark.get_system_prompt()
 
-    args = parser.parse_args()
+    for file_path in benchmark_files:
+        input_png = file_path.with_suffix(".png").resolve()
+        input_json = file_path.with_suffix(".json").resolve()
+        input_prompt = file_path.with_suffix(".txt").resolve()
 
-    input_category = args.category.lower()
-    if input_category not in allowed_categories:
-        raise ValueError(f"Category {input_category} is not supported.")
+        with open(input_prompt, 'r') as f:
+            user_prompt = f.read().strip()
+            
+        model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
 
-    input_png = Path(args.input).with_suffix(".png")
-    if not input_png.exists():
-        raise FileNotFoundError(f"Input image file not found: {input_png}")
+        ground_truth = parse_response(parse_ground_truth(input_json))
+        response = model.generate_model_response(input_png, system_prompt, additional_user_prompt=user_prompt) or ""
+        response = parse_response(response)
+        score = evaluate_response(ground_truth, response)
+        print(f"Ground Truth: {ground_truth}")
+        print(f"Parsed Response: {response}")
+        print(f"Evaluation Score: {score}")
 
-    input_py = Path(args.input).with_suffix(".py")
-    if not input_py.exists():
-        raise FileNotFoundError(f"Input Python file not found: {input_py}")
-    else:
-        with open(input_py, 'r') as f:
-            raw_content = f.read()
-            parts =raw_content.split('"')
-            instruct_prompt = parts[1]
+        result = SingleTaskResult(
+            benchmark_type=benchmark.value,
+            model=benchmark.get_model_name(),
+            final_score=score,
+            iou=None,
+            classification_correct=score,
+            distance=None,
+            score_formula="exact match",
+            input_file=str(file_path),
+            ground_truth=ground_truth,
+            user_prompt=user_prompt,
+            response=response,
+        )
 
-    input_json = Path(args.input).with_suffix(".json")
-    if not input_json.exists():
-        raise FileNotFoundError(f"Input Json file not found: {input_json}")
-
-    SYSTEM_PROMPT = get_system_prompt(input_category=input_category)
-
-    API_KEY = get_api_key()
-
-    ground_truth = parse_response(parse_ground_truth(input_json))
-    # response = generate_model_response(input_png, model_name="qwen/qwen3-vl-30b-a3b-instruct") or ""
-    response = generate_model_response(input_png, api_key=API_KEY, SYSTEM_PROMPT=SYSTEM_PROMPT,
-                                       instruct_prompt=instruct_prompt,
-                                       model_name="qwen/qwen3-vl-235b-a22b-instruct") or ""
-    response = parse_response(response)
-    score = evaluate_response(ground_truth, response)
-    print(f"Ground Truth: {ground_truth}")
-    print(f"Parsed Response: {response}")
-    print(f"Evaluation Score: {score}")
+        cli.results.append(result)
+    
+    if cli.save:
+        cli.save_results()

@@ -1,8 +1,13 @@
 from abc import abstractmethod
 import argparse
+import csv
 from enum import Enum
 import os
 from pathlib import Path
+import time
+
+from src.llm_wrapper import LLMWrapperBase, Qwen3VLLLMWrapper
+from src.results_model import SingleTaskResult
 
 class BenchmarkBase(Enum):
     @abstractmethod
@@ -20,9 +25,13 @@ class BenchmarkBase(Enum):
 class BenchmarkCli:
     benchmark: str
     save: bool
+    results: list[SingleTaskResult] = []
+    model: LLMWrapperBase|None = None
 
-    def __init__(self, description: str, benchmark_types: list[BenchmarkBase]):
-        self.parser = argparse.ArgumentParser(description=description)
+    def __init__(self, name: str, benchmark_types: list[BenchmarkBase]):
+        assert ' ' not in name, "name should not contain spaces"
+        self.name = name
+        self.parser = argparse.ArgumentParser(description=name)
         self.parser.add_argument("--save", action="store_true", help="Flag to save the results in <input>.txt")
         self.parser.add_argument(
             "--benchmark",
@@ -31,7 +40,15 @@ class BenchmarkCli:
             required=True,
             help="Benchmark type with combination of model and task.",
         )
+        self.parser.add_argument(
+            "--model",
+            type=str,
+            choices=['qwen/qwen3-vl-235b-a22b-instruct'],
+            required=False,
+            help="Optional model name override.",
+        )
         args = self.parser.parse_args()
+        self.args = args
         self.benchmark = args.benchmark
         assert isinstance(self.benchmark, str)
         self.save = args.save
@@ -40,6 +57,28 @@ class BenchmarkCli:
         self.API_KEY = get_api_key()
         self.BASE_URL = get_base_url()
 
+        if args.model:
+            print(f"Overriding model name to: {args.model}")
+            match args.model:
+                case 'qwen/qwen3-vl-235b-a22b-instruct':
+                    self.model = Qwen3VLLLMWrapper(api_key=self.API_KEY, base_url=self.BASE_URL, model_name=args.model)
+                case _:
+                    raise ValueError(f"Model not implemented: {args.model}")
+
+    def save_results(self):
+        if not self.save or not self.results:
+            return
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        output_path = Path(f"{self.name}_results_{timestamp}.csv")
+        results_dir = Path('results')
+        results_dir.mkdir(exist_ok=True)
+        output_path = results_dir / output_path
+        with open(output_path, "w", newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=SingleTaskResult.get_fieldnames())
+            writer.writeheader()
+            for result in self.results:
+                writer.writerow(result.to_dict())
+        print(f"\nAll results saved to {output_path}")
 
 def get_api_key() -> str:
     API_KEY = os.getenv("OPENROUTER_API_KEY")

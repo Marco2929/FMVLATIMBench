@@ -1,5 +1,4 @@
 import json
-import csv
 from pathlib import Path
 from typing import override
 
@@ -190,13 +189,13 @@ def evaluate_response_point(ground_truth: tuple[int, int], response: tuple[int, 
     return distance
 
 if __name__ == "__main__":
-    cli = BenchmarkCli(description="Run Benchmark 1: Grounding Tasks", benchmark_types=list(GroundingBenchmarkType))
+    cli = BenchmarkCli(name="benchmark1_grounding", benchmark_types=list(GroundingBenchmarkType))
     benchmark = GroundingBenchmarkType(cli.benchmark)
-
     benchmark_files = benchmark.get_relevant_files()
 
-    results: list[SingleTaskResult] = []
-    
+    model_name = benchmark.get_model_name()
+    system_prompt = benchmark.get_system_prompt()
+
     for file_path in benchmark_files:
         input_png = file_path.with_suffix(".png")
         input_json = file_path.with_suffix(".json")
@@ -212,14 +211,14 @@ if __name__ == "__main__":
         match benchmark:
             case GroundingBenchmarkType.QWEN3_CLASSIFY:
                 assert isinstance(ground_truth, str)
-                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
-                response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt()) or ""
+                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+                response = model.generate_model_response(input_png, system_prompt=system_prompt) or ""
                 response = model.parse_response_text(response)
                 score = evaluate_response(ground_truth, response)
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
-                    model=benchmark.get_model_name(),
+                    model=model_name,
                     final_score=score,
                     iou=None,
                     classification_correct=score,
@@ -227,6 +226,7 @@ if __name__ == "__main__":
                     score_formula="exact match",
                     input_file=str(file_path),
                     ground_truth=ground_truth,
+                    user_prompt=None,
                     response=response
                 )
 
@@ -235,14 +235,14 @@ if __name__ == "__main__":
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
                 additional_user_prompt = f"Locate the {ground_truth_bbox.label}"
-                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
-                response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt) or ""
+                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+                response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
                 parsed_response = model.parse_response_bbox(response, image_width=image_width, image_height=image_height)
                 score = 0 if parsed_response is None else evaluate_response_bbox(ground_truth_bbox, parsed_response)
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
-                    model=benchmark.get_model_name(),
+                    model=model_name,
                     final_score=score,
                     iou=score,
                     classification_correct=None,
@@ -250,6 +250,7 @@ if __name__ == "__main__":
                     score_formula="IoU",
                     input_file=str(file_path),
                     ground_truth=ground_truth_bbox,
+                    user_prompt=additional_user_prompt,
                     response=parsed_response if parsed_response is not None else response
                 )
 
@@ -259,14 +260,14 @@ if __name__ == "__main__":
                 assert len(ground_truth_bbox) >= 1
                 object_list = ", ".join([gt.label for gt in ground_truth_bbox if gt.label is not None])
                 additional_user_prompt = f"Locate the following objects: {object_list}"
-                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
-                response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt) or ""
+                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+                response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
                 response = model.parse_response_bboxes(response, image_height=image_height, image_width=image_width)
                 score = evaluate_response_bboxes(ground_truth_bbox, response)
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
-                    model=benchmark.get_model_name(),
+                    model=model_name,
                     final_score=score,
                     iou=score,
                     classification_correct=None,
@@ -274,6 +275,7 @@ if __name__ == "__main__":
                     score_formula="average IoU",
                     input_file=str(file_path),
                     ground_truth=ground_truth_bbox,
+                    user_prompt=additional_user_prompt,
                     response=response
                 )
 
@@ -282,15 +284,15 @@ if __name__ == "__main__":
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
                 additional_user_prompt = f"Click the {ground_truth_bbox.label}"
-                model = UiTarsLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=benchmark.get_model_name())
-                response = model.generate_model_response(input_png, system_prompt=benchmark.get_system_prompt(), additional_user_prompt=additional_user_prompt) or ""
+                model = UiTarsLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+                response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
                 parsed_response_tuple = model.parse_response_point(response)
                 parsed_response = Point(x=parsed_response_tuple[0], y=parsed_response_tuple[1])
                 score = ground_truth_bbox.center().euclidian_distance_to(parsed_response)
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
-                    model=benchmark.get_model_name(),
+                    model=model_name,
                     final_score=score,
                     iou=None,
                     classification_correct=None,
@@ -298,33 +300,14 @@ if __name__ == "__main__":
                     score_formula="euclidean distance",
                     input_file=str(file_path),
                     ground_truth=ground_truth_bbox,
+                    user_prompt=additional_user_prompt,
                     response=parsed_response
                 )
 
             case _:
                 raise ValueError(f"Benchmark type not implemented: {benchmark}")
 
-        results.append(result)
+        cli.results.append(result)
 
-        if score is not None:
-            if cli.save:
-                results_path = file_path.with_suffix(f".{benchmark.value}.txt")
-                with open(results_path, "w") as f:
-                    f.write(f"Ground Truth: {ground_truth}\n")
-                    f.write(f"Response: {response}\n")
-                    f.write(f"Evaluation Score: {score}\n")
-                print(f"Results saved to {results_path}")
-
-        print(f"Ground Truth: {ground_truth}")
-        print(f"Response: {response}")
-        print(f"Evaluation Score: {score}")
-
-    # Save all results to CSV
-    if results and cli.save:
-        csv_path = Path("benchmark1_grounding_results.csv")
-        with open(csv_path, "w", newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=SingleTaskResult.get_fieldnames())
-            writer.writeheader()
-            for result in results:
-                writer.writerow(result.to_dict())
-        print(f"\nAll results saved to {csv_path}")
+    if cli.save:
+        cli.save_results()
