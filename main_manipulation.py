@@ -38,7 +38,7 @@ except Exception:
 
 from ui_tars_1_5_7B.action_parser import parse_action_to_structure_output, parsing_response_to_pyautogui_code, parsing_response_to_pydirectinput_code
 from utils import get_api_key, encode_image, DistanceTracker, VisualLocator, calculate_iou
-from PIL import Image
+from PIL import Image, ImageDraw
 
 # Configuration constants
 MAX_MESSAGE_SIZE = 10  # maximum number of messages to keep in history (including user and assistant messages)
@@ -322,14 +322,108 @@ def _screenshot_to_base64():
         # img = img.resize((640, int(640 * img.height / img.width)))
         img.save(buf, format="PNG")
         # save image also to disk for debugging
-        with open("benchmark4_manipulation/debug/debug_screenshot.png", "wb") as f:
-            f.write(buf.getvalue())
+        # with open(f"{eval_dir}/final_screenshot.png", "wb") as f:
+        #     f.write(buf.getvalue())
         b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
         return b64
     except Exception as e:
         # If screenshot fails, return empty string so we don't break the loop
         print("Warning: failed to capture screenshot:", e)
         return ""
+
+
+def _create_action_path_overlay(screenshot_path: str, action_history: List[str], output_path: str):
+    """Create an overlay on the screenshot showing the path of actions taken.
+    
+    Args:
+        screenshot_path: Path to the base screenshot
+        action_history: List of generated pyautogui/pydirectinput code strings
+        output_path: Path to save the overlaid image
+    """
+    import re
+    
+    try:
+        # Open the screenshot
+        img = Image.open(screenshot_path)
+        draw = ImageDraw.Draw(img)
+        
+        # Extract coordinates from generated code
+        points = []
+        for code in action_history:
+            if not code or code == "DONE":
+                continue
+            
+            # Parse click actions: pydirectinput.click(x, y) or pyautogui.click(x, y)
+            click_match = re.search(r'(?:pydirectinput|pyautogui)\.click\((\d+),\s*(\d+)\)', code)
+            if click_match:
+                x, y = int(click_match.group(1)), int(click_match.group(2))
+                points.append((x, y, 'click'))
+            
+            # Parse moveTo/hover actions: pydirectinput.moveTo(x, y) or pyautogui.moveTo(x, y)
+            move_match = re.search(r'(?:pydirectinput|pyautogui)\.moveTo\((\d+),\s*(\d+)\)', code)
+            if move_match:
+                x, y = int(move_match.group(1)), int(move_match.group(2))
+                points.append((x, y, 'hover'))
+            
+            # Parse drag actions: pydirectinput.dragTo(x, y) or pyautogui.dragTo(x, y)
+            # Also check for drag(x1, y1, x2, y2) pattern
+            drag_match = re.search(r'(?:pydirectinput|pyautogui)\.dragTo\((\d+),\s*(\d+)\)', code)
+            if drag_match:
+                x, y = int(drag_match.group(1)), int(drag_match.group(2))
+                points.append((x, y, 'drag_end'))
+            
+            # Check for explicit drag with start and end coordinates
+            drag_full_match = re.search(r'(?:pydirectinput|pyautogui)\.drag\((\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)', code)
+            if drag_full_match:
+                x1, y1, x2, y2 = int(drag_full_match.group(1)), int(drag_full_match.group(2)), int(drag_full_match.group(3)), int(drag_full_match.group(4))
+                points.append((x1, y1, 'drag_start'))
+                points.append((x2, y2, 'drag_end'))
+        
+        # Draw lines connecting consecutive points
+        if len(points) > 1:
+            for i in range(len(points) - 1):
+                x1, y1, _ = points[i]
+                x2, y2, _ = points[i + 1]
+                draw.line([(x1, y1), (x2, y2)], fill='lime', width=3)
+        
+        # Draw markers for each action point
+        for i, (x, y, action_type) in enumerate(points):
+            # Color code by action type
+            if action_type == 'click':
+                color = 'red'
+                radius = 8
+            elif action_type == 'hover':
+                color = 'yellow'
+                radius = 6
+            elif action_type == 'drag_start':
+                color = 'blue'
+                radius = 8
+            elif action_type == 'drag_end':
+                color = 'cyan'
+                radius = 8
+            else:
+                color = 'white'
+                radius = 5
+            
+            # Draw circle marker
+            draw.ellipse(
+                [(x - radius, y - radius), (x + radius, y + radius)],
+                fill=color,
+                outline='black',
+                width=2
+            )
+            
+            # Draw step number
+            text = str(i + 1)
+            # Simple text positioning (center of circle)
+            draw.text((x - 3, y - 6), text, fill='black')
+        
+        # Save the overlaid image
+        img.save(output_path)
+        print(f"Action path overlay saved to: {output_path}")
+        
+    except Exception as e:
+        print(f"Warning: failed to create action path overlay: {e}")
 
 
 if __name__ == "__main__":
@@ -376,6 +470,21 @@ if __name__ == "__main__":
         instruct_prompt=instruct_prompt
     )
 
+    # Prepare per-level results directories
+    results_root = Path("benchmark4_manipulation") / "results" / input_category
+    level_key = Path(args.input).name or Path(args.input).stem
+    level_dir = results_root / level_key
+    screenshots_dir = level_dir / "screenshots"
+    actions_dir = level_dir / "actions"
+    messages_dir = level_dir / "messages"
+    raw_dir = level_dir / "raw"
+    eval_dir = level_dir / "evaluation"
+    for d in (results_root, level_dir, screenshots_dir, actions_dir, messages_dir, raw_dir, eval_dir):
+        d.mkdir(parents=True, exist_ok=True)
+
+    iter_idx = 0
+    action_history = []  # Track all actions for path overlay
+    
     # Pause here until the user triggers the start
     _wait_for_start()
     
@@ -385,6 +494,24 @@ if __name__ == "__main__":
         # break if ctrl+c is pressed
         if _have_keyboard and keyboard.is_pressed("ctrl+c"):
             print("Ctrl+C detected, exiting...")
+            b64 = _screenshot_to_base64()
+            if b64:
+                try:
+                    screenshot_bytes = base64.b64decode(b64)
+                    shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
+                    eval_path = eval_dir / "final_screenshot.png"
+                    overlay_path = eval_dir / "final_screenshot_with_path.png"
+                    with open(eval_path, "wb") as ef:
+                        ef.write(screenshot_bytes)
+                    with open(shot_path, "wb") as sf:
+                        sf.write(screenshot_bytes)
+                    
+                    # Create action path overlay
+                    _create_action_path_overlay(str(eval_path), action_history, str(overlay_path))
+                except Exception as e:
+                    print("Warning: failed to write per-iteration screenshot:", e)
+                except Exception as e:
+                    print("Warning: failed to write per-iteration screenshot:", e)
             break
         
         chat_completion = client.chat.completions.create(
@@ -422,8 +549,27 @@ if __name__ == "__main__":
         )
         print(f"Generated code:\n{parsed_pyautogui_code}")
         
+        # Track generated code for path overlay
+        if parsed_pyautogui_code and parsed_pyautogui_code != "DONE":
+            action_history.append(parsed_pyautogui_code)
+        
         if parsed_pyautogui_code == "DONE":
-            _screenshot_to_base64()
+            b64 = _screenshot_to_base64()
+            if b64:
+                try:
+                    screenshot_bytes = base64.b64decode(b64)
+                    shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
+                    eval_path = eval_dir / "final_screenshot.png"
+                    overlay_path = eval_dir / "final_screenshot_with_path.png"
+                    with open(eval_path, "wb") as ef:
+                        ef.write(screenshot_bytes)
+                    with open(shot_path, "wb") as sf:
+                        sf.write(screenshot_bytes)
+                    
+                    # Create action path overlay
+                    _create_action_path_overlay(str(eval_path), action_history, str(overlay_path))
+                except Exception as e:
+                    print("Warning: failed to write per-iteration screenshot:", e)
             break
         exec(parsed_pyautogui_code)
         
@@ -451,9 +597,46 @@ if __name__ == "__main__":
                 # keep user prompt (first message) and new message + last MAX_MESSAGE_SIZE-1 messages
                 message = [message[0]] + message[-MAX_MESSAGE_SIZE:]
         
-        # print message to file for debugging
-        with open("benchmark4_manipulation/debug/debug_message.json", "w") as f:
+        # print message to file for debugging (global debug)
+        with open(f"{eval_dir}/final_message.json", "w") as f:
             json.dump(message, f, indent=4)
+
+        # Save per-iteration artifacts into the per-level results folder
+        # 1) Save latest screenshot (if present)
+        if b64:
+            try:
+                screenshot_bytes = base64.b64decode(b64)
+                shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
+                with open(shot_path, "wb") as sf:
+                    sf.write(screenshot_bytes)
+            except Exception as e:
+                print("Warning: failed to write per-iteration screenshot:", e)
+
+        # 2) Save parsed actions / assistant response (parsed_dict may be list)
+        try:
+            actions_path = actions_dir / f"actions_{iter_idx:04d}.json"
+            with open(actions_path, "w", encoding="utf-8") as af:
+                json.dump(parsed_dict, af, indent=4, ensure_ascii=False)
+        except Exception as e:
+            print("Warning: failed to write parsed actions:", e)
+
+        # 3) Save full message history snapshot
+        try:
+            msg_path = messages_dir / f"messages_{iter_idx:04d}.json"
+            with open(msg_path, "w", encoding="utf-8") as mf:
+                json.dump(message, mf, indent=4, ensure_ascii=False)
+        except Exception as e:
+            print("Warning: failed to write messages snapshot:", e)
+
+        # 4) Save raw model response text
+        try:
+            raw_path = raw_dir / f"response_{iter_idx:04d}.txt"
+            with open(raw_path, "w", encoding="utf-8") as rf:
+                rf.write(response)
+        except Exception as e:
+            print("Warning: failed to write raw response:", e)
+
+        iter_idx += 1
     
     # After the loop ends, evaluate the final result
     print("\n" + "="*50)
@@ -461,7 +644,7 @@ if __name__ == "__main__":
     print("="*50)
     
     # Get the final screenshot for evaluation
-    final_screenshot_path = "benchmark4_manipulation/debug/debug_screenshot.png"
+    final_screenshot_path = f"{eval_dir}/final_screenshot.png"
     
     if os.path.exists(final_screenshot_path):
         success, total_distance, details, iou_scores, mean_iou = evaluate_response(
@@ -501,10 +684,10 @@ if __name__ == "__main__":
             "ground_truth": ground_truth_data
         }
         
-        with open(f"benchmark4_manipulation/debug/evaluation_results_{input_category}.json", "w") as f:
+        with open(f"{eval_dir}/results.json", "w") as f:
             json.dump(eval_results, f, indent=4)
         
-        print(f"\nEvaluation results saved to: benchmark4_manipulation/debug/evaluation_results_{input_category}.json")
+        print(f"\nEvaluation results saved to: {eval_dir}/results.json")
     else:
         print(f"Warning: Final screenshot not found at {final_screenshot_path}")
         print("Skipping evaluation.")
