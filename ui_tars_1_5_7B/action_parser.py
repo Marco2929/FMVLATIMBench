@@ -442,6 +442,7 @@ def parsing_response_to_pyautogui_code(responses,
                 pyautogui_code += (
                     f"\npyautogui.moveTo({sx}, {sy})\n"
                     f"\npyautogui.dragTo({ex}, {ey}, duration=1.0)\n")
+                    #f"\npyautogui.click({ex}, {ey}, button='left')\n")
 
         elif action_type == "scroll":
             # Parsing scroll action

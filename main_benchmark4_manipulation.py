@@ -7,6 +7,8 @@ from typing import List
 import os
 import io
 import importlib
+from datetime import datetime
+import traceback
 
 from benchmark4_manipulation.system_prompts.ui_tars_1_5_7B_object_manipul_actions import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_MANIPUL_ACTIONS
@@ -332,13 +334,14 @@ def _screenshot_to_base64():
         return ""
 
 
-def _create_action_path_overlay(screenshot_path: str, action_history: List[str], output_path: str):
+def _create_action_path_overlay(screenshot_path: str, action_history: List[str], output_path: str, y_offset_factor: float = 0.0):
     """Create an overlay on the screenshot showing the path of actions taken.
     
     Args:
         screenshot_path: Path to the base screenshot
         action_history: List of generated pyautogui/pydirectinput code strings
         output_path: Path to save the overlaid image
+        y_offset_factor: Y-axis offset factor to reverse (subtract the offset that was added during code generation)
     """
     import re
     
@@ -353,31 +356,29 @@ def _create_action_path_overlay(screenshot_path: str, action_history: List[str],
             if not code or code == "DONE":
                 continue
             
-            # Parse click actions: pydirectinput.click(x, y) or pyautogui.click(x, y)
-            click_match = re.search(r'(?:pydirectinput|pyautogui)\.click\((\d+),\s*(\d+)\)', code)
-            if click_match:
-                x, y = int(click_match.group(1)), int(click_match.group(2))
-                points.append((x, y, 'click'))
+            # Parse click actions: pyautogui.click(x, y, ...) with floats or ints
+            click_matches = re.finditer(r'(?:pydirectinput|pyautogui)\.click\s*\(\s*([\d.]+)\s*,\s*([\d.]+)', code)
+            for match in click_matches:
+                x, y = float(match.group(1)), float(match.group(2))
+                # Reverse the y_offset_factor: original_y = adjusted_y / (1 + y_offset_factor)
+                original_y = y / (1 + y_offset_factor) if y_offset_factor != 0 else y
+                points.append((int(x), int(original_y), 'click'))
             
-            # Parse moveTo/hover actions: pydirectinput.moveTo(x, y) or pyautogui.moveTo(x, y)
-            move_match = re.search(r'(?:pydirectinput|pyautogui)\.moveTo\((\d+),\s*(\d+)\)', code)
-            if move_match:
-                x, y = int(move_match.group(1)), int(move_match.group(2))
-                points.append((x, y, 'hover'))
+            # Parse moveTo/hover actions: pyautogui.moveTo(x, y) with floats or ints
+            move_matches = re.finditer(r'(?:pydirectinput|pyautogui)\.moveTo\s*\(\s*([\d.]+)\s*,\s*([\d.]+)', code)
+            for match in move_matches:
+                x, y = float(match.group(1)), float(match.group(2))
+                # Reverse the y_offset_factor
+                original_y = y / (1 + y_offset_factor) if y_offset_factor != 0 else y
+                points.append((int(x), int(original_y), 'move'))
             
-            # Parse drag actions: pydirectinput.dragTo(x, y) or pyautogui.dragTo(x, y)
-            # Also check for drag(x1, y1, x2, y2) pattern
-            drag_match = re.search(r'(?:pydirectinput|pyautogui)\.dragTo\((\d+),\s*(\d+)\)', code)
-            if drag_match:
-                x, y = int(drag_match.group(1)), int(drag_match.group(2))
-                points.append((x, y, 'drag_end'))
-            
-            # Check for explicit drag with start and end coordinates
-            drag_full_match = re.search(r'(?:pydirectinput|pyautogui)\.drag\((\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)', code)
-            if drag_full_match:
-                x1, y1, x2, y2 = int(drag_full_match.group(1)), int(drag_full_match.group(2)), int(drag_full_match.group(3)), int(drag_full_match.group(4))
-                points.append((x1, y1, 'drag_start'))
-                points.append((x2, y2, 'drag_end'))
+            # Parse dragTo actions: pyautogui.dragTo(x, y, ...) with floats or ints
+            drag_matches = re.finditer(r'(?:pydirectinput|pyautogui)\.dragTo\s*\(\s*([\d.]+)\s*,\s*([\d.]+)', code)
+            for match in drag_matches:
+                x, y = float(match.group(1)), float(match.group(2))
+                # Reverse the y_offset_factor
+                original_y = y / (1 + y_offset_factor) if y_offset_factor != 0 else y
+                points.append((int(x), int(original_y), 'drag_end'))
         
         # Draw lines connecting consecutive points
         if len(points) > 1:
@@ -392,12 +393,9 @@ def _create_action_path_overlay(screenshot_path: str, action_history: List[str],
             if action_type == 'click':
                 color = 'red'
                 radius = 8
-            elif action_type == 'hover':
+            elif action_type == 'move':
                 color = 'yellow'
                 radius = 6
-            elif action_type == 'drag_start':
-                color = 'blue'
-                radius = 8
             elif action_type == 'drag_end':
                 color = 'cyan'
                 radius = 8
@@ -435,259 +433,300 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    input_png = Path(args.input).with_suffix(".png")
-    if not input_png.exists():
-        raise FileNotFoundError(f"Input image file not found: {input_png}")
-    input_json = Path(args.input).with_suffix(".json")
-    if not input_json.exists():
-        raise FileNotFoundError(f"Input Json file not found: {input_json}")
-    input_py = Path(args.input).with_suffix(".py")
-    if not input_py.exists():
-        raise FileNotFoundError(f"Input Python file not found: {input_py}")
-    else:
-        with open(input_py, 'r') as f:
-            instruct_prompt = f.read()
-    input_category = args.category.lower()
-    if input_category not in allowed_categories:
-        raise ValueError(f"Category {input_category} is not supported.")
-    
-    SYSTEM_PROMPT = get_system_prompt(input_category)
-    
-    # Parse ground truth data
-    ground_truth_data = parse_ground_truth(input_json)
-    print(f"Ground truth loaded: {len(ground_truth_data['targets'])} targets, {len(ground_truth_data['templates'])} templates")
-    
-    API_KEY = get_api_key()
-    
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=API_KEY
-    )
-
-    message = get_initial_message(
-        image_path=input_png,
-        SYSTEM_PROMPT=SYSTEM_PROMPT,
-        instruct_prompt=instruct_prompt
-    )
-
-    # Prepare per-level results directories
-    results_root = Path("benchmark4_manipulation") / "results" / input_category
+    # Prepare per-level results directories with timestamp for each run
+    # (Create early so we can write errors to it)
+    results_root = Path("benchmark4_manipulation") / "results" / args.category.lower()
     level_key = Path(args.input).name or Path(args.input).stem
-    level_dir = results_root / level_key
-    screenshots_dir = level_dir / "screenshots"
-    actions_dir = level_dir / "actions"
-    messages_dir = level_dir / "messages"
-    raw_dir = level_dir / "raw"
-    eval_dir = level_dir / "evaluation"
-    for d in (results_root, level_dir, screenshots_dir, actions_dir, messages_dir, raw_dir, eval_dir):
+    experiment_dir = results_root / level_key
+    
+    # Create a new run folder with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_dir = experiment_dir / f"run_{timestamp}"
+    
+    screenshots_dir = run_dir / "screenshots"
+    actions_dir = run_dir / "actions"
+    messages_dir = run_dir / "messages"
+    raw_dir = run_dir / "raw"
+    eval_dir = run_dir / "evaluation"
+    for d in (results_root, experiment_dir, run_dir, screenshots_dir, actions_dir, messages_dir, raw_dir, eval_dir):
         d.mkdir(parents=True, exist_ok=True)
-
-    iter_idx = 0
-    action_history = []  # Track all actions for path overlay
     
-    # Pause here until the user triggers the start
-    _wait_for_start()
+    error_log_path = run_dir / "error.log"
     
-    action_type = "init"
-    
-    while action_type != "finished":
-        # break if ctrl+c is pressed
-        if _have_keyboard and keyboard.is_pressed("ctrl+c"):
-            print("Ctrl+C detected, exiting...")
-            b64 = _screenshot_to_base64()
-            if b64:
-                try:
-                    screenshot_bytes = base64.b64decode(b64)
-                    shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
-                    eval_path = eval_dir / "final_screenshot.png"
-                    overlay_path = eval_dir / "final_screenshot_with_path.png"
-                    with open(eval_path, "wb") as ef:
-                        ef.write(screenshot_bytes)
-                    with open(shot_path, "wb") as sf:
-                        sf.write(screenshot_bytes)
-                    
-                    # Create action path overlay
-                    _create_action_path_overlay(str(eval_path), action_history, str(overlay_path))
-                except Exception as e:
-                    print("Warning: failed to write per-iteration screenshot:", e)
-                except Exception as e:
-                    print("Warning: failed to write per-iteration screenshot:", e)
-            break
-        
-        chat_completion = client.chat.completions.create(
-            model="bytedance/ui-tars-1.5-7b",
-            messages=message,
-            top_p=None,
-            temperature=0.0,
-            max_tokens=400,
-            stream=True,
-            seed=None,
-            stop=None,
-            frequency_penalty=None,
-            presence_penalty=None
-        )
-        
-        response = ""
-        for msg in chat_completion:
-            response += msg.choices[0].delta.content if msg.choices[0].delta.content else ""
-        
-        parsed_dict = parse_model_response(response)
-        action_type = parsed_dict[0].get("action_type", "N/A")
-        
-        # Get screen size for code generation
-        if _have_pyautogui:
-            screen_size = pyautogui.size()
-            original_image_width, original_image_height = screen_size.width, screen_size.height
+    try:
+        input_png = Path(args.input).with_suffix(".png")
+        if not input_png.exists():
+            raise FileNotFoundError(f"Input image file not found: {input_png}")
+        input_json = Path(args.input).with_suffix(".json")
+        if not input_json.exists():
+            raise FileNotFoundError(f"Input Json file not found: {input_json}")
+        input_py = Path(args.input).with_suffix(".py")
+        if not input_py.exists():
+            raise FileNotFoundError(f"Input Python file not found: {input_py}")
         else:
-            original_image_width, original_image_height = MY_RESOLUTION
+            with open(input_py, 'r') as f:
+                instruct_prompt = f.read()
+        input_category = args.category.lower()
+        if input_category not in allowed_categories:
+            raise ValueError(f"Category {input_category} is not supported.")
         
-        parsed_pyautogui_code = parsing_response_to_pydirectinput_code(
-            responses=parsed_dict,
-            image_height=original_image_height,
-            image_width=original_image_width,
-            y_offset_factor=-441/4800
+        SYSTEM_PROMPT = get_system_prompt(input_category)
+        
+        # Parse ground truth data
+        ground_truth_data = parse_ground_truth(input_json)
+        print(f"Ground truth loaded: {len(ground_truth_data['targets'])} targets, {len(ground_truth_data['templates'])} templates")
+        
+        API_KEY = get_api_key()
+        
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=API_KEY
         )
-        print(f"Generated code:\n{parsed_pyautogui_code}")
+
+        message = get_initial_message(
+            image_path=input_png,
+            SYSTEM_PROMPT=SYSTEM_PROMPT,
+            instruct_prompt=instruct_prompt
+        )
+
+        iter_idx = 0
+        action_history = []  # Track all actions for path overlay
         
-        # Track generated code for path overlay
-        if parsed_pyautogui_code and parsed_pyautogui_code != "DONE":
-            action_history.append(parsed_pyautogui_code)
+        # Pause here until the user triggers the start
+        _wait_for_start()
         
-        if parsed_pyautogui_code == "DONE":
+        action_type = "init"
+        
+        while action_type != "finished":
+            # break if ctrl+c is pressed
+            if _have_keyboard and keyboard.is_pressed("ctrl+c"):
+                print("Ctrl+C detected, exiting...")
+                b64 = _screenshot_to_base64()
+                if b64:
+                    try:
+                        screenshot_bytes = base64.b64decode(b64)
+                        shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
+                        eval_path = eval_dir / "final_screenshot.png"
+                        overlay_path = eval_dir / "final_screenshot_with_path.png"
+                        with open(eval_path, "wb") as ef:
+                            ef.write(screenshot_bytes)
+                        with open(shot_path, "wb") as sf:
+                            sf.write(screenshot_bytes)
+                        
+                        # Create action path overlay (reverse the y_offset_factor)
+                        _create_action_path_overlay(str(eval_path), action_history, str(overlay_path), y_offset_factor=-441/4800)
+                    except Exception as e:
+                        print("Warning: failed to write per-iteration screenshot:", e)
+                break
+            
+            chat_completion = client.chat.completions.create(
+                model="bytedance/ui-tars-1.5-7b",
+                messages=message,
+                top_p=None,
+                temperature=0.0,
+                max_tokens=400,
+                stream=True,
+                seed=None,
+                stop=None,
+                frequency_penalty=None,
+                presence_penalty=None
+            )
+            
+            response = ""
+            for msg in chat_completion:
+                response += msg.choices[0].delta.content if msg.choices[0].delta.content else ""
+            
+            parsed_dict = parse_model_response(response)
+            action_type = parsed_dict[0].get("action_type", "N/A")
+            
+            # Get screen size for code generation
+            if _have_pyautogui:
+                screen_size = pyautogui.size()
+                original_image_width, original_image_height = screen_size.width, screen_size.height
+            else:
+                original_image_width, original_image_height = MY_RESOLUTION
+            
+            parsed_pyautogui_code = parsing_response_to_pyautogui_code(
+                responses=parsed_dict,
+                image_height=original_image_height,
+                image_width=original_image_width,
+                y_offset_factor=-441/4800
+            )
+            print(f"Generated code:\n{parsed_pyautogui_code}")
+            
+            # Track generated code for path overlay
+            if parsed_pyautogui_code and parsed_pyautogui_code != "DONE":
+                action_history.append(parsed_pyautogui_code)
+            
+            if parsed_pyautogui_code == "DONE":
+                b64 = _screenshot_to_base64()
+                if b64:
+                    try:
+                        screenshot_bytes = base64.b64decode(b64)
+                        shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
+                        eval_path = eval_dir / "final_screenshot.png"
+                        overlay_path = eval_dir / "final_screenshot_with_path.png"
+                        with open(eval_path, "wb") as ef:
+                            ef.write(screenshot_bytes)
+                        with open(shot_path, "wb") as sf:
+                            sf.write(screenshot_bytes)
+                        
+                        # Create action path overlay (reverse the y_offset_factor)
+                        _create_action_path_overlay(str(eval_path), action_history, str(overlay_path), y_offset_factor=-441/4800)
+                    except Exception as e:
+                        print("Warning: failed to write per-iteration screenshot:", e)
+                break
+            exec(parsed_pyautogui_code)
+
+            # wait a bit for UI to update
+            import time
+            time.sleep(1.0)
+            
+            # Append the assistant response to chat history
+            assistant_message = {"role": "assistant", "content": parsed_dict[0].get("text")}
+            message.append(assistant_message)
+            
+            # Take a screenshot and append as a user message
             b64 = _screenshot_to_base64()
+            if _have_pyautogui:
+                print(pyautogui.size())
+            
+            if b64:
+                image_message = {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/png;base64,{b64}"}
+                        }
+                    ]
+                }
+                message.append(image_message)
+                if len(message) > MAX_MESSAGE_SIZE:
+                    # keep user prompt (first message) and new message + last MAX_MESSAGE_SIZE-1 messages
+                    message = [message[0]] + message[-MAX_MESSAGE_SIZE:]
+            
+            # print message to file for debugging (global debug)
+            with open(f"{eval_dir}/final_message.json", "w") as f:
+                json.dump(message, f, indent=4)
+
+            # Save per-iteration artifacts into the per-level results folder
+            # 1) Save latest screenshot (if present)
             if b64:
                 try:
                     screenshot_bytes = base64.b64decode(b64)
                     shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
-                    eval_path = eval_dir / "final_screenshot.png"
-                    overlay_path = eval_dir / "final_screenshot_with_path.png"
-                    with open(eval_path, "wb") as ef:
-                        ef.write(screenshot_bytes)
                     with open(shot_path, "wb") as sf:
                         sf.write(screenshot_bytes)
-                    
-                    # Create action path overlay
-                    _create_action_path_overlay(str(eval_path), action_history, str(overlay_path))
                 except Exception as e:
                     print("Warning: failed to write per-iteration screenshot:", e)
-            break
-        exec(parsed_pyautogui_code)
-        
-        # Append the assistant response to chat history
-        assistant_message = {"role": "assistant", "content": parsed_dict[0].get("text")}
-        message.append(assistant_message)
-        
-        # Take a screenshot and append as a user message
-        b64 = _screenshot_to_base64()
-        if _have_pyautogui:
-            print(pyautogui.size())
-        
-        if b64:
-            image_message = {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/png;base64,{b64}"}
-                    }
-                ]
-            }
-            message.append(image_message)
-            if len(message) > MAX_MESSAGE_SIZE:
-                # keep user prompt (first message) and new message + last MAX_MESSAGE_SIZE-1 messages
-                message = [message[0]] + message[-MAX_MESSAGE_SIZE:]
-        
-        # print message to file for debugging (global debug)
-        with open(f"{eval_dir}/final_message.json", "w") as f:
-            json.dump(message, f, indent=4)
 
-        # Save per-iteration artifacts into the per-level results folder
-        # 1) Save latest screenshot (if present)
-        if b64:
+            # 2) Save parsed actions / assistant response (parsed_dict may be list)
             try:
-                screenshot_bytes = base64.b64decode(b64)
-                shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
-                with open(shot_path, "wb") as sf:
-                    sf.write(screenshot_bytes)
+                actions_path = actions_dir / f"actions_{iter_idx:04d}.json"
+                with open(actions_path, "w", encoding="utf-8") as af:
+                    json.dump(parsed_dict, af, indent=4, ensure_ascii=False)
             except Exception as e:
-                print("Warning: failed to write per-iteration screenshot:", e)
+                print("Warning: failed to write parsed actions:", e)
 
-        # 2) Save parsed actions / assistant response (parsed_dict may be list)
-        try:
-            actions_path = actions_dir / f"actions_{iter_idx:04d}.json"
-            with open(actions_path, "w", encoding="utf-8") as af:
-                json.dump(parsed_dict, af, indent=4, ensure_ascii=False)
-        except Exception as e:
-            print("Warning: failed to write parsed actions:", e)
+            # 3) Save full message history snapshot
+            try:
+                msg_path = messages_dir / f"messages_{iter_idx:04d}.json"
+                with open(msg_path, "w", encoding="utf-8") as mf:
+                    json.dump(message, mf, indent=4, ensure_ascii=False)
+            except Exception as e:
+                print("Warning: failed to write messages snapshot:", e)
 
-        # 3) Save full message history snapshot
-        try:
-            msg_path = messages_dir / f"messages_{iter_idx:04d}.json"
-            with open(msg_path, "w", encoding="utf-8") as mf:
-                json.dump(message, mf, indent=4, ensure_ascii=False)
-        except Exception as e:
-            print("Warning: failed to write messages snapshot:", e)
+            # 4) Save raw model response text
+            try:
+                raw_path = raw_dir / f"response_{iter_idx:04d}.txt"
+                with open(raw_path, "w", encoding="utf-8") as rf:
+                    rf.write(response)
+            except Exception as e:
+                print("Warning: failed to write raw response:", e)
 
-        # 4) Save raw model response text
-        try:
-            raw_path = raw_dir / f"response_{iter_idx:04d}.txt"
-            with open(raw_path, "w", encoding="utf-8") as rf:
-                rf.write(response)
-        except Exception as e:
-            print("Warning: failed to write raw response:", e)
-
-        iter_idx += 1
-    
-    # After the loop ends, evaluate the final result
-    print("\n" + "="*50)
-    print("EVALUATION RESULTS")
-    print("="*50)
-    
-    # Get the final screenshot for evaluation
-    final_screenshot_path = f"{eval_dir}/final_screenshot.png"
-    
-    if os.path.exists(final_screenshot_path):
-        success, total_distance, details, iou_scores, mean_iou = evaluate_response(
-            ground_truth_data=ground_truth_data,
-            screenshot_path=final_screenshot_path
-        )
+            iter_idx += 1
         
-        print(f"\nSuccess: {success}")
-        print(f"Total Distance: {total_distance:.2f} pixels")
-        print(f"Threshold: {ground_truth_data['threshold']} pixels")
+        # After the loop ends, save action history and evaluate the final result
+        # Save complete action history
+        try:
+            action_history_path = eval_dir / "action_history.json"
+            with open(action_history_path, "w", encoding="utf-8") as ahf:
+                json.dump(action_history, ahf, indent=4, ensure_ascii=False)
+            print(f"Action history saved to: {action_history_path}")
+        except Exception as e:
+            print(f"Warning: failed to write action history: {e}")
         
-        # Display IoU metrics if enabled
-        if ground_truth_data.get('use_iou', False) and iou_scores:
-            print(f"\nIoU Evaluation: ENABLED")
-            print(f"Mean IoU: {mean_iou:.4f}")
-            print(f"IoU Threshold: {ground_truth_data.get('iou_threshold', 0.5):.2f}")
+        print("\n" + "="*50)
+        print("EVALUATION RESULTS")
+        print("="*50)
+        
+        # Get the final screenshot for evaluation
+        final_screenshot_path = f"{eval_dir}/final_screenshot.png"
+        
+        if os.path.exists(final_screenshot_path):
+            success, total_distance, details, iou_scores, mean_iou = evaluate_response(
+                ground_truth_data=ground_truth_data,
+                screenshot_path=final_screenshot_path
+            )
+            
+            print(f"\nSuccess: {success}")
+            print(f"Total Distance: {total_distance:.2f} pixels")
+            print(f"Threshold: {ground_truth_data['threshold']} pixels")
+            
+            # Display IoU metrics if enabled
+            if ground_truth_data.get('use_iou', False) and iou_scores:
+                print(f"\nIoU Evaluation: ENABLED")
+                print(f"Mean IoU: {mean_iou:.4f}")
+                print(f"IoU Threshold: {ground_truth_data.get('iou_threshold', 0.5):.2f}")
+            else:
+                print(f"\nIoU Evaluation: DISABLED")
+            
+            print("\nPer-object distances:")
+            for obj_name, distance in details.items():
+                status = "✓" if distance != float('inf') and distance <= ground_truth_data['threshold'] else "✗"
+                dist_str = f"{distance:.2f}" if distance != float('inf') else "NOT FOUND"
+                iou_str = f" | IoU: {iou_scores[obj_name]:.4f}" if obj_name in iou_scores else ""
+                print(f"  {status} {obj_name}: {dist_str} pixels{iou_str}")
+            
+            # Save evaluation results
+            eval_results = {
+                "success": success,
+                "total_distance": total_distance,
+                "threshold": ground_truth_data['threshold'],
+                "details": {k: (v if v != float('inf') else "inf") for k, v in details.items()},
+                "use_iou": ground_truth_data.get('use_iou', False),
+                "iou_scores": iou_scores,
+                "mean_iou": mean_iou,
+                "iou_threshold": ground_truth_data.get('iou_threshold', 0.5),
+                "ground_truth": ground_truth_data
+            }
+            
+            with open(f"{eval_dir}/results.json", "w") as f:
+                json.dump(eval_results, f, indent=4)
+            
+            print(f"\nEvaluation results saved to: {eval_dir}/results.json")
         else:
-            print(f"\nIoU Evaluation: DISABLED")
+            print(f"Warning: Final screenshot not found at {final_screenshot_path}")
+            print("Skipping evaluation.")
+    
+    except Exception as e:
+        # Log the error to file
+        error_message = f"Error occurred at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        error_message += f"Error type: {type(e).__name__}\n"
+        error_message += f"Error message: {str(e)}\n\n"
+        error_message += "Full traceback:\n"
+        error_message += traceback.format_exc()
         
-        print("\nPer-object distances:")
-        for obj_name, distance in details.items():
-            status = "✓" if distance != float('inf') and distance <= ground_truth_data['threshold'] else "✗"
-            dist_str = f"{distance:.2f}" if distance != float('inf') else "NOT FOUND"
-            iou_str = f" | IoU: {iou_scores[obj_name]:.4f}" if obj_name in iou_scores else ""
-            print(f"  {status} {obj_name}: {dist_str} pixels{iou_str}")
+        with open(error_log_path, "w", encoding="utf-8") as error_file:
+            error_file.write(error_message)
         
-        # Save evaluation results
-        eval_results = {
-            "success": success,
-            "total_distance": total_distance,
-            "threshold": ground_truth_data['threshold'],
-            "details": {k: (v if v != float('inf') else "inf") for k, v in details.items()},
-            "use_iou": ground_truth_data.get('use_iou', False),
-            "iou_scores": iou_scores,
-            "mean_iou": mean_iou,
-            "iou_threshold": ground_truth_data.get('iou_threshold', 0.5),
-            "ground_truth": ground_truth_data
-        }
+        print(f"\n{'='*60}")
+        print("ERROR OCCURRED")
+        print(f"{'='*60}")
+        print(f"Error: {e}")
+        print(f"Error log saved to: {error_log_path}")
+        print(f"{'='*60}")
         
-        with open(f"{eval_dir}/results.json", "w") as f:
-            json.dump(eval_results, f, indent=4)
-        
-        print(f"\nEvaluation results saved to: {eval_dir}/results.json")
-    else:
-        print(f"Warning: Final screenshot not found at {final_screenshot_path}")
-        print("Skipping evaluation.")
+        # Re-raise the exception
+        raise
