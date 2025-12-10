@@ -1,4 +1,4 @@
 {
-  "solution": "yes",
-  "TASK_DESCRIPTION": "Is the lamp on?"
+  "solution": "NO",
+  "TASK_DESCRIPTION": "Is the laser connected with a socket?"
 }

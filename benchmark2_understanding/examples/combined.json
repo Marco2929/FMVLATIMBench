@@ -1,0 +1,58 @@
+{
+  "PROP1": {
+    "solution": "SUPER_BALL",
+    "TASK_DESCRIPTION": "Which ball has the highest elasticity"
+  },
+  "PROP2": {
+    "solution": "CURIE_CAT",
+    "TASK_DESCRIPTION": "What makes the Newton Mouse run away?"
+  },
+  "PROP3": {
+    "solution": "ALLIGATOR",
+    "TASK_DESCRIPTION": "What is dangerous for Mel Schlemming"
+  },
+  "PROP4": {
+    "solution": "BALLOON",
+    "TASK_DESCRIPTION": "Which object rises?"
+  },
+  "PROP5": {
+    "solution": "BOWLING_BALL",
+    "TASK_DESCRIPTION": "Which ball weights the most?"
+  },
+  "PROP6": {
+    "solution": "YES",
+    "TASK_DESCRIPTION": "Is Mels house in the scene?"
+  },
+  "PROP7": {
+    "solution": "CHEESE",
+    "TASK_DESCRIPTION": "Which object the newton mouse will come after"
+  },
+  "PROP8": {
+    "solution": "YELLOW_BRICK_WALL",
+    "TASK_DESCRIPTION": "Which wall is the most slippery?"
+  },
+  "PROP9": {
+    "solution": "CANDLE",
+    "TASK_DESCRIPTION": "Which object is able to burn"
+  },
+  "PROP10": {
+    "solution": "FISH_TANK",
+    "TASK_DESCRIPTION": "Which object breaks in case something falls on it"
+  },
+  "PROP11": {
+    "solution": "MIRROR",
+    "TASK_DESCRIPTION": "Which object reflects a laser beam"
+  },
+  "PROP12": {
+    "solution": "LOG_WALL",
+    "TASK_DESCRIPTION": "Which wall is affected by an explosion?"
+  },
+  "PROP13": {
+    "solution": "NONE",
+    "TASK_DESCRIPTION": "Which ball has the highest elasticity"
+  },
+  "PROP14": {
+    "solution": "NONE",
+    "TASK_DESCRIPTION": "Which object rises?"
+  }
+}

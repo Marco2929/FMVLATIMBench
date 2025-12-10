@@ -1,0 +1,49 @@
+Physikalisch:
+Masse, Dichte, Reibung, Entflammbarkeit, Zerbrechlichkeit, Biologische Interaktion, Durchlässigkeit
+
+PROP1: Welcher Ball hat die höchste Elastizität
+PROP2: Vor was hat die Maus Angst?
+PROP3: Vor was muss der Mensch aufpassen?
+PROP4: Was steigt höher?
+PROP5: Welcher Ball hat die Höchste Masse?
+PROP6: Was ist Mels Haus?
+PROP7: Welches Objekt möchte die Maus?
+PROP8: Welcher Wand ist am meisten slippery?
+PROP9: Welches Objekt kann brennen?
+PROP10: Welches Objekt kann bei einem Fall zerbrechen?
+PROP11: Welches Objekt blockiert/spiegelt Laser?
+PROP12: Welche Wand wird von Explosionen beeinfluss?
+PROP13: None question elasticity
+PROP14: None question
+
+Dynamische Zustände:
+Mechanische Verbindungen/Zustand, Elektrische Verbindungen/Zustand
+
+STATE1: Ist die Lampe an? Ja
+STATE2: Ist die Lampe an? Nein
+STATE3: Ist das Aquarium kaputt? Ja
+STATE4: Ist das Aquarium kaputt? Nein
+STATE5: Ist das Feuer an? Ja
+STATE6: Ist das Feuer an? Nein
+STATE7: Sind die beiden Objekte durch einen Riemen verbunden? Ja
+STATE8: Sind die beiden Objekte durch einen Riemen verbunden? Nein
+STATE9: Ist das Gerät mit der Steckdose verbunden? Ja
+STATE10: Ist das Gerät mit der Steckdose verbunden? Nein
+STATE11: 2 Ist das Gerät mit der Steckdose verbunden? Ja
+STATE12: 2 Ist das Gerät mit der Steckdose verbunden? Nein
+STATE13: Ist der Laser an? Ja
+STATE14: Ist der Laser an? Nein
+STATE15: Ist der Ball im Eimer? Ja
+STATE16: Ist der Ball im Eimer? Nein
+STATE17: Ist die Maus im Basket? Ja
+STATE18: Ist die Maus im Basket? Nein
+STATE19: None question
+STATE20: None question
+
+Outcome Prediction:
+Why did X happen?
+
+Effect Prediction:
+What happends if X is active?
+
+

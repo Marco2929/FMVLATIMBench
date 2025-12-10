@@ -81,7 +81,7 @@ def parse_ground_truth(json_path: Path) -> dict:
             "key": [100, 150]
         },
         "templates": {
-            "ball": "templates/ball.png",
+            "ball": "templates/OUTCOME1.png",
             "key": "templates/key.png"
         },
         "threshold": 15

@@ -100,10 +100,10 @@ def calculate_iou(box1, box2):
     iou = intersection_area / union_area
     return iou
 
-def parse_ground_truth(json_path: Path) -> str:
+def load_json(json_path: Path) -> tuple[str, str]:
     with open(json_path, "r") as f:
         data = json.load(f)
-    return data["solution"]
+    return data['TASK_DESCRIPTION'], data['solution']
 
 def parse_model_response_bbox_qwen3(response: str) -> tuple[str|None, list[int]]:
     PNG_WIDTH = 640
