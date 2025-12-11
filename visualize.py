@@ -44,22 +44,34 @@ def benchmark_textual(folder: str = "results/", benchmarks: list[str] = None):
     # Aggregate by benchmark type only
     agg_data = data.groupby("benchmark_type")["classification_correct_numeric"].mean().reset_index()
 
-    # Define custom benchmark type order
+    reverse_map = {}
+    for category, subtypes in benchmark_map.items():
+        for subtype in subtypes:
+            reverse_map[subtype] = category
+
+    # Map the specific types in the data to the broad categories
+    # This must happen BEFORE groupby if you want to group by broad category
+    data["benchmark_category"] = data["benchmark_type"].map(reverse_map)
+
+    # Aggregate by the new 'benchmark_category' column instead
+    agg_data = data.groupby("benchmark_category")["classification_correct_numeric"].mean().reset_index()
+
+    # Now apply the categorical ordering to the correct column
     benchmark_order = ["understanding", "event", "manipulation", "planning"]
-    agg_data["benchmark_type"] = pd.Categorical(
-        agg_data["benchmark_type"],
+    agg_data["benchmark_category"] = pd.Categorical(
+        agg_data["benchmark_category"],
         categories=benchmark_order,
         ordered=True
     )
-    agg_data = agg_data.sort_values("benchmark_type")
+    agg_data = agg_data.sort_values("benchmark_category")
 
-    # Plot
+    # Update plot x-axis
     plt.figure(figsize=(8, 6))
     sns.barplot(
-        x="benchmark_type",
+        x="benchmark_category",
         y="classification_correct_numeric",
-        data=agg_data
-    )
+        data=agg_data)
+
     plt.title("Average Accuracy per Benchmark Type")
     plt.ylabel("Accuracy")
     plt.xlabel("Benchmark Type")
