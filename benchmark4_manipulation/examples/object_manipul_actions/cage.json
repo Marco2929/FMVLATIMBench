@@ -1,0 +1,14 @@
+{
+    "targets": {
+        "basketball": [635, 240]
+    },
+    "templates": {
+        "basketball": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\basketball.png"
+    },
+    "threshold": 15,
+    "use_iou": true,
+    "target_boxes": {
+        "basketball": [565, 100, 720, 310]
+    },
+    "iou_threshold": 0.5
+}

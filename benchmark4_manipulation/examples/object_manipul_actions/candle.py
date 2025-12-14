@@ -1,0 +1,1 @@
+"Light up the candle using the magnifying glass and the flashlight."

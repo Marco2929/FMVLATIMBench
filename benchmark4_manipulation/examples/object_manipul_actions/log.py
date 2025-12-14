@@ -1,0 +1,1 @@
+"Manipulate the log wall such that it switches from a horizontal to a vertical orientation."

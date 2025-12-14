@@ -1,0 +1,9 @@
+{
+    "targets": {
+        "basketball": [985, 490]
+    },
+    "templates": {
+        "basketball": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\gears_connected.png"
+    },
+    "threshold": 15
+}

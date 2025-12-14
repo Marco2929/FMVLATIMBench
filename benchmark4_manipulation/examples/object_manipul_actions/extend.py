@@ -1,0 +1,1 @@
+"Extend the brickwall's size by one unit. Then run the puzzle."

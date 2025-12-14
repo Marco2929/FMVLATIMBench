@@ -1,0 +1,17 @@
+{
+    "targets": {
+        "trapdoor": [815, 565],
+        "gloves": [1380, 480]
+    },
+    "templates": {
+        "trapdoor": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\trapdoor.png",
+        "gloves": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\boxing_gloves.png"
+    },
+    "threshold": 15,
+    "use_iou": true,
+    "target_boxes": {
+        "trapdoor": [1250, 370, 1480, 580],
+        "gloves": [880, 650, 1100, 880]
+    },
+    "iou_threshold": 0.5
+}

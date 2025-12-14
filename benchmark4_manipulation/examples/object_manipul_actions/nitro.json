@@ -1,0 +1,12 @@
+{
+    "targets": {
+        "brickwall": [500, 520]
+    },
+    "templates": {
+        "brickwall": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\brickwall_extended_4.png"
+    },
+    "negative": {
+        "brickwall": true
+    },
+    "threshold": 15
+}

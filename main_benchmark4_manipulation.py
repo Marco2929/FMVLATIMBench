@@ -76,6 +76,7 @@ def parse_ground_truth(json_path: Path) -> dict:
             - 'use_iou': Boolean flag to enable IoU evaluation (default: False)
             - 'target_boxes': Optional dict of target bounding boxes (only used if use_iou=True)
             - 'iou_threshold': Optional IoU threshold for success (default: 0.5)
+            - 'negative': Dict of negative flags {'object_name': bool} (default: False for all)
     
     Expected JSON format:
     {
@@ -93,7 +94,10 @@ def parse_ground_truth(json_path: Path) -> dict:
             "ball": [180, 280, 220, 320],
             "key": [80, 130, 120, 170]
         },
-        "iou_threshold": 0.5
+        "iou_threshold": 0.5,
+        "negative": {
+            "key": true
+        }
     }
     """
     with open(json_path, "r") as f:
@@ -129,13 +133,17 @@ def parse_ground_truth(json_path: Path) -> dict:
             if isinstance(box, list) and len(box) == 4:
                 target_boxes[obj_name] = tuple(box)
     
+    # Parse negative flags (objects that should NOT be found)
+    negative = data.get("negative", {})
+    
     return {
         "targets": targets,
         "templates": templates,
         "threshold": data.get("threshold", 10),
         "use_iou": use_iou,
         "target_boxes": target_boxes,
-        "iou_threshold": data.get("iou_threshold", 0.5)
+        "iou_threshold": data.get("iou_threshold", 0.5),
+        "negative": negative
     }
 
 
@@ -216,6 +224,7 @@ def evaluate_response(ground_truth_data: dict, screenshot_path: str = None, scre
             - 'use_iou': Boolean flag to enable IoU evaluation
             - 'target_boxes': Optional dict of target bounding boxes (only used if use_iou=True)
             - 'iou_threshold': Optional IoU threshold for success (default: 0.5)
+            - 'negative': Dict of negative flags {'object_name': bool} - objects that should NOT be found
         screenshot_path: Path to the screenshot to evaluate (optional if screenshot_image provided)
         screenshot_image: PIL Image object of the screenshot (optional if screenshot_path provided)
         
@@ -235,6 +244,7 @@ def evaluate_response(ground_truth_data: dict, screenshot_path: str = None, scre
     use_iou = ground_truth_data.get('use_iou', False)
     target_boxes = ground_truth_data.get('target_boxes', {})
     iou_threshold = ground_truth_data.get('iou_threshold', 0.5)
+    negative = ground_truth_data.get('negative', {})
     
     # Initialize VisualLocator with templates
     locator = VisualLocator(templates)
@@ -250,8 +260,20 @@ def evaluate_response(ground_truth_data: dict, screenshot_path: str = None, scre
         detected_boxes = {}
         print(f"Located objects: {current_positions}")
     
-    # Calculate distance-based metrics
-    tracker = DistanceTracker(targets)
+    # Check negative targets (objects that should NOT be found)
+    negative_success = True
+    for obj_name, is_negative in negative.items():
+        if is_negative:
+            object_found = obj_name in current_positions
+            if object_found:
+                print(f"NEGATIVE CHECK FAILED: Object '{obj_name}' should NOT be found but was detected at {current_positions[obj_name]}")
+                negative_success = False
+            else:
+                print(f"NEGATIVE CHECK PASSED: Object '{obj_name}' correctly NOT found")
+    
+    # Calculate distance-based metrics (only for non-negative targets)
+    positive_targets = {name: target for name, target in targets.items() if not negative.get(name, False)}
+    tracker = DistanceTracker(positive_targets)
     total_distance, distance_details = tracker.calculate_progress(current_positions)
     print(f"Total distance: {total_distance:.2f} pixels")
     print(f"Per-object distances: {distance_details}")
@@ -286,9 +308,9 @@ def evaluate_response(ground_truth_data: dict, screenshot_path: str = None, scre
     
     if use_iou and target_boxes:
         iou_success = mean_iou >= iou_threshold and all(iou >= iou_threshold for iou in iou_scores.values() if iou > 1e-6)
-        success = distance_success and iou_success
+        success = distance_success and iou_success and negative_success
     else:
-        success = distance_success
+        success = distance_success and negative_success
     
     return success, total_distance, distance_details, iou_scores, mean_iou
 
@@ -496,8 +518,30 @@ if __name__ == "__main__":
         _wait_for_start()
         
         action_type = "init"
+        max_actions = 20
         
         while action_type != "finished":
+            # Check if maximum number of actions reached
+            if iter_idx >= max_actions:
+                print(f"\nMaximum number of actions ({max_actions}) reached. Stopping loop and starting evaluation...")
+                b64 = _screenshot_to_base64()
+                if b64:
+                    try:
+                        screenshot_bytes = base64.b64decode(b64)
+                        shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
+                        eval_path = eval_dir / "final_screenshot.png"
+                        overlay_path = eval_dir / "final_screenshot_with_path.png"
+                        with open(eval_path, "wb") as ef:
+                            ef.write(screenshot_bytes)
+                        with open(shot_path, "wb") as sf:
+                            sf.write(screenshot_bytes)
+                        
+                        # Create action path overlay (reverse the y_offset_factor)
+                        _create_action_path_overlay(str(eval_path), action_history, str(overlay_path), y_offset_factor=-441/4800)
+                    except Exception as e:
+                        print("Warning: failed to write per-iteration screenshot:", e)
+                break
+            
             # break if ctrl+c is pressed
             if _have_keyboard and keyboard.is_pressed("ctrl+c"):
                 print("Ctrl+C detected, exiting...")

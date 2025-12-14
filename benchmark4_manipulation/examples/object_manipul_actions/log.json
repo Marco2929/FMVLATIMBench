@@ -1,0 +1,14 @@
+{
+    "targets": {
+        "logwall": [815, 565]
+    },
+    "templates": {
+        "logwall": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\logwall_vertical.png"
+    },
+    "threshold": 15,
+    "use_iou": true,
+    "target_boxes": {
+        "logwall": [790, 350, 860, 585]
+    },
+    "iou_threshold": 0.5
+}

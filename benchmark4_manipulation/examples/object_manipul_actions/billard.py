@@ -1,0 +1,1 @@
+"Rotate and move the cue stick in a position such that the eight ball is hit into the corner pocket."

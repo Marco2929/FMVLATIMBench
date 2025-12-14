@@ -1,0 +1,1 @@
+"Move the boxing gloves to the right side of the tree and rotate the trap door once."

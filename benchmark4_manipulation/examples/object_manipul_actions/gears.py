@@ -1,0 +1,1 @@
+"Cut the rope connection with the left gear and attach it to the right gear."

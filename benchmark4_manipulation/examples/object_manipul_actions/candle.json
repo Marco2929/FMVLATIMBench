@@ -1,0 +1,12 @@
+{
+    "targets": {
+        "candle": [820, 370]
+    },
+    "templates": {
+        "candle": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\candle.png"
+    },
+    "negative": {
+        "candle": true
+    },
+    "threshold": 15
+}

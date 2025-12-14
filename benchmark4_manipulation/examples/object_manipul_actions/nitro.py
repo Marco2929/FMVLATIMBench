@@ -1,0 +1,1 @@
+"Destroy the wall by placing the nitro glass above it and starting the machine with the green flag."

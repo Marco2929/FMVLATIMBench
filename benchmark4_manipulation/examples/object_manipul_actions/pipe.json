@@ -1,0 +1,14 @@
+{
+    "targets": {
+        "pipe": [791, 406]
+    },
+    "templates": {
+        "pipe": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\pipe_curved.png"
+    },
+    "threshold": 15,
+    "use_iou": true,
+    "target_boxes": {
+        "pipe": [657, 271, 925, 540]
+    },
+    "iou_threshold": 0.5
+}
