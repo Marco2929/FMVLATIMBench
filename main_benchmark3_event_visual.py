@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import override
 
+from tqdm import tqdm
+
 
 from benchmark3_event.system_prompts.qwen3vl_outcome_visual import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_OUTCOME_VISUAL
@@ -12,7 +14,7 @@ from benchmark3_event.system_prompts.qwen3vl_effect_visual import \
 from src.bechmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
 from src.llm_wrapper import Qwen3VLLLMWrapper
-from utils import draw_bounding_box, parse_ground_truth
+from utils import draw_bounding_box, load_json
 
 class EventVisualBenchmarkType(BenchmarkBase):
     OUTCOME_VISUAL = 'outcome_visual'
@@ -56,7 +58,7 @@ class EventVisualBenchmarkType(BenchmarkBase):
         
         file_paths = []
         for folder in folders:
-            file_paths.extend([p for p in folder.glob("*.txt")])
+            file_paths.extend([p for p in folder.glob("*.json")])
         return sorted(file_paths)
 
 
@@ -68,17 +70,15 @@ if __name__ == "__main__":
     model_name = benchmark.get_model_name()
     system_prompt = benchmark.get_system_prompt()
 
-    for file_path in benchmark_files:
+    pbar = tqdm(benchmark_files, desc="Processing files", unit="file")
+    for file_path in pbar:
+        pbar.set_description(f"Processing: {file_path.name}")
         input_png = file_path.with_suffix(".png").resolve()
         input_json = file_path.with_suffix(".json").resolve()
-        input_prompt = file_path.with_suffix(".txt").resolve()
 
-        with open(input_prompt, 'r') as f:
-            user_prompt = f.read().strip()
-            
         model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
 
-        ground_truth = parse_ground_truth(input_json)
+        user_prompt, ground_truth = load_json(input_json)
 
         image_width, image_height = get_image_dimensions(input_png)
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         if response is None:
             print(f"Could not parse response for file: {file_path}")
             continue
-        image_with_bbox_path = draw_bounding_box(input_png, response.bbox_list())
+        image_with_bbox_path = draw_bounding_box(input_png.with_suffix('.g.png'), response.bbox_list())
         print(f"Task: {user_prompt}")
         print(f"Ground Truth: {ground_truth}")
         print(f"Parsed Response: {response}")
