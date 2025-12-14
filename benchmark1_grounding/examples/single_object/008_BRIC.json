@@ -1,0 +1,33 @@
+{
+  "version": "TIM2",
+  "title": "",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "RED_BRICK_WALL",
+      "position": {
+        "x": 248,
+        "y": 168
+      },
+      "size": {
+        "width_1": 16,
+        "height_1": 80,
+        "width_2": 16,
+        "height_2": 80
+      },
+      "flags_3": [
+        "LOCKED",
+        "WALL_PART"
+      ]
+    }
+  ]
+}

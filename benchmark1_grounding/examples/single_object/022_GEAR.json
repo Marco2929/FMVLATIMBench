@@ -1,0 +1,37 @@
+{
+  "version": "TIM2",
+  "title": "",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "GEAR",
+      "position": {
+        "x": 200,
+        "y": 128
+      },
+      "size": {
+        "width_1": 40,
+        "height_1": 35,
+        "width_2": 32,
+        "height_2": 32
+      },
+      "flags_3": [
+        "LOCKED"
+      ],
+      "belt_connection": {
+        "x": 17,
+        "y": 17,
+        "distance": 5
+      }
+    }
+  ]
+}

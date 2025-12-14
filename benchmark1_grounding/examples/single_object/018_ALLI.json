@@ -1,0 +1,33 @@
+{
+  "version": "TIM2",
+  "title": "",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "ALLIGATOR",
+      "position": {
+        "x": 440,
+        "y": 168
+      },
+      "size": {
+        "width_1": 100,
+        "height_1": 16,
+        "width_2": 94,
+        "height_2": 16
+      },
+      "flags_3": [
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    }
+  ]
+}
