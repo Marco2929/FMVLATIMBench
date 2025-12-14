@@ -35,7 +35,7 @@ def pad_image(image_path: Path, grid_size) -> Path:
     new_width = ((width + grid_size - 1) // grid_size) * grid_size
     new_height = ((height + grid_size - 1) // grid_size) * grid_size
 
-    print(f"Padding image from ({width}, {height}) to ({new_width}, {new_height})")
+    # print(f"Padding image from ({width}, {height}) to ({new_width}, {new_height})")
 
     padded_image = Image.new("RGB", (new_width, new_height))
     padded_image.paste(image, (0, 0))
