@@ -13,7 +13,7 @@
   },
   "parts": [
     {
-      "part_type": "UNKNOWN_44",
+      "part_type": "TENNIS_BALL",
       "position": {
         "x": 485,
         "y": 167
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "part_type": "UNKNOWN_28",
+      "part_type": "BASEBALL",
       "position": {
         "x": 458,
         "y": 164
@@ -85,7 +85,7 @@
       ]
     },
     {
-      "part_type": "UNKNOWN_68",
+      "part_type": "SOCCER_BALL",
       "position": {
         "x": 305,
         "y": 153
@@ -168,7 +168,7 @@
       ]
     },
     {
-      "part_type": "UNKNOWN_43",
+      "part_type": "PINBALL",
       "position": {
         "x": 350,
         "y": 162

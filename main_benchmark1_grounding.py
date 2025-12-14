@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from typing import override
+from tqdm import tqdm
 
 from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTEM_PROMPT as UITARS_LOCALIZE_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_object_recognition import SYSTEM_PROMPT as QWEN3_CLASSIFY_SYSTEM_PROMPT
@@ -55,7 +56,7 @@ class GroundingBenchmarkType(BenchmarkBase):
             case GroundingBenchmarkType.QWEN3_LOCALIZE:
                 folders = [single_object, multi_object]
             case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
-                folders = [single_object, multi_object]
+                folders = [multi_object]
             case GroundingBenchmarkType.UITARS_LOCALIZE:
                 folders = [single_object, multi_object]
             case _:
@@ -196,7 +197,9 @@ if __name__ == "__main__":
     model_name = benchmark.get_model_name()
     system_prompt = benchmark.get_system_prompt()
 
-    for file_path in benchmark_files:
+    pbar = tqdm(benchmark_files, desc="Processing files", unit="file")
+    for file_path in pbar:
+        pbar.set_description(f"Processing: {file_path.name}")
         input_png = file_path.with_suffix(".png")
         input_json = file_path.with_suffix(".json")
 
