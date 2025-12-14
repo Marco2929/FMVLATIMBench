@@ -1,0 +1,187 @@
+{
+  "version": "TIM2",
+  "title": "End2EndBenchmark 2",
+  "description": "The laser beam must activate the laser detector.",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1002,
+    "num_moving": 1
+  },
+  "parts": [
+    {
+      "part_type": "ANGLED_MIRROR",
+      "position": {
+        "x": 75,
+        "y": 282
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      }
+    },
+    {
+      "part_type": "ANGLED_MIRROR",
+      "position": {
+        "x": 355,
+        "y": 281
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED"
+      ],
+      "appearance": 3
+    },
+    {
+      "part_type": "UNKNOWN_21",
+      "position": {
+        "x": 488,
+        "y": 216
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 32,
+        "width_2": 32,
+        "height_2": 32
+      },
+      "flags_3": [
+        "IS_ELECTRIC_OUTLET",
+        "LOCKED"
+      ],
+      "appearance": 1,
+      "outlet_plugged_1": 4
+    },
+    {
+      "part_type": "ANGLED_MIRROR",
+      "position": {
+        "x": 178,
+        "y": 212
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED"
+      ]
+    },
+    {
+      "part_type": "BLUE_LASER",
+      "position": {
+        "x": 440,
+        "y": 200
+      },
+      "size": {
+        "width_1": 48,
+        "height_1": 18,
+        "width_2": 51,
+        "height_2": 51
+      },
+      "flags_3": [
+        "CAN_PLUG_OUTLET",
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ],
+      "appearance": 2,
+      "outlet_plugged_1": 2
+    },
+    {
+      "part_type": "ANGLED_MIRROR",
+      "position": {
+        "x": 348,
+        "y": 86
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED"
+      ],
+      "appearance": 2
+    },
+    {
+      "part_type": "ANGLED_MIRROR",
+      "position": {
+        "x": 179,
+        "y": 86
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED"
+      ],
+      "appearance": 1
+    },
+    {
+      "part_type": "LASER_DETECTOR",
+      "position": {
+        "x": 84,
+        "y": 34
+      },
+      "size": {
+        "width_1": 40,
+        "height_1": 32,
+        "width_2": 37,
+        "height_2": 32
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "BOWLING_BALL",
+      "position": {
+        "x": 486,
+        "y": 150
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 32,
+        "width_2": 32,
+        "height_2": 32
+      }
+    }
+  ],
+  "solution": {
+    "conditions": [
+      {
+        "part_index": 7,
+        "state_1": 1,
+        "state_2": 19,
+        "count": 0,
+        "rectangle": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      }
+    ]
+  }
+}

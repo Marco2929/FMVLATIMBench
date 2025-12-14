@@ -1,0 +1,148 @@
+{
+  "version": "TIM2",
+  "title": "End2EndBenchmark 1",
+  "description": "Push the small ball off the screen.",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1001,
+    "num_moving": 2
+  },
+  "parts": [
+    {
+      "part_type": "RED_BRICK_WALL",
+      "position": {
+        "x": 392,
+        "y": 168
+      },
+      "size": {
+        "width_1": 80,
+        "height_1": 16,
+        "width_2": 80,
+        "height_2": 16
+      },
+      "flags_3": [
+        "LOCKED",
+        "WALL_PART"
+      ]
+    },
+    {
+      "part_type": "BRICK_INCLINE",
+      "position": {
+        "x": 264,
+        "y": 152
+      },
+      "size": {
+        "width_1": 64,
+        "height_1": 32,
+        "width_2": 64,
+        "height_2": 32
+      },
+      "flags_3": [
+        "LOCKED"
+      ],
+      "appearance": 3
+    },
+    {
+      "part_type": "BRICK_INCLINE",
+      "position": {
+        "x": 472,
+        "y": 136
+      },
+      "size": {
+        "width_1": 48,
+        "height_1": 32,
+        "width_2": 48,
+        "height_2": 32
+      },
+      "flags_2": [
+        "SPRITE_FLIP_HORIZONTAL",
+        "CAN_STRETCH_ONE_DIR"
+      ],
+      "flags_3": [
+        "LOCKED"
+      ],
+      "appearance": 2
+    },
+    {
+      "part_type": "BRICK_INCLINE",
+      "position": {
+        "x": 200,
+        "y": 136
+      },
+      "size": {
+        "width_1": 64,
+        "height_1": 32,
+        "width_2": 64,
+        "height_2": 32
+      },
+      "flags_3": [
+        "LOCKED"
+      ],
+      "appearance": 3
+    },
+    {
+      "part_type": "BOXING_GLOVE",
+      "position": {
+        "x": 407,
+        "y": 129
+      },
+      "size": {
+        "width_1": 56,
+        "height_1": 39,
+        "width_2": 53,
+        "height_2": 39
+      }
+    },
+    {
+      "part_type": "SUPER_BALL",
+      "position": {
+        "x": 250,
+        "y": 126
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 23,
+        "width_2": 23,
+        "height_2": 23
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "BOWLING_BALL",
+      "position": {
+        "x": 498,
+        "y": 63
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 32,
+        "width_2": 32,
+        "height_2": 32
+      }
+    }
+  ],
+  "solution": {
+    "conditions": [
+      {
+        "part_index": 5,
+        "state_1": 0,
+        "state_2": 0,
+        "count": 0,
+        "rectangle": {
+          "x": -1,
+          "y": -1,
+          "width": -1,
+          "height": -1
+        }
+      }
+    ]
+  }
+}

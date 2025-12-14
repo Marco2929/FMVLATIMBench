@@ -1,0 +1,361 @@
+{
+  "version": "TIM2",
+  "title": "End2EndBenchmark 3",
+  "description": "Shoot the missile off the top of the screen.",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1002,
+    "num_moving": 6
+  },
+  "parts": [
+    {
+      "part_type": "RED_BRICK_WALL",
+      "position": {
+        "x": 440,
+        "y": 312
+      },
+      "size": {
+        "width_1": 112,
+        "height_1": 16,
+        "width_2": 112,
+        "height_2": 16
+      },
+      "flags_3": [
+        "LOCKED",
+        "WALL_PART"
+      ]
+    },
+    {
+      "part_type": "RED_BRICK_WALL",
+      "position": {
+        "x": 88,
+        "y": 312
+      },
+      "size": {
+        "width_1": 208,
+        "height_1": 16,
+        "width_2": 208,
+        "height_2": 16
+      },
+      "flags_3": [
+        "LOCKED",
+        "WALL_PART"
+      ]
+    },
+    {
+      "part_type": "FLASHLIGHT",
+      "position": {
+        "x": 396,
+        "y": 291
+      },
+      "size": {
+        "width_1": 48,
+        "height_1": 21,
+        "width_2": 46,
+        "height_2": 21
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "MAGNIFYING_GLASS",
+      "position": {
+        "x": 451,
+        "y": 289
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 40,
+        "width_2": 18,
+        "height_2": 40
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED"
+      ]
+    },
+    {
+      "part_type": "UNKNOWN_27",
+      "position": {
+        "x": 85,
+        "y": 267
+      },
+      "size": {
+        "width_1": 70,
+        "height_1": 44,
+        "width_2": 65,
+        "height_2": 44
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_PROGRAM_ICON",
+        "SHOW_SOLUTION_ICON"
+      ],
+      "behavior": 1,
+      "rope_1_connection": {
+        "x": 27,
+        "y": 32
+      }
+    },
+    {
+      "part_type": "LARGE_PIPES",
+      "position": {
+        "x": 264,
+        "y": 259
+      },
+      "size": {
+        "width_1": 128,
+        "height_1": 38,
+        "width_2": 128,
+        "height_2": 38
+      },
+      "flags_3": [
+        "LOCKED"
+      ]
+    },
+    {
+      "part_type": "LARGE_CURVED_PIPE",
+      "position": {
+        "x": 200,
+        "y": 227
+      },
+      "size": {
+        "width_1": 64,
+        "height_1": 70,
+        "width_2": 64,
+        "height_2": 70
+      },
+      "flags_3": [
+        "LOCKED"
+      ],
+      "appearance": 3
+    },
+    {
+      "part_type": "FISH_TANK",
+      "position": {
+        "x": 131,
+        "y": 217
+      },
+      "size": {
+        "width_1": 67,
+        "height_1": 51,
+        "width_2": 64,
+        "height_2": 51
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "TEETER_TOTTER",
+      "position": {
+        "x": 264,
+        "y": 200
+      },
+      "size": {
+        "width_1": 88,
+        "height_1": 40,
+        "width_2": 81,
+        "height_2": 40
+      },
+      "flags_3": [
+        "LOCKED"
+      ],
+      "rope_1_connection": {
+        "x": 5,
+        "y": 26
+      },
+      "rope_2_connection": {
+        "x": 72,
+        "y": 2
+      }
+    },
+    {
+      "part_type": "UNKNOWN_40",
+      "position": {
+        "x": 115,
+        "y": 148
+      },
+      "size": {
+        "width_1": 56,
+        "height_1": 55,
+        "width_2": 50,
+        "height_2": 55
+      },
+      "flags_2": [
+        "BELT_CAN_CONNECT"
+      ],
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ],
+      "belt_connection": {
+        "x": 26,
+        "y": 26,
+        "distance": 3
+      }
+    },
+    {
+      "part_type": "T_CONNECTOR",
+      "position": {
+        "x": 184,
+        "y": 147
+      },
+      "size": {
+        "width_1": 80,
+        "height_1": 80,
+        "width_2": 80,
+        "height_2": 80
+      },
+      "flags_3": [
+        "LOCKED"
+      ]
+    },
+    {
+      "part_type": "NEWTON_MOUSE",
+      "position": {
+        "x": 187,
+        "y": 290
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 20,
+        "width_2": 20,
+        "height_2": 20
+      },
+      "flags_2": [],
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "CANDLE",
+      "position": {
+        "x": 472,
+        "y": 278
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 33,
+        "width_2": 24,
+        "height_2": 33
+      },
+      "flags_1": [
+        "MOVING_PART"
+      ],
+      "flags_3": [
+        "CAN_BURN_OR_FUSE",
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "CURIE_CAT",
+      "position": {
+        "x": 149,
+        "y": 270
+      },
+      "size": {
+        "width_1": 45,
+        "height_1": 42,
+        "width_2": 39,
+        "height_2": 42
+      },
+      "flags_2": [],
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "PROGRAMMABLE_BALL",
+      "position": {
+        "x": 397,
+        "y": 246
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 27,
+        "width_2": 27,
+        "height_2": 27
+      },
+      "appearance": 5,
+      "programmable_ball_data": {
+        "density": 2832,
+        "elasticity": 128,
+        "friction": 16,
+        "gravity_buoyancy": 269,
+        "mass": 200,
+        "appearance_2": 5
+      }
+    },
+    {
+      "part_type": "MISSILE",
+      "position": {
+        "x": 462,
+        "y": 213
+      },
+      "size": {
+        "width_1": 32,
+        "height_1": 95,
+        "width_2": 96,
+        "height_2": 96
+      },
+      "flags_3": [
+        "CAN_BURN_OR_FUSE",
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    },
+    {
+      "part_type": "BLIMP",
+      "position": {
+        "x": 56,
+        "y": 157
+      },
+      "size": {
+        "width_1": 56,
+        "height_1": 36,
+        "width_2": 53,
+        "height_2": 36
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    }
+  ],
+  "solution": {
+    "conditions": [
+      {
+        "part_index": 15,
+        "state_1": 0,
+        "state_2": 0,
+        "count": 0,
+        "rectangle": {
+          "x": -500,
+          "y": -2000,
+          "width": 1640,
+          "height": 2000
+        }
+      }
+    ]
+  }
+}
