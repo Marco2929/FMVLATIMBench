@@ -1,0 +1,38 @@
+{
+  "version": "TIM2",
+  "title": "",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 1
+  },
+  "parts": [
+    {
+      "part_type": "CANDLE",
+      "position": {
+        "x": 280,
+        "y": 186
+      },
+      "size": {
+        "width_1": 24,
+        "height_1": 33,
+        "width_2": 24,
+        "height_2": 33
+      },
+      "flags_1": [
+        "MOVING_PART"
+      ],
+      "flags_3": [
+        "CAN_BURN_OR_FUSE",
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    }
+  ]
+}

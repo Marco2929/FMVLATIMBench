@@ -1,0 +1,36 @@
+{
+  "version": "TIM2",
+  "title": "",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "MESSAGE_COMPUTER",
+      "position": {
+        "x": 359,
+        "y": 148
+      },
+      "size": {
+        "width_1": 48,
+        "height_1": 43,
+        "width_2": 46,
+        "height_2": 43
+      },
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_PROGRAM_ICON",
+        "SHOW_SOLUTION_ICON"
+      ],
+      "behavior": 65
+    }
+  ]
+}

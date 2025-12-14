@@ -1,0 +1,41 @@
+{
+  "version": "TIM2",
+  "title": "",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 1
+  },
+  "parts": [
+    {
+      "part_type": "BUCKET",
+      "position": {
+        "x": 356,
+        "y": 152
+      },
+      "size": {
+        "width_1": 40,
+        "height_1": 49,
+        "width_2": 37,
+        "height_2": 49
+      },
+      "flags_1": [
+        "MOVING_PART"
+      ],
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ],
+      "rope_1_connection": {
+        "x": 18,
+        "y": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "version": "TIM2",
+  "title": "",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 1
+  },
+  "parts": [
+    {
+      "part_type": "CURIE_CAT",
+      "position": {
+        "x": 282,
+        "y": 19
+      },
+      "size": {
+        "width_1": 45,
+        "height_1": 42,
+        "width_2": 39,
+        "height_2": 42
+      },
+      "flags_2": [],
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "version": "TIM2",
+  "title": "green laser ",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "GREEN_LASER",
+      "position": {
+        "x": 203,
+        "y": 194
+      },
+      "size": {
+        "width_1": 48,
+        "height_1": 18,
+        "width_2": 51,
+        "height_2": 51
+      },
+      "flags_3": [
+        "CAN_PLUG_OUTLET",
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    }
+  ]
+}

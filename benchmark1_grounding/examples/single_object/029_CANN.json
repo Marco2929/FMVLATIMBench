@@ -1,0 +1,35 @@
+{
+  "version": "TIM2",
+  "title": "cannon",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "CANNON",
+      "position": {
+        "x": 248,
+        "y": 228
+      },
+      "size": {
+        "width_1": 80,
+        "height_1": 61,
+        "width_2": 101,
+        "height_2": 78
+      },
+      "flags_3": [
+        "CAN_BURN_OR_FUSE",
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ]
+    }
+  ]
+}

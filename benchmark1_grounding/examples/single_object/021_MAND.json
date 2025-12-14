@@ -1,0 +1,47 @@
+{
+  "version": "TIM2",
+  "title": "021_mandril_motor",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "MANDRILL_MOTOR",
+      "position": {
+        "x": 253,
+        "y": 190
+      },
+      "size": {
+        "width_1": 106,
+        "height_1": 79,
+        "width_2": 101,
+        "height_2": 79
+      },
+      "flags_2": [
+        "BELT_CAN_CONNECT",
+        "ROPE_CAN_CONNECT"
+      ],
+      "flags_3": [
+        "UNKNOWN_0x8",
+        "LOCKED",
+        "SHOW_SOLUTION_ICON"
+      ],
+      "belt_connection": {
+        "x": 34,
+        "y": 66,
+        "distance": 7
+      },
+      "rope_1_connection": {
+        "x": 98,
+        "y": 66
+      }
+    }
+  ]
+}

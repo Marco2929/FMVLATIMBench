@@ -1,0 +1,32 @@
+{
+  "version": "TIM2",
+  "title": "",
+  "description": "",
+  "background": {
+    "color": 3
+  },
+  "global_settings": {
+    "pressure": 67,
+    "gravity": 272,
+    "music": 1000,
+    "num_moving": 0
+  },
+  "parts": [
+    {
+      "part_type": "T_CONNECTOR",
+      "position": {
+        "x": 312,
+        "y": 179
+      },
+      "size": {
+        "width_1": 80,
+        "height_1": 80,
+        "width_2": 80,
+        "height_2": 80
+      },
+      "flags_3": [
+        "LOCKED"
+      ]
+    }
+  ]
+}
