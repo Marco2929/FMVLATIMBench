@@ -26,7 +26,7 @@ Add `--model qwen3/...` to change the model. Additional models are likely not to
 
 `python main_benchmark1_grounding.py --benchmark qwen3_localize_multi`
 
-`python main_benchmark1_grounding.py --benchmark qwen3_uitars_localize`
+`python main_benchmark1_grounding.py --benchmark uitars_localize`
 
 ## Benchmark 2: Understanding
 
