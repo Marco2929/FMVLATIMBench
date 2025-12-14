@@ -1,4 +1,4 @@
 {
-  "TASK_DESCRIPTION": "What happens if the red laser and blue laser intersects in the laser mixer",
-  "solution": "The mixer generates yellow and hit a object with the beam"
-}
+      "TASK_DESCRIPTION": "What happens if the red laser and blue laser intersects in the laser mixer",
+      "solution": "The mixer generates purple and hit a ball with the beam but don’t destroy it"
+    }

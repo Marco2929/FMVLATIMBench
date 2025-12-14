@@ -1,4 +1,4 @@
 {
-  "solution": "negative",
-  "TASK_DESCRIPTION": "negative"
-}
+      "TASK_DESCRIPTION": "What does the newton mouse after simulation is started?",
+      "solution": "Nothing there’s no event that triggers the mouse"
+    }

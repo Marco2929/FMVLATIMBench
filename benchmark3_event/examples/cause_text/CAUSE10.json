@@ -1,4 +1,4 @@
 {
-  "solution": "negative",
-  "TASK_DESCRIPTION": "negative"
-}
+      "TASK_DESCRIPTION": "Why is the laser not on?",
+      "solution": "The description is wrong, the laser is on and was triggered by the solar panel"
+    }

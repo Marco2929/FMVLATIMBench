@@ -1,0 +1,132 @@
+[
+  {
+    "CAUSE1": {
+      "TASK_DESCRIPTION": "What caused the ballon to burst?",
+      "solution": "The ball fell down and pressed the switch to activate the laser, it bursted the ballon"
+    },
+    "CAUSE2": {
+      "TASK_DESCRIPTION": "Why is the Aquarium destroyed?",
+      "solution": "The ball rolled down the slope and hit the Aquarium"
+    },
+    "CAUSE3": {
+      "TASK_DESCRIPTION": "What caused the electric mixer spinning?",
+      "solution": "The bucket moved up the paper, that made the bananas visible. The monkey got addicted by the bananas moved the treadmill and generated electricity to move the mixer"
+    },
+    "CAUSE4": {
+      "TASK_DESCRIPTION": "Starting from the caution plattform. Why did Mel Schlemming walked to his house?",
+      "solution": "The Blimp flew against the button of the boxing glove. Mel Schmelling fell down and walkes against a wall turned around fell down again and turn around. Next he walks to his house"
+    },
+    "CAUSE5": {
+      "TASK_DESCRIPTION": "Starting on top of the archway. Why the blimp flew diagonal?",
+      "solution": "The ball constantly falls on the spring board and triggers it. As soon the blimp reaches it the spring board triggers a diagonal fly"
+    },
+    "CAUSE6": {
+      "TASK_DESCRIPTION": "What caused the curie cat to run towards the left side?",
+      "solution": "The curie cat went after the newton mouse but the newton mouse run to the lower plattform."
+    },
+    "CAUSE7": {
+      "TASK_DESCRIPTION": "Why is the Fan not blowing air dispite plugged in?",
+      "solution": "The switch of the fan is not turned on"
+    },
+    "CAUSE8": {
+      "TASK_DESCRIPTION": "Why is the Aquarium destroyed?",
+      "solution": "None"
+    },
+    "CAUSE9": {
+      "TASK_DESCRIPTION": "Why is the Solar Panel not powering the electric motor?",
+      "solution": "The description is wrong the electric motor is powered by the solar panel"
+    },
+    "CAUSE10": {
+      "TASK_DESCRIPTION": "Why is the laser not on?",
+      "solution": "The description is wrong, the laser is on and was triggered by the solar panel"
+    }
+  },
+  {
+    "EFFECT1": {
+      "TASK_DESCRIPTION": "What happens if the laser is on?",
+      "solution": "The laser burst the ball"
+    },
+    "EFFECT2": {
+      "TASK_DESCRIPTION": "What happens after the monkey is triggered with the banana",
+      "solution": "The monkey walks and loves the banana what makes the belt with the three gears attached rotating"
+    },
+    "EFFECT3": {
+      "TASK_DESCRIPTION": "What happens if the bowling ball lands on the high end of the teeter-tooter",
+      "solution": "The bowling ball shifts the weight on the teeter-tooter and newton mouse jumps to the air lands on the plattform and the curie cat eats it"
+    },
+    "EFFECT4": {
+      "TASK_DESCRIPTION": "What happens if the red laser and blue laser intersects in the laser mixer",
+      "solution": "The mixer generates purple and hit a ball with the beam but don’t destroy it"
+    },
+    "EFFECT5": {
+      "TASK_DESCRIPTION": "What happens when the curie cat sees the fish bowl",
+      "solution": "The cat runs to the fish bowl"
+    },
+    "EFFECT6": {
+      "TASK_DESCRIPTION": "What occurs if the nitroglycerin canister falls down?",
+      "solution": "It lands on the wooden floor and explodes this causes the ball to fall down from the explosion"
+    },
+    "EFFECT7": {
+      "TASK_DESCRIPTION": "What happens with the motor, generator, conveyor belt?",
+      "solution": "Nothing the electric motor is not moving and also not connected to the conveyor belt"
+    },
+    "EFFECT8": {
+      "TASK_DESCRIPTION": "What happens with the red laser?",
+      "solution": "None"
+    },
+    "EFFECT9": {
+      "TASK_DESCRIPTION": "What happens if the dynamite is placed next to a flashlight?",
+      "solution": "Nothing the dynamite can't destroy the flash light"
+    },
+    "EFFECT10": {
+      "TASK_DESCRIPTION": "What happens if a bowling ball falls on the wooden wall?",
+      "solution": "Nothing"
+    },
+    "EFFECT11": {
+      "TASK_DESCRIPTION": "What happens when the flashlight is on",
+      "solution": "The flashlight generates a source to use the magnifying glass to ignite the candle"
+    }
+  },
+  {
+    "OUTCOME1": {
+      "TASK_DESCRIPTION": "What happens to the ball when the machine is started?",
+      "solution": "The ball falls down in the pipe because of the gravity and after going through it lands on the ground where it bounces a bit"
+    },
+    "OUTCOME2": {
+      "TASK_DESCRIPTION": "What does the mouse do after simulation is started?",
+      "solution": "The mouse runs away from the cat and triggers the conveyor belt this moves the cheese and it falls into the bucket"
+    },
+    "OUTCOME3": {
+      "TASK_DESCRIPTION": "Describe the chain of events starting from the electric motor",
+      "solution": "The electric motor activates the conveyor belt that moves the cheese and it hits the button of the boxing glove"
+    },
+    "OUTCOME4": {
+      "TASK_DESCRIPTION": "Describe the chain of events starting from the monkey",
+      "solution": "The monkey get triggered by the banana that turns the belt which turns three gears after it moves the trans-roto-matic"
+    },
+    "OUTCOME5": {
+      "TASK_DESCRIPTION": "Describe the chain of events starting from the socket",
+      "solution": "The laser is plugged into the socked powering the ballon to go upwards"
+    },
+    "OUTCOME6": {
+      "TASK_DESCRIPTION": "Where will the bowling ball land?",
+      "solution": "The bowling ball travels through the pipes and lands on the wooden floor and triggers...."
+    },
+    "OUTCOME7": {
+      "TASK_DESCRIPTION": "What makes the machine not working?",
+      "solution": "Nothing triggers the socket lever"
+    },
+    "OUTCOME8": {
+      "TASK_DESCRIPTION": "Describe the chain of events starting from the monkey",
+      "solution": "None"
+    },
+    "OUTCOME9": {
+      "TASK_DESCRIPTION": "What does the newton mouse after simulation is started?",
+      "solution": "Nothing there’s no event that triggers the mouse"
+    },
+    "OUTCOME10": {
+      "TASK_DESCRIPTION": "Where will the ball land?",
+      "solution": "The ball won't move and stay on the platfrom"
+    }
+  }
+]

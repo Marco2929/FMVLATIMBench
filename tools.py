@@ -2,7 +2,7 @@ import json
 import os
 from pathlib import Path
 
-folder = "/home/mm/dev/git/FoundationModelsVLA/benchmark2_understanding/examples/object_property_ident"
+folder = "/home/mm/dev/git/FoundationModelsVLA/benchmark3_event/examples/outcome_text"
 
 def extract_number(name):
     digits = "".join(ch for ch in name if ch.isdigit())

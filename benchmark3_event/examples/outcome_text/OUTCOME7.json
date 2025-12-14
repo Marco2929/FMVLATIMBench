@@ -1,4 +1,4 @@
 {
-  "solution": "No the lamp isn't turned on",
-  "TASK_DESCRIPTION": "Will the solar panel generate electricity?"
-}
+      "TASK_DESCRIPTION": "What makes the machine not working?",
+      "solution": "Nothing triggers the socket lever"
+    }

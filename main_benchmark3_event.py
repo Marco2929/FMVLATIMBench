@@ -17,7 +17,8 @@ from benchmark3_event.system_prompts.qwen3vl_effect_text import \
 from src.bechmark_base import BenchmarkBase, BenchmarkCli
 from src.llm_wrapper import Qwen3VLLLMWrapper
 from src.results_model import SingleTaskResult
-from utils import parse_ground_truth
+from utils import load_json
+
 
 class EventBenchmarkType(BenchmarkBase):
     OUTCOME_TEXT = 'outcome_text'
@@ -61,7 +62,7 @@ class EventBenchmarkType(BenchmarkBase):
         
         file_paths = []
         for folder in folders:
-            file_paths.extend([p for p in folder.glob("*.txt")])
+            file_paths.extend([p for p in folder.glob("*.json")])
         return sorted(file_paths)
 
 def evaluate_response_deep_eval(openrouter_llm: DeepEvalBaseLLM, input: str, expected_output: str, actual_output: str,
@@ -101,22 +102,17 @@ if __name__ == "__main__":
 
     model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
 
-    for file_path in benchmark_files:
+    for i, file_path in enumerate(benchmark_files):
         input_png = file_path.with_suffix(".png").resolve()
         input_json = file_path.with_suffix(".json").resolve()
-        input_prompt = file_path.with_suffix(".txt").resolve()
 
-        with open(input_prompt, 'r') as f:
-            user_prompt = f.read().strip()
-
-
-        ground_truth = parse_ground_truth(input_json)
+        user_prompt, ground_truth = load_json(input_json)
 
         # response = generate_model_response(input_png, model_name="qwen/qwen3-vl-30b-a3b-instruct") or ""
-        response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=user_prompt) or ""
+        response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=user_prompt)
         score = evaluate_response_deep_eval(openrouter_llm=openrouter_llm, input=system_prompt, expected_output=ground_truth,
                                             actual_output=response, retrieval_context=[user_prompt])
-        print(f"Task: {user_prompt}")
+        print(f"{i+1} Task: {user_prompt}")
         print(f"Ground Truth: {ground_truth}")
         print(f"Parsed Response: {response}")
         print(f"Evaluation Score: {score}")

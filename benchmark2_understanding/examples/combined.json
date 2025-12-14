@@ -1,58 +1,22 @@
 {
-  "PROP1": {
-    "solution": "SUPER_BALL",
-    "TASK_DESCRIPTION": "Which ball has the highest elasticity"
-  },
-  "PROP2": {
-    "solution": "CURIE_CAT",
-    "TASK_DESCRIPTION": "What makes the Newton Mouse run away?"
-  },
-  "PROP3": {
-    "solution": "ALLIGATOR",
-    "TASK_DESCRIPTION": "What is dangerous for Mel Schlemming"
-  },
-  "PROP4": {
-    "solution": "BALLOON",
-    "TASK_DESCRIPTION": "Which object rises?"
-  },
-  "PROP5": {
-    "solution": "BOWLING_BALL",
-    "TASK_DESCRIPTION": "Which ball weights the most?"
-  },
-  "PROP6": {
-    "solution": "YES",
-    "TASK_DESCRIPTION": "Is Mels house in the scene?"
-  },
-  "PROP7": {
-    "solution": "CHEESE",
-    "TASK_DESCRIPTION": "Which object the newton mouse will come after"
-  },
-  "PROP8": {
-    "solution": "YELLOW_BRICK_WALL",
-    "TASK_DESCRIPTION": "Which wall is the most slippery?"
-  },
-  "PROP9": {
-    "solution": "CANDLE",
-    "TASK_DESCRIPTION": "Which object is able to burn"
-  },
-  "PROP10": {
-    "solution": "FISH_TANK",
-    "TASK_DESCRIPTION": "Which object breaks in case something falls on it"
-  },
-  "PROP11": {
-    "solution": "MIRROR",
-    "TASK_DESCRIPTION": "Which object reflects a laser beam"
-  },
-  "PROP12": {
-    "solution": "LOG_WALL",
-    "TASK_DESCRIPTION": "Which wall is affected by an explosion?"
-  },
-  "PROP13": {
-    "solution": "NONE",
-    "TASK_DESCRIPTION": "Which ball has the highest elasticity"
-  },
-  "PROP14": {
-    "solution": "NONE",
-    "TASK_DESCRIPTION": "Which object rises?"
-  }
+  "STATE1": {"solution": "YES", "TASK_DESCRIPTION": "Is the lamp on?"},
+  "STATE2": {"solution": "NO", "TASK_DESCRIPTION": "Is the lamp on?"},
+  "STATE3": {"solution": "YES", "TASK_DESCRIPTION": "Is the aquarium broken?"}, 
+  "STATE4": {"solution": "NO", "TASK_DESCRIPTION": "Is the aquarium broken?"},
+  "STATE5": {"solution": "YES", "TASK_DESCRIPTION": "Is the fire burning?"},
+  "STATE6": {"solution": "NO", "TASK_DESCRIPTION": "Is the fire burning?"},
+  "STATE7": {"solution": "YES", "TASK_DESCRIPTION": "Are two objects connected by a belt?"}, 
+  "STATE8": {"solution": "NO", "TASK_DESCRIPTION": "Are two objects connected by a belt?"},
+  "STATE9": {"solution": "NO", "TASK_DESCRIPTION": "Is the laser connected with a socket?"},
+  "STATE10": {"solution": "YES", "TASK_DESCRIPTION": "Is the laser connected with a socket?"},
+  "STATE11": {"solution": "NO","TASK_DESCRIPTION": "Is the electic mixer connected with a socket?"},
+  "STATE12": {"solution": "YES","TASK_DESCRIPTION": "Is the electic mixer connected with a socket?"},
+  "STATE13": {"solution": "YES","TASK_DESCRIPTION": "Is the laser activated?"},
+  "STATE14": {"solution": "NO","TASK_DESCRIPTION": "Is the laser activated?"},
+  "STATE15": {"solution": "YES","TASK_DESCRIPTION": "Is the ball inside the bucket?"},
+  "STATE16": {"solution": "NO","TASK_DESCRIPTION": "Is the ball inside the bucket?"},
+  "STATE17": {"solution": "YES","TASK_DESCRIPTION": "Is the mouse inside the basket?"},
+  "STATE18": {"solution": "NO","TASK_DESCRIPTION": "Is the mouse inside the basket?"},
+  "STATE19": {"solution": "NONE","TASK_DESCRIPTION": "Is the lamp on?"},
+  "STATE20": {"solution": "NONE","TASK_DESCRIPTION": "Is the laser activated?"}
 }

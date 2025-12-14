@@ -65,18 +65,19 @@ if __name__ == "__main__":
     model_name = benchmark.get_model_name()
     system_prompt = benchmark.get_system_prompt()
 
+    model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+
     for i, file_path in enumerate(benchmark_files):
         input_png = file_path.with_suffix(".png").resolve()
         input_json = file_path.with_suffix(".json").resolve()
-
-        model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
 
         user_prompt, ground_truth = load_json(input_json)
 
         response = model.generate_model_response(input_png, system_prompt, additional_user_prompt=user_prompt)
         response = parse_response(response)
         score = evaluate_response(ground_truth, response)
-        print(f"{i+1} Ground Truth: {ground_truth}")
+        print(f"{i+1} Task: {user_prompt}")
+        print(f"Ground Truth: {ground_truth}")
         print(f"Parsed Response: {response}")
         print(f"Evaluation Score: {score}")
 

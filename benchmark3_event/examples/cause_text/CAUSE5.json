@@ -1,4 +1,4 @@
 {
-  "TASK_DESCRIPTION": "Why did the Blimp reverse its direction?",
-  "solution": "Check"
-}
+      "TASK_DESCRIPTION": "Starting on top of the archway. Why the blimp flew diagonal?",
+      "solution": "The ball constantly falls on the spring board and triggers it. As soon the blimp reaches it the spring board triggers a diagonal fly"
+    }

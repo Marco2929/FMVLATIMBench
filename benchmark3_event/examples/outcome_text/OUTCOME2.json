@@ -1,4 +1,4 @@
 {
-  "solution": "The mouse runs away from the cat and triggers some mechanism",
-  "TASK_DESCRIPTION": "What does the mouse do after simulation is started?"
-}
+      "TASK_DESCRIPTION": "What does the mouse do after simulation is started?",
+      "solution": "The mouse runs away from the cat and triggers the conveyor belt this moves the cheese and it falls into the bucket"
+    }

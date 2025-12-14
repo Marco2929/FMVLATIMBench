@@ -1,4 +1,4 @@
 {
-  "solution": "The mandrill motor activates the conveyor belt that moves an object and triggers another event (bucket?)",
-  "TASK_DESCRIPTION": "Describe the chain of events starting from the mandrill motor"
-}
+      "TASK_DESCRIPTION": "Describe the chain of events starting from the electric motor",
+      "solution": "The electric motor activates the conveyor belt that moves the cheese and it hits the button of the boxing glove"
+    }

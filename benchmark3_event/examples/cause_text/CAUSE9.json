@@ -1,4 +1,4 @@
 {
-  "TASK_DESCRIPTION": "Why is the Solar Panel not powering the motor?",
-  "solution": "It is powering the motor"
-}
+      "TASK_DESCRIPTION": "Why is the Solar Panel not powering the electric motor?",
+      "solution": "The description is wrong the electric motor is powered by the solar panel"
+    }

@@ -1,4 +1,4 @@
 {
-  "solution": "The ball falls down because of the gravity and lands on the ground where it bounces a bit",
-  "TASK_DESCRIPTION": "What happens to the ball when the machine is started?"
-}
+      "TASK_DESCRIPTION": "What happens to the ball when the machine is started?",
+      "solution": "The ball falls down in the pipe because of the gravity and after going through it lands on the ground where it bounces a bit"
+    }
