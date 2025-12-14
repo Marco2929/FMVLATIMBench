@@ -98,3 +98,4 @@ ALLIGATOR - Here's Edison the Alligator. He'll chew down Mel Schlemmington or Ne
 MEL_SCHLEMMINGTON - Meet Mel Schlemmington. Mel walks or runs mindlessly forward until he bumps into something. Then he turns around and walks mindlessly in the other direction. You can program him to walk, run, or stand still until he's bumped. If he falls too far, he goes to sleep. He also has to watch out for alligators.
 BOXES - This box is really five boxes in one. Program it to be glass, wooden, wicker, metal, or cardboard which are all different sizes. Drop things inside it. Use it to catch falling objects.
 MESSAGE_COMPUTER - This little computer is a handy way of relaying messages (one letter at a time). A letter will appear on the monitor if something bumps the keyboard. The computer may be programmed to display any letter in the alphabet, numbers 0-9, and several symbols. Line them up side by side to spell out a whole message.
+TOASTER - A toaster
