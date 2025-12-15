@@ -48,7 +48,7 @@ MAX_MESSAGE_SIZE = 10  # maximum number of messages to keep in history (includin
 HOTKEY = "<ctrl>+<shift>+s"  # Cross-platform hotkey (Ctrl+Shift+S)
 MY_RESOLUTION = (1920, 1200)
 DEVICE_PIXEL_RATIO = 2.0  # Device pixel ratio (1.0 for standard displays, 2.0 for Retina/HiDPI)
-MAX_ACTIONS = 1
+MAX_ACTIONS = 5
 
 # Global flag for hotkey detection
 _hotkey_pressed = False
@@ -153,35 +153,20 @@ def parse_ground_truth(json_path: Path) -> dict:
     }
 
 
-def get_initial_message(image_path: Path, SYSTEM_PROMPT: str, instruct_prompt: str):
+def get_initial_message(SYSTEM_PROMPT: str, instruct_prompt: str):
     """Get initial message to model before loop.
     
     Args:
-        image_path: Path to input image
         SYSTEM_PROMPT: System prompt for the model
         instruct_prompt: Additional instruction prompt
         
     Returns:
-        Model response string
+        Initial message list with system prompt only
     """
-    base64_image = encode_image(image_path)
-    data_url = f"data:image/jpeg;base64,{base64_image}"
-    
     message = [
         {
             "role": "system",
             "content": SYSTEM_PROMPT + instruct_prompt
-        },
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": data_url
-                    }
-                }
-            ]
         }
     ]
     
@@ -527,9 +512,6 @@ if __name__ == "__main__":
     error_log_path = run_dir / "error.log"
     
     try:
-        input_png = Path(args.input).with_suffix(".png")
-        if not input_png.exists():
-            raise FileNotFoundError(f"Input image file not found: {input_png}")
         input_json = Path(args.input).with_suffix(".json")
         if not input_json.exists():
             raise FileNotFoundError(f"Input Json file not found: {input_json}")
@@ -557,7 +539,6 @@ if __name__ == "__main__":
         )
 
         message = get_initial_message(
-            image_path=input_png,
             SYSTEM_PROMPT=SYSTEM_PROMPT,
             instruct_prompt=instruct_prompt
         )
@@ -567,6 +548,23 @@ if __name__ == "__main__":
         
         # Pause here until the user triggers the start
         _wait_for_start()
+        print("Starting the action loop...")
+        
+        # Take initial screenshot and add to message
+        b64 = _screenshot_to_base64()
+        if b64:
+            image_message = {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/png;base64,{b64}"}
+                    }
+                ]
+            }
+            message.append(image_message)
+        else:
+            raise RuntimeError("Failed to capture initial screenshot")
         
         action_type = "init"
         
