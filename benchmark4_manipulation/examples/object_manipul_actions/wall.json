@@ -3,7 +3,7 @@
         "brickwall": [1600, null]
     },
     "templates": {
-        "brickwall": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\brickwall.png"
+        "brickwall": "../../../templates/brickwall.png"
     },
     "threshold": 15,
     "use_iou": true,
