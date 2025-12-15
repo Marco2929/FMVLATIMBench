@@ -226,7 +226,7 @@ def parse_action_to_structure_output(text,
     for action_instance, raw_str in zip(parsed_actions, all_action):
         if action_instance == None:
             print(f"Action can't parse: {raw_str}")
-            raise ValueError(f"Action can't parse: {raw_str}")
+            raise ValueError(f"Action can't parse: {raw_str}", "\n\tFull text:", text)
         action_type = action_instance["function"]
         params = action_instance["args"]
 
