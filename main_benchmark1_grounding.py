@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from typing import override
+from itertools import combinations
 from tqdm import tqdm
 
 from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTEM_PROMPT as UITARS_LOCALIZE_SYSTEM_PROMPT
@@ -183,11 +184,24 @@ def evaluate_response_bboxes(ground_truth: list[BoundingBox], response: list[Bou
     average_iou = total_iou / matched
     return average_iou
 
-def evaluate_response_point(ground_truth: tuple[int, int], response: tuple[int, int]):
-    gt_x, gt_y = ground_truth
-    resp_x, resp_y = response
-    distance = ((gt_x - resp_x) ** 2 + (gt_y - resp_y) ** 2) ** 0.5
-    return distance
+def evaluate_response_bboxes_distance(ground_truth: list[BoundingBox], response: list[BoundingBox]):
+    # calc average distance for multiple bboxes, matching by label
+    if not ground_truth or not response:
+        return None
+    total_distance = 0.0
+    matched = 0
+    for gt in ground_truth:
+        for resp in response:
+            # Match by label before calculating distance
+            if gt.label == resp.label:
+                distance = gt.center().euclidian_distance_to(resp.center())
+                total_distance += distance
+                matched += 1
+                break
+    if matched == 0:
+        return None
+    average_distance = total_distance / matched
+    return average_distance
 
 if __name__ == "__main__":
     cli = BenchmarkCli(name="benchmark1_grounding", benchmark_types=list(GroundingBenchmarkType))
@@ -261,26 +275,54 @@ if __name__ == "__main__":
                 assert isinstance(ground_truth, list)
                 ground_truth_bbox = ground_truth
                 assert len(ground_truth_bbox) >= 1
-                object_list = ", ".join([gt.label for gt in ground_truth_bbox if gt.label is not None])
-                additional_user_prompt = f"Locate the following objects: {object_list}"
-                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
-                response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
-                response = model.parse_response_bboxes(response, image_height=image_height, image_width=image_width)
-                score = evaluate_response_bboxes(ground_truth_bbox, response)
+                
+                # Generate combinations: single objects, pairs, and all objects
+                n_objects = len(ground_truth_bbox)
+                all_combos = []
+                
+                # Single objects
+                all_combos.extend([(1, combo) for combo in combinations(range(n_objects), 1)])
+                
+                # Pairs (only if n_objects >= 2)
+                if n_objects >= 2:
+                    all_combos.extend([(2, combo) for combo in combinations(range(n_objects), 2)])
+                
+                # All objects together (only if n_objects > 2, otherwise it's already covered by pairs)
+                if n_objects > 2:
+                    all_combos.append((n_objects, tuple(range(n_objects))))
+                
+                combo_pbar = tqdm(all_combos, desc=f"Testing combinations for {file_path.name}", unit="combo", leave=False)
+                for r, combo in combo_pbar:
+                    # Get the subset of ground truth bboxes for this combination
+                    combo_ground_truth = [ground_truth_bbox[i] for i in combo]
+                    object_list = ", ".join([gt.label for gt in combo_ground_truth if gt.label is not None])
+                    additional_user_prompt = f"Locate the following objects: {object_list}"
+                    combo_pbar.set_description(f"{file_path.name} - {len(combo_ground_truth)} obj(s): {object_list[:30]}")
+                    
+                    model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+                    response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
+                    parsed_response = model.parse_response_bboxes(response, image_height=image_height, image_width=image_width)
+                    iou = evaluate_response_bboxes(combo_ground_truth, parsed_response)
+                    distance = evaluate_response_bboxes_distance(combo_ground_truth, parsed_response)
+                    score = iou  # Using average IoU as the score
 
-                result = SingleTaskResult(
-                    benchmark_type=benchmark.value,
-                    model=model_name,
-                    final_score=score,
-                    iou=score,
-                    classification_correct=None,
-                    distance=None,
-                    score_formula="average IoU",
-                    input_file=str(file_path),
-                    ground_truth=ground_truth_bbox,
-                    user_prompt=additional_user_prompt,
-                    response=response
-                )
+                    result = SingleTaskResult(
+                        benchmark_type=benchmark.value,
+                        model=model_name,
+                        final_score=-1,
+                        iou=iou,
+                        classification_correct=None,
+                        distance=distance,
+                        score_formula="IoU and distance",
+                        input_file=str(file_path),
+                        ground_truth=combo_ground_truth,
+                        user_prompt=additional_user_prompt,
+                        response=parsed_response
+                    )
+                    cli.results.append(result)
+                
+                # Skip the default result append at the end for this case
+                continue
 
             case GroundingBenchmarkType.UITARS_LOCALIZE:
                 assert isinstance(ground_truth, list)
