@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the object that will be hit by the beam when the red and blue lasers intersect in the laser mixer.",
-      "solution": "The mixer generates purple and hit a ball with the beam but don't destroy it"
-    }
+  "TASK_DESCRIPTION": "Mark the object that is affected when the red and blue lasers intersect in the laser mixer.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      481,
+      208,
+      514,
+      239
+    ]
+  }
+}

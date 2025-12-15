@@ -1,4 +1,12 @@
 {
-  "TASK_DESCRIPTION": "Mark the object or mechanism that caused the balloon to burst.",
-  "solution": "The ball fell down and pressed the switch to activate the laser, it bursted the ballon"
+  "TASK_DESCRIPTION": "Mark the object that caused the balloon to burst.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      401,
+      390,
+      486,
+      432
+    ]
+  }
 }

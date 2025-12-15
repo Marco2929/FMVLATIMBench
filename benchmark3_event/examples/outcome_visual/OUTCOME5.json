@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the area where the balloon will be when the laser is powered through the socket.",
-      "solution": "The laser is plugged into the socked powering the ballon to go upwards"
-    }
+  "TASK_DESCRIPTION": "Mark the area where the balloon will be when the laser is powered through the socket.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      352,
+      2,
+      385,
+      36
+    ]
+  }
+}

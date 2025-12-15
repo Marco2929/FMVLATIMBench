@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the area where the boxing glove will be activated after the electric motor starts the conveyor belt.",
-      "solution": "The electric motor activates the conveyor belt that moves the cheese and it hits the button of the boxing glove"
-    }
+  "TASK_DESCRIPTION": "Mark the object that activates the boxing glove.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      296,
+      147,
+      327,
+      166
+    ]
+  }
+}

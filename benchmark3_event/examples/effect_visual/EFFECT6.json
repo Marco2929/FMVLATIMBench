@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the area where the ball will land after the nitroglycerin canister falls and explodes.",
-      "solution": "It lands on the wooden floor and explodes this causes the ball to fall down from the explosion"
-    }
+  "TASK_DESCRIPTION": "Mark the area where the ball will land after the nitroglycerin canister falls and explodes.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      151,
+      352,
+      220,
+      374
+    ]
+  }
+}

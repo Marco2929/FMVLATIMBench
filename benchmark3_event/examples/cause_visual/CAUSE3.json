@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the sequence of objects that caused the electric mixer to start spinning.",
-      "solution": "The bucket moved up the paper, that made the bananas visible. The monkey got addicted by the bananas moved the treadmill and generated electricity to move the mixer"
-    }
+  "TASK_DESCRIPTION": "Mark the object that initiates the chain reaction to turn on the electric mixer.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      331,
+      323,
+      369,
+      375
+    ]
+  }
+}

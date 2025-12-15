@@ -1,4 +1,4 @@
 {
-      "TASK_DESCRIPTION": "Mark the region that shows movement when the motor and generator are connected to the conveyor belt.",
-      "solution": "Nothing the electric motor is not moving and also not connected to the conveyor belt"
-    }
+  "TASK_DESCRIPTION": "Mark the parts that rotate when the level is started.",
+  "solution": null
+}

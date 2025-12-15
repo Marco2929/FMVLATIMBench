@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the area where the monkey will move to after being triggered with the banana.",
-      "solution": "The monkey walks and loves the banana what makes the belt with the three gears attached rotating"
-    }
+  "TASK_DESCRIPTION": "Mark the bottom most, single object that does something after the machine is turned on.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      399,
+      273,
+      436,
+      306
+    ]
+  }
+}

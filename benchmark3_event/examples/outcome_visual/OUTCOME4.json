@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the region where the trans-roto-matic will be positioned after the monkey is triggered by the banana.",
-      "solution": "The monkey get triggered by the banana that turns the belt which turns three gears after it moves the trans-roto-matic"
-    }
+  "TASK_DESCRIPTION": "Mark the object where the trans-roto-matic will be positioned after the monkey is triggered by the banana.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      282,
+      274,
+      312,
+      293
+    ]
+  }
+}

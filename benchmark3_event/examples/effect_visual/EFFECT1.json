@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the object that will be affected when the laser is turned on.",
-      "solution": "The laser burst the ballon"
-    }
+  "TASK_DESCRIPTION": "Mark the object that will be affected when the laser is turned on.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      469,
+      137,
+      503,
+      189
+    ]
+  }
+}

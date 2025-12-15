@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the region where the cheese will end up after the mouse triggers the conveyor belt.",
-      "solution": "The mouse runs away from the cat and triggers the conveyor belt this moves the cheese and it falls into the bucket"
-    }
+  "TASK_DESCRIPTION": "Mark the region where the cheese will end up after the mouse triggers the conveyor belt.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      479,
+      214,
+      517,
+      263
+    ]
+  }
+}

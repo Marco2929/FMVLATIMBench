@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the object that caused the aquarium to be destroyed.",
-      "solution": "The ball rolled down the slope and hit the Aquarium"
-    }
+  "TASK_DESCRIPTION": "Mark the object that caused the aquarium to be destroyed.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      358,
+      202,
+      391,
+      235
+    ]
+  }
+}

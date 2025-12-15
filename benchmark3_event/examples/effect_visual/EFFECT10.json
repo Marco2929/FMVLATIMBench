@@ -1,4 +1,4 @@
 {
-      "TASK_DESCRIPTION": "Mark the area of the wooden wall that will be impacted or damaged when the bowling ball falls on it.",
-      "solution": "Nothing"
-    }
+  "TASK_DESCRIPTION": "Mark the area that will be impacted or damaged when the bowling ball falls on it.",
+  "solution": null
+}

@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the location where the curie cat will end up when it sees the fish bowl.",
-      "solution": "The cat runs to the fish bowl"
-    }
+  "TASK_DESCRIPTION": "Mark the location where the curie cat will end up when it sees the fish bowl.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      277,
+      181,
+      342,
+      228
+    ]
+  }
+}

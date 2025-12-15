@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the component that explains why the fan is not blowing air despite being plugged in.",
-      "solution": "The switch of the fan is not turned on"
-    }
+  "TASK_DESCRIPTION": "Mark the component that explains why the fan is not blowing air despite being plugged in.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      183,
+      120,
+      215,
+      151
+    ]
+  }
+}

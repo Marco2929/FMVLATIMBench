@@ -1,4 +1,4 @@
 {
-      "TASK_DESCRIPTION": "Mark the region where the newton mouse would move if an event triggered it during the simulation.",
-      "solution": "Nothing there’s no event that triggers the mouse"
-    }
+  "TASK_DESCRIPTION": "Mark the region where the newton mouse would move after starting the simulation.",
+  "solution": null
+}

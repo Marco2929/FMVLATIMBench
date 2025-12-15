@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the region where an action is missing that would trigger the socket lever to activate the machine.",
-      "solution": "Nothing triggers the socket lever"
-    }
+  "TASK_DESCRIPTION": "Mark the full region where a ball may be placed to trigger the outlet to activate the machine.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      252,
+      3,
+      292,
+      181
+    ]
+  }
+}

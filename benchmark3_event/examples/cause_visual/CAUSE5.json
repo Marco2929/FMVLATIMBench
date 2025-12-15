@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Starting on top of the archway, mark the mechanism that caused the blimp to fly diagonally.",
-      "solution": "The ball constantly falls on the spring board and triggers it. As soon the blimp reaches it the spring board triggers a diagonal fly"
-    }
+  "TASK_DESCRIPTION": "Mark the mechanism (multiple objects) that caused the blimp to fly diagonally.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      75,
+      92,
+      125,
+      168
+    ]
+  }
+}

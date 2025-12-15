@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the exact spot on the wooden floor where the bowling ball will come to rest after traveling through the pipes.",
-      "solution": "The bowling ball travels through the pipes and lands on the wooden floor and triggers...."
-    }
+  "TASK_DESCRIPTION": "Mark the exact spot on the wooden floor where the bowling ball will come to rest after traveling through the pipes and activating the teeter-totter.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      342,
+      295,
+      360,
+      310
+    ]
+  }
+}

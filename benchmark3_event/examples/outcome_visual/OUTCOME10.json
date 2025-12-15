@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the area where the ball is currently resting on the platform throughout the simulation.",
-      "solution": "The ball won't move and stay on the platfrom"
-    }
+  "TASK_DESCRIPTION": "Mark the area where the ball ends up after the simulation.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      140,
+      119,
+      172,
+      151
+    ]
+  }
+}

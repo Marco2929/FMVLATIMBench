@@ -1,4 +1,12 @@
 {
-      "TASK_DESCRIPTION": "Mark the component that is powering or triggering the laser.",
-      "solution": "The description is wrong, the laser is on and was triggered by the solar panel"
-    }
+  "TASK_DESCRIPTION": "Mark the component that leads to a chain reaction triggering the laser.",
+  "solution": {
+    "label": "",
+    "bbox": [
+      102,
+      188,
+      134,
+      220
+    ]
+  }
+}
