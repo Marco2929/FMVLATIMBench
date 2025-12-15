@@ -1,6 +1,6 @@
 GAME_INSTRUCTIONS = (
     "PLACING PARTS ON THE PLAYFIELD \n"
-    "Click on any part in the Parts Bin and move it onto the playfield. Click AGAIN to set the part down! If a red 'X' appears over the part, you have set it too close to another part."
+    "Click on any part in the Parts Bin and move it onto the playfield. Click AGAIN to place the part! If a red 'X' appears over the part, the parts overlap and you have set it too close to another part."
     "\n\nPARTS BIN\n"
     "Radio - Shows or hides the Control Panel on the left.\n"
     "Green Flag - Run the puzzle.\n"

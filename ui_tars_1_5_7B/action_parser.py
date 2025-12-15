@@ -440,9 +440,10 @@ def parsing_response_to_pyautogui_code(responses,
                 ey = round(float((y1 + y2) / 2) * image_height, 3)
                 ey = round(ey + (ey * y_offset_factor), 3)  # Apply y-axis offset correction
                 pyautogui_code += (
-                    f"\npyautogui.moveTo({sx}, {sy})\n"
-                    f"\npyautogui.dragTo({ex}, {ey}, duration=1.0, button='left')\n")
-                    #f"\npyautogui.click({ex}, {ey}, button='left')\n")
+                    f"\npyautogui.moveTo({sx}, {sy}, duration=0.5)\n"
+                    f"\npyautogui.click({sx}, {sy}, button='left')\n"
+                    f"\npyautogui.moveTo({ex}, {ey}, duration=0.5)\n"
+                    f"\npyautogui.click({ex}, {ey}, button='left')\n")
 
         elif action_type == "scroll":
             # Parsing scroll action
@@ -499,12 +500,12 @@ def parsing_response_to_pyautogui_code(responses,
                     pyautogui_code += f"\npyautogui.moveTo({x}, {y})"
 
         elif action_type in ["finished"]:
-            pyautogui_code = f"DONE"
+            return f"DONE"
 
         else:
             pyautogui_code += f"\n# Unrecognized action type: {action_type}"
 
-    return pyautogui_code
+    return "pyautogui.PAUSE = 0.5\n" + pyautogui_code
 
 
 def parsing_response_to_pydirectinput_code(responses,
@@ -731,7 +732,7 @@ def parsing_response_to_pydirectinput_code(responses,
                     pydirectinput_code += f"\npydirectinput.moveTo({x}, {y})"
 
         elif action_type in ["finished"]:
-            pydirectinput_code = f"DONE"
+            return f"DONE"
 
         else:
             pydirectinput_code += f"\n# Unrecognized action type: {action_type}"

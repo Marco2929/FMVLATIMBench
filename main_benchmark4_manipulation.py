@@ -27,7 +27,7 @@ except Exception:
     _have_pyautogui = False
 
 try:
-    from PIL import ImageGrab
+    from PIL import ImageGrab, ImageDraw
     _have_imagegrab = True
 except Exception:
     _have_imagegrab = False
@@ -794,7 +794,7 @@ if __name__ == "__main__":
         
         with open(error_log_path, "w", encoding="utf-8") as error_file:
             error_file.write(error_message)
-        
+
         print(f"\n{'='*60}")
         print("ERROR OCCURRED")
         print(f"{'='*60}")
