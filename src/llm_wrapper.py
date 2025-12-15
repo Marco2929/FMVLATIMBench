@@ -106,7 +106,7 @@ class LLMWrapperBase:
         ]
         if logging:
             print("Sending request to model...")
-        response = self.client.chat.completions.create(model=self.model_name, messages=messages, temperature=0.1, timeout=30, max_tokens=10000)
+        response = self.client.chat.completions.create(model=self.model_name, messages=messages, temperature=0.1, timeout=15, max_tokens=1024)
         part_name = response.choices[0].message.content
         if logging:
             pprint(response.model_dump())
@@ -170,11 +170,11 @@ class Qwen3VLLLMWrapper(LLMWrapperBase):
             
             for bbox_data in bbox_list:
                 if not isinstance(bbox_data, dict):
-                    print("Invalid bounding box entry, skipping.")
+                    print("Invalid bounding box entry, skipping.", bbox_data)
                     continue
                 bbox = bbox_data.get("bbox")
                 if not isinstance(bbox, list) or len(bbox) != 4:
-                    print("Invalid bounding box format, skipping.")
+                    print("Invalid bounding box format, skipping.", bbox)
                     continue
                 
                 label = bbox_data.get("label")
