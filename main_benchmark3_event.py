@@ -6,7 +6,7 @@ from deepeval.test_case import LLMTestCase
 from deepeval.metrics import ContextualPrecisionMetric
 from deepeval.models.base_model import DeepEvalBaseLLM
 
-from deepeval_openrouter_utils import OpenRouterLLM
+from llm_evaluator import llm_evaluate
 from benchmark3_event.system_prompts.qwen3vl_outcome_text import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_OUTCOME_TEXT
 from benchmark3_event.system_prompts.qwen3vl_cause_text import \
@@ -95,11 +95,6 @@ if __name__ == "__main__":
     model_name = benchmark.get_model_name()
     system_prompt = benchmark.get_system_prompt()
 
-    openrouter_llm = OpenRouterLLM(
-        model_name=model_name,
-        api_key=cli.API_KEY,
-    )
-
     model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
 
     for i, file_path in enumerate(benchmark_files):
@@ -110,8 +105,9 @@ if __name__ == "__main__":
 
         # response = generate_model_response(input_png, model_name="qwen/qwen3-vl-30b-a3b-instruct") or ""
         response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=user_prompt)
-        score = evaluate_response_deep_eval(openrouter_llm=openrouter_llm, input=system_prompt, expected_output=ground_truth,
-                                            actual_output=response, retrieval_context=[user_prompt])
+
+        score = llm_evaluate(input=user_prompt, actual_output=response, expected_output=ground_truth, context=system_prompt)
+
         print(f"{i+1} Task: {user_prompt}")
         print(f"Ground Truth: {ground_truth}")
         print(f"Parsed Response: {response}")
