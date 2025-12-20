@@ -203,6 +203,13 @@ def evaluate_response_bboxes_distance(ground_truth: list[BoundingBox], response:
     average_distance = total_distance / matched
     return average_distance
 
+def evaluate_response_bbox_distance(ground_truth: BoundingBox, response: BoundingBox):
+    # calc distance for bbox centers
+    if not ground_truth or not response:
+        return None
+    distance = ground_truth.center().euclidian_distance_to(response.center())
+    return distance
+
 if __name__ == "__main__":
     cli = BenchmarkCli(name="benchmark1_grounding", benchmark_types=list(GroundingBenchmarkType))
     benchmark = GroundingBenchmarkType(cli.benchmark)
@@ -254,16 +261,18 @@ if __name__ == "__main__":
                 additional_user_prompt = f"Locate the {ground_truth_bbox.label}"
                 model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
                 response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
-                parsed_response = model.parse_response_bbox(response, image_width=image_width, image_height=image_height)
-                score = 0 if parsed_response is None else evaluate_response_bbox(ground_truth_bbox, parsed_response)
+
+                parsed_response = model.parse_response_bbox(response, image_height=image_height, image_width=image_width)
+                iou = 0 if parsed_response is None else evaluate_response_bbox(ground_truth_bbox, parsed_response)
+                distance = 0 if parsed_response is None else evaluate_response_bbox_distance(ground_truth_bbox, parsed_response)
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
                     model=model_name,
-                    final_score=score,
-                    iou=score,
+                    final_score=-1,
+                    iou=iou,
                     classification_correct=None,
-                    distance=None,
+                    distance=distance,
                     score_formula="IoU",
                     input_file=str(file_path),
                     ground_truth=ground_truth_bbox,
@@ -304,7 +313,6 @@ if __name__ == "__main__":
                     parsed_response = model.parse_response_bboxes(response, image_height=image_height, image_width=image_width)
                     iou = evaluate_response_bboxes(combo_ground_truth, parsed_response)
                     distance = evaluate_response_bboxes_distance(combo_ground_truth, parsed_response)
-                    score = iou  # Using average IoU as the score
 
                     result = SingleTaskResult(
                         benchmark_type=benchmark.value,
@@ -319,7 +327,8 @@ if __name__ == "__main__":
                         user_prompt=additional_user_prompt,
                         response=parsed_response
                     )
-                    cli.results.append(result)
+                    if cli.save:
+                        cli.save_result(result)
                 
                 # Skip the default result append at the end for this case
                 continue
@@ -333,15 +342,18 @@ if __name__ == "__main__":
                 response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
                 parsed_response_tuple = model.parse_response_point(response)
                 parsed_response = Point(x=parsed_response_tuple[0], y=parsed_response_tuple[1])
-                score = ground_truth_bbox.center().euclidian_distance_to(parsed_response)
+                if parsed_response.x < 0 or parsed_response.y < 0:
+                    distance = None
+                else:
+                    distance = ground_truth_bbox.center().euclidian_distance_to(parsed_response)
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
                     model=model_name,
-                    final_score=score,
+                    final_score=distance if distance is not None else -1,
                     iou=None,
                     classification_correct=None,
-                    distance=score,
+                    distance=distance,
                     score_formula="euclidean distance",
                     input_file=str(file_path),
                     ground_truth=ground_truth_bbox,
@@ -352,7 +364,5 @@ if __name__ == "__main__":
             case _:
                 raise ValueError(f"Benchmark type not implemented: {benchmark}")
 
-        cli.results.append(result)
-
-    if cli.save:
-        cli.save_results()
+        if cli.save:
+            cli.save_result(result)

@@ -43,7 +43,7 @@ class BenchmarkCli:
         self.parser.add_argument(
             "--model",
             type=str,
-            choices=['qwen/qwen3-vl-235b-a22b-instruct'],
+            choices=['qwen/qwen3-vl-235b-a22b-instruct', 'qwen/qwen3-vl-8b-instruct'],
             required=False,
             help="Optional model name override.",
         )
@@ -60,25 +60,40 @@ class BenchmarkCli:
         if args.model:
             print(f"Overriding model name to: {args.model}")
             match args.model:
-                case 'qwen/qwen3-vl-235b-a22b-instruct':
+                case 'qwen/qwen3-vl-235b-a22b-instruct' | 'qwen/qwen3-vl-8b-instruct':
                     self.model = Qwen3VLLLMWrapper(api_key=self.API_KEY, base_url=self.BASE_URL, model_name=args.model)
                 case _:
                     raise ValueError(f"Model not implemented: {args.model}")
 
+        if self.save:
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            output_path = Path(f"{self.name}_results_{timestamp}.csv")
+            results_dir = Path(f'{self.name}/results/{self.benchmark}')
+            if args.model:
+                results_dir = results_dir / args.model.split('/')[-1]
+            results_dir.mkdir(parents=True, exist_ok=True)
+            self.output_path = results_dir / output_path
+
+    def save_result(self, result: SingleTaskResult):
+        self.results.append(result)
+        if not self.save:
+            return
+        file_exists = self.output_path.exists()
+        with open(self.output_path, "a", newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=SingleTaskResult.get_fieldnames())
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(result.to_dict())
+
     def save_results(self):
         if not self.save or not self.results:
             return
-        timestamp = time.strftime("%Y%m%d_%H%M%S")
-        output_path = Path(f"{self.name}_results_{timestamp}.csv")
-        results_dir = Path(f'{self.name}/results/{self.benchmark}')
-        results_dir.mkdir(parents=True, exist_ok=True)
-        output_path = results_dir / output_path
-        with open(output_path, "w", newline='') as f:
+        with open(self.output_path, "w", newline='') as f:
             writer = csv.DictWriter(f, fieldnames=SingleTaskResult.get_fieldnames())
             writer.writeheader()
             for result in self.results:
                 writer.writerow(result.to_dict())
-        print(f"\nAll results saved to {output_path}")
+        print(f"\nAll results saved to {self.output_path}")
 
 def get_api_key() -> str:
     API_KEY = os.getenv("OPENROUTER_API_KEY")
