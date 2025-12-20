@@ -240,3 +240,6 @@ debug
 .vscode
 .deepeval
 results
+!benchmark1*/results
+!benchmark2*/results
+!benchmark3*/results

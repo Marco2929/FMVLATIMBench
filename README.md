@@ -20,6 +20,11 @@ Add `--model qwen3/...` to change the model. Additional models are likely not to
 
 ## Benchmark 1: Grounding
 
+Model provider:
+- qwen/qwen3-vl-235b-a22b-instruct: Parasail (fp8) and DeepInfra (fp8)
+- qwen/qwen3-vl-8b-instruct: Parasail (bf16) and DeepInfra (fp8)
+- bytedance/ui-tars-1.5-7b: Parasil (bf16)
+
 `python main_benchmark1_grounding.py --benchmark qwen3_classify`
 
 `python main_benchmark1_grounding.py --benchmark qwen3_localize`
