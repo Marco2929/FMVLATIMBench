@@ -70,8 +70,8 @@ class BenchmarkCli:
             return
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         output_path = Path(f"{self.name}_results_{timestamp}.csv")
-        results_dir = Path('results')
-        results_dir.mkdir(exist_ok=True)
+        results_dir = Path(f'{self.name}/results/{self.benchmark}')
+        results_dir.mkdir(parents=True, exist_ok=True)
         output_path = results_dir / output_path
         with open(output_path, "w", newline='') as f:
             writer = csv.DictWriter(f, fieldnames=SingleTaskResult.get_fieldnames())
