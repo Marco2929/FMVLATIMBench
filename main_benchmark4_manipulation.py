@@ -1,6 +1,7 @@
 import base64
 import json
 from pathlib import Path
+import re
 from openai import OpenAI
 import argparse
 from typing import List
@@ -39,6 +40,8 @@ except Exception:
     pynput_keyboard = None
     _have_pynput = False
 
+from src.bechmark_base import get_base_url
+from src.llm_wrapper import Qwen3VLLLMWrapper
 from ui_tars_1_5_7B.action_parser import parse_action_to_structure_output, parsing_response_to_pyautogui_code, parsing_response_to_pydirectinput_code
 from utils import get_api_key, encode_image, DistanceTracker, VisualLocator, calculate_iou
 
@@ -46,7 +49,7 @@ from utils import get_api_key, encode_image, DistanceTracker, VisualLocator, cal
 # Configuration constants
 MAX_MESSAGE_SIZE = 10  # maximum number of messages to keep in history (including user and assistant messages)
 HOTKEY = "<ctrl>+<shift>+s"  # Cross-platform hotkey (Ctrl+Shift+S)
-MY_RESOLUTION = (1920, 1200)
+MY_RESOLUTION = (1728, 1117)
 DEVICE_PIXEL_RATIO = 2.0  # Device pixel ratio (1.0 for standard displays, 2.0 for Retina/HiDPI)
 MAX_ACTIONS = 5
 
@@ -530,18 +533,13 @@ if __name__ == "__main__":
         # Parse ground truth data
         ground_truth_data = parse_ground_truth(input_json)
         print(f"Ground truth loaded: {len(ground_truth_data['targets'])} targets, {len(ground_truth_data['templates'])} templates")
-        
-        API_KEY = get_api_key()
-        
-        client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=API_KEY
-        )
 
         message = get_initial_message(
             SYSTEM_PROMPT=SYSTEM_PROMPT,
             instruct_prompt=instruct_prompt
         )
+
+        model = Qwen3VLLLMWrapper(get_api_key(), get_base_url(), "qwen/qwen3-vl-235b-a22b-instruct")
 
         iter_idx = 0
         action_history = []  # Track all actions for path overlay
@@ -592,24 +590,9 @@ if __name__ == "__main__":
             
             # Note: Ctrl+C handling removed as pynput doesn't support is_pressed()
             # User can use Ctrl+C in terminal to interrupt the script
-            
-            chat_completion = client.chat.completions.create(
-                model="bytedance/ui-tars-1.5-7b",
-                messages=message,
-                top_p=None,
-                temperature=0.0,
-                max_tokens=400,
-                stream=True,
-                seed=None,
-                stop=None,
-                frequency_penalty=None,
-                presence_penalty=None
-            )
-            
-            response = ""
-            for msg in chat_completion:
-                response += msg.choices[0].delta.content if msg.choices[0].delta.content else ""
-            
+
+            response = model.generate_model_response(full_messages=message, logging=True) or ""
+
             parsed_dict = parse_model_response(response)
             action_type = parsed_dict[0].get("action_type", "N/A")
             

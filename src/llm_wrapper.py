@@ -82,28 +82,33 @@ class LLMWrapperBase:
     def parse_response_point(self, response: str) -> tuple[int, int]:
         raise NotImplementedError("This method should be implemented by subclasses.")
 
-    def generate_model_response(self, image_path:Path, system_prompt:str, additional_user_prompt="", logging=False):
-        encoded_image = self.encode_image(image_path)
-        data_url = f"data:image/webp;base64,{encoded_image}"
-        user_prompt = []
-        if additional_user_prompt:
-            user_prompt.append({"type": "text", "text": additional_user_prompt})
-        user_prompt.append({
-            "type": "image_url",
-            "image_url": {
-                "url": data_url
-            }
-        })
-        messages = [
-            {
-                "role": "system",
-                "content": system_prompt,
-            },
-            {
-                "role": "user",
-                "content": user_prompt
-            }
-        ]
+    def generate_model_response(self, image_path:Path|None=None, system_prompt:str|None=None, additional_user_prompt="", logging=False, full_messages:list|None=None):
+        assert full_messages is not None or (image_path is not None and system_prompt is not None), "Either provide full_messages or image_path and system_prompt."
+
+        if full_messages is not None:
+                messages = full_messages
+        else:
+            encoded_image = self.encode_image(image_path)
+            data_url = f"data:image/webp;base64,{encoded_image}"
+            user_prompt = []
+            if additional_user_prompt:
+                user_prompt.append({"type": "text", "text": additional_user_prompt})
+            user_prompt.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": data_url
+                }
+            })
+            messages = [
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+            ]
         if logging:
             print("Sending request to model...")
         response = self.client.chat.completions.create(model=self.model_name, messages=messages, temperature=0.1, timeout=15, max_tokens=1024)
