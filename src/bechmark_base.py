@@ -5,8 +5,9 @@ from enum import Enum
 import os
 from pathlib import Path
 import time
+from typing import Dict, Optional
 
-from src.llm_wrapper import LLMWrapperBase, Qwen3VLLLMWrapper
+from src.llm_wrapper import LLMWrapperBase, Qwen3VLLLMWrapper, OpenAILLMWrapper, GeminiLLMWrapper
 from src.results_model import SingleTaskResult
 
 class BenchmarkBase(Enum):
@@ -22,6 +23,7 @@ class BenchmarkBase(Enum):
     def get_relevant_files(self) -> list[Path]:
         raise NotImplementedError("This method should be implemented by subclasses.")
 
+
 class BenchmarkCli:
     benchmark: str
     save: bool
@@ -30,6 +32,12 @@ class BenchmarkCli:
 
     def __init__(self, name: str, benchmark_types: list[BenchmarkBase]):
         assert ' ' not in name, "name should not contain spaces"
+        self.openrouter_model_list = ['qwen/qwen3-vl-235b-a22b-instruct',
+                      'qwen/qwen3-vl-8b-instruct',
+                      'bytedance/ui-tars-1.5-7b',
+                      'qwen/qwen-2.5-vl-7b-instruct']
+        self.openai_model_list = ['gpt-5-mini']
+        self.gemini_model_list = ['gemini-2.5-flash']
         self.name = name
         self.parser = argparse.ArgumentParser(description=name)
         self.parser.add_argument("--nosave", action="store_true", help="Flag to not save the results in results/*.csv at the end.")
@@ -43,7 +51,7 @@ class BenchmarkCli:
         self.parser.add_argument(
             "--model",
             type=str,
-            choices=['qwen/qwen3-vl-235b-a22b-instruct', 'qwen/qwen3-vl-8b-instruct'],
+            choices=self.openrouter_model_list + self.gemini_model_list + self.openai_model_list,
             required=False,
             help="Optional model name override.",
         )
@@ -54,16 +62,36 @@ class BenchmarkCli:
         self.save = not args.nosave
         assert isinstance(self.save, bool)
 
-        self.API_KEY = get_api_key()
-        self.BASE_URL = get_base_url()
+        self.model_name = args.model
 
         if args.model:
             print(f"Overriding model name to: {args.model}")
-            match args.model:
-                case 'qwen/qwen3-vl-235b-a22b-instruct' | 'qwen/qwen3-vl-8b-instruct':
-                    self.model = Qwen3VLLLMWrapper(api_key=self.API_KEY, base_url=self.BASE_URL, model_name=args.model)
-                case _:
-                    raise ValueError(f"Model not implemented: {args.model}")
+
+            if args.model in self.openrouter_model_list:
+                self.API_KEY = get_api_keys('OPENROUTER_API_KEY')
+                self.BASE_URL = get_base_url('BASE_URL')
+                self.model = Qwen3VLLLMWrapper(
+                    api_key=self.API_KEY,
+                    base_url=self.BASE_URL,
+                    model_name=args.model
+                )
+            elif args.model in self.openai_model_list:
+                self.API_KEY = get_api_keys('OPENAI_API_KEY')
+                self.model = OpenAILLMWrapper(
+                    api_key=self.API_KEY,
+                    base_url=None,
+                    model_name=args.model
+                )
+            elif args.model in self.openai_model_list:
+                self.API_KEY = get_api_keys('GEMINI_API_KEY')
+                self.BASE_URL = get_base_url('BASE_URL_GEMINI')
+                self.model = GeminiLLMWrapper(
+                    api_key=self.API_KEY,
+                    base_url=self.BASE_URL,
+                    model_name=args.model
+                )
+            else:
+                raise ValueError(f"Model not implemented: {args.model}")
 
         if self.save:
             timestamp = time.strftime("%Y%m%d_%H%M%S")
@@ -95,8 +123,9 @@ class BenchmarkCli:
                 writer.writerow(result.to_dict())
         print(f"\nAll results saved to {self.output_path}")
 
-def get_api_key() -> str:
-    API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+def get_api_keys(key_adress) -> str:
+    API_KEY = os.getenv(key_adress)
     if API_KEY:
         return API_KEY
     else:
@@ -105,15 +134,15 @@ def get_api_key() -> str:
                 for line in f:
                     key, value = line.strip().split('=', 1)
                     os.environ[key] = value
-            API_KEY = os.getenv("OPENROUTER_API_KEY")
+            API_KEY = os.getenv(key_adress)
             if API_KEY is None:
-                raise ValueError("Please set the OPENROUTER_API_KEY environment variable (e.g. in .env)")
+                raise ValueError(f"Please set the {key_adress} environment variable (e.g. in .env)")
         except FileNotFoundError:
-            raise ValueError("Please set the OPENROUTER_API_KEY environment variable (e.g. in .env)")
+            raise ValueError(f"Please set the {key_adress} environment variable (e.g. in .env)")
     return API_KEY
 
-def get_base_url() -> str:
-    BASE_URL = os.getenv("BASE_URL")
+def get_base_url(base_url) -> str:
+    BASE_URL = os.getenv(base_url)
     if BASE_URL:
         return BASE_URL
     else:
@@ -122,9 +151,9 @@ def get_base_url() -> str:
                 for line in f:
                     key, value = line.strip().split('=', 1)
                     os.environ[key] = value
-            BASE_URL = os.getenv("BASE_URL")
+            BASE_URL = os.getenv(base_url)
             if BASE_URL is None:
-                raise ValueError("Please set the OPENROUTER_BASE_URL environment variable (e.g. in .env)")
+                raise ValueError(f"Please set the {base_url} environment variable (e.g. in .env)")
         except FileNotFoundError:
-            raise ValueError("Please set the OPENROUTER_BASE_URL environment variable (e.g. in .env)")
+            raise ValueError(f"Please set the {base_url} environment variable (e.g. in .env)")
     return BASE_URL

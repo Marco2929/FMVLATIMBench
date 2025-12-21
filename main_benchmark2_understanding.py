@@ -20,9 +20,7 @@ class UnderstandingBenchmarkType(BenchmarkBase):
 
     @override
     def get_model_name(self) -> str:
-        match self:
-            case _:
-                return "qwen/qwen3-vl-235b-a22b-instruct"
+        pass
 
     @override
     def get_system_prompt(self) -> str:
@@ -62,10 +60,9 @@ if __name__ == "__main__":
     benchmark = UnderstandingBenchmarkType(cli.benchmark)
     benchmark_files = benchmark.get_relevant_files()
 
-    model_name = benchmark.get_model_name()
     system_prompt = benchmark.get_system_prompt()
 
-    model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+    model = cli.model
 
     for i, file_path in enumerate(benchmark_files):
         input_png = file_path.with_suffix(".png").resolve()
@@ -83,7 +80,7 @@ if __name__ == "__main__":
 
         result = SingleTaskResult(
             benchmark_type=benchmark.value,
-            model=benchmark.get_model_name(),
+            model=cli.model_name,
             final_score=score,
             iou=None,
             classification_correct=score,

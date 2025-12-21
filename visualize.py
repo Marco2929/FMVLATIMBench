@@ -3,16 +3,29 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 import argparse
+import sys
 
 
-def benchmark_textual(folder: str = "results/", benchmarks: list[str] = None):
+def benchmark_textual(category: str, folder: str = "results/"):
     """
-    Visualize benchmark results from CSV files in a folder.
+    Visualize benchmark results for a specific category.
+    Automatically plots all models found in the CSV files separately.
 
     Args:
+        category (str): The benchmark category (e.g., 'understanding', 'event').
         folder (str): Path to folder containing CSV files.
-        benchmarks (list[str], optional): List of benchmark types to include. Defaults to None (all).
     """
+    # 1. Define Mappings
+    benchmark_map = {
+        "understanding": ["with_instruct", "without_instruct", "state_ident"],
+        "event": ["outcome_text", "cause_text", "effect_text"],
+    }
+
+    if category not in benchmark_map:
+        print(f"Error: Category '{category}' not found. Available: {list(benchmark_map.keys())}")
+        sys.exit(1)
+
+    # 2. Load Data
     folder_path = Path(folder)
     csv_files = list(folder_path.glob("*.csv"))
 
@@ -20,88 +33,74 @@ def benchmark_textual(folder: str = "results/", benchmarks: list[str] = None):
         print(f"No CSV files found in folder: {folder}")
         return
 
-    # Load and concatenate all CSV files
+    # Load and concatenate all CSVs
     data_list = [pd.read_csv(f, parse_dates=["timestamp"]) for f in csv_files]
     data = pd.concat(data_list, ignore_index=True)
 
-    # Convert boolean columns to numeric
-    data["final_score_numeric"] = data["final_score"].astype(int)
+    # 3. Validation
+    # Ensure 'model' column exists to distinguish the files/models
+    if "model" not in data.columns:
+        print("Error: The column 'model' is missing from the CSV files.")
+        print("Cannot map results to specific models without this column.")
+        return
+
     data["classification_correct_numeric"] = data["classification_correct"].astype(int)
 
-    # Map benchmark types
-    benchmark_map = {
-        "understanding": ["with_instruct", "without_instruct", "state_ident"],
-        "event": ["outcome_text", "cause_text", "effect_text"],
-        # add more mappings if needed
-    }
+    # 4. Filter by Category
+    target_types = benchmark_map[category]
+    filtered_data = data[data["benchmark_type"].isin(target_types)].copy()
 
-    if benchmarks:
-        mapped_values = []
-        for b in benchmarks:
-            mapped_values.extend(benchmark_map.get(b.lower(), []))
-        data = data[data["benchmark_type"].isin(mapped_values)]
+    if filtered_data.empty:
+        print(f"No data found for category '{category}' (checked types: {target_types}).")
+        return
 
-    reverse_map = {}
-    for category, subtypes in benchmark_map.items():
-        for subtype in subtypes:
-            reverse_map[subtype] = category
-
-    data["benchmark_category"] = data["benchmark_type"].map(reverse_map)
-
-    # 2. Aggregate by BOTH category and specific type
-    agg_data = data.groupby(["benchmark_category", "benchmark_type"])[
+    # 5. Aggregate
+    # Group by BOTH benchmark_type and model.
+    # This separates the scores for every model found in the files.
+    agg_data = filtered_data.groupby(["benchmark_type", "model"])[
         "classification_correct_numeric"].mean().reset_index()
 
-    # 3. Apply custom ordering to the main category
-    benchmark_order = ["understanding", "event", "manipulation", "planning"]
-    agg_data["benchmark_category"] = pd.Categorical(
-        agg_data["benchmark_category"],
-        categories=benchmark_order,
-        ordered=True
-    )
+    # 6. Plot
+    plt.figure(figsize=(10, 6))
+    sns.set_theme(style="whitegrid")
 
-    # Sort to ensure the plots appear in the correct order
-    agg_data = agg_data.sort_values(["benchmark_category", "benchmark_type"])
-
-    # 4. Plot using catplot for hierarchical visualization
-    g = sns.catplot(
+    # hue="model" creates the separate bars for each model automatically
+    ax = sns.barplot(
         data=agg_data,
         x="benchmark_type",
         y="classification_correct_numeric",
-        col="benchmark_category",
-        kind="bar",
-        col_wrap=2,
-        height=4,
-        aspect=1.2,
-        sharex=False,
-        sharey=True
+        hue="model"
     )
 
-    # Adjust titles and labels
-    g.set_titles("{col_name}")
-    g.set_axis_labels("", "Accuracy")
+    # Formatting
+    ax.set_title(f"Benchmark Accuracy: {category.capitalize()}")
+    ax.set_ylabel("Accuracy")
+    ax.set_xlabel("Benchmark Type")
+    ax.set_ylim(0, 1)
 
-    # Fix the Y-axis limit for all subplots
-    g.set(ylim=(0, 1))
+    # Move legend outside to prevent blocking data if there are many models
+    sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
 
     plt.tight_layout()
     plt.show()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Visualize benchmark results.")
+    parser = argparse.ArgumentParser(description="Visualize benchmark results by category.")
+
+    parser.add_argument(
+        "category",
+        type=str,
+        choices=["understanding", "event"],
+        help="The benchmark category to visualize."
+    )
+
     parser.add_argument(
         "--folder",
-
         type=str,
         default="results/",
-        help="Folder containing CSV benchmark results (default: results/)"
+        help="Folder containing CSV benchmark results."
     )
-    parser.add_argument(
-        "--benchmarks",
-        type=str,
-        nargs="+",
-        help="Benchmark types to visualize (space separated, e.g., understanding event manipulation planning)"
-    )
+
     args = parser.parse_args()
-    benchmark_textual(folder=args.folder, benchmarks=args.benchmarks)
+    benchmark_textual(category=args.category, folder=args.folder)
