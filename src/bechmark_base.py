@@ -82,9 +82,9 @@ class BenchmarkCli:
                     base_url=None,
                     model_name=args.model
                 )
-            elif args.model in self.openai_model_list:
+            elif args.model in self.gemini_model_list:
                 self.API_KEY = get_api_keys('GEMINI_API_KEY')
-                self.BASE_URL = get_base_url('BASE_URL_GEMINI')
+                self.BASE_URL = get_base_url('GEMINI_BASE_URL')
                 self.model = GeminiLLMWrapper(
                     api_key=self.API_KEY,
                     base_url=self.BASE_URL,

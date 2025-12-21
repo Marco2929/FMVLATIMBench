@@ -1,0 +1,21 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2025-12-21T14:43:29.018126,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE1.json,YES,NONE,Is the lamp on?
+2025-12-21T14:43:29.724418,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE10.json,YES,NONE,Is the laser connected with a socket?
+2025-12-21T14:43:30.846599,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE11.json,NO,NONE,Is the electic mixer connected with a socket?
+2025-12-21T14:43:41.051382,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE12.json,YES,NONE,Is the electic mixer connected with a socket?
+2025-12-21T14:43:41.914887,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE13.json,YES,NONE,Is the laser activated?
+2025-12-21T14:43:51.231875,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE14.json,NO,NONE,Is the laser activated?
+2025-12-21T14:43:51.933739,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE15.json,YES,NO,Is the ball inside the bucket?
+2025-12-21T14:43:52.638654,state_ident,qwen/qwen-2.5-vl-7b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE16.json,NO,NO,Is the ball inside the bucket?
+2025-12-21T14:43:53.718150,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE17.json,YES,NONE,Is the mouse inside the basket?
+2025-12-21T14:43:55.162303,state_ident,qwen/qwen-2.5-vl-7b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE18.json,NO,NO,Is the mouse inside the basket?
+2025-12-21T14:43:55.888356,state_ident,qwen/qwen-2.5-vl-7b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE19.json,NONE,NONE,Is the lamp on?
+2025-12-21T14:43:56.671814,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE2.json,NO,NONE,Is the lamp on?
+2025-12-21T14:43:57.356183,state_ident,qwen/qwen-2.5-vl-7b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE20.json,NONE,NONE,Is the laser activated?
+2025-12-21T14:43:58.082694,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE3.json,YES,NONE,Is the aquarium broken?
+2025-12-21T14:43:58.903768,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE4.json,NO,NONE,Is the aquarium broken?
+2025-12-21T14:44:00.131532,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE5.json,YES,NO,Is the candle burning?
+2025-12-21T14:44:00.823551,state_ident,qwen/qwen-2.5-vl-7b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE6.json,NO,NO,Is the candle burning?
+2025-12-21T14:44:01.575428,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE7.json,YES,NONE,Is something connected to the conveyor belt?
+2025-12-21T14:44:02.291742,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE8.json,NO,NONE,Is something connected to the conveyor belt?
+2025-12-21T14:44:03.008601,state_ident,qwen/qwen-2.5-vl-7b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE9.json,NO,NONE,Is the laser connected with a socket?
