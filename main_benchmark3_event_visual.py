@@ -11,7 +11,7 @@ from benchmark3_event.system_prompts.qwen3vl_cause_visual import \
 from benchmark3_event.system_prompts.qwen3vl_effect_visual import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_VISUAL
 
-from src.bechmark_base import BenchmarkBase, BenchmarkCli
+from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
 from src.llm_wrapper import Qwen3VLLLMWrapper
 from utils import draw_bounding_box, load_json

@@ -65,7 +65,7 @@ class BenchmarkCli:
         self.model_name = args.model
 
         if args.model:
-            print(f"Overriding model name to: {args.model}")
+            print(f"Using model: {args.model}")
 
             if args.model in self.openrouter_model_list:
                 self.API_KEY = get_api_keys('OPENROUTER_API_KEY')

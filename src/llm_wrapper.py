@@ -261,7 +261,7 @@ class OpenAILLMWrapper(LLMWrapperBase):
         ]
         if logging:
             print("Sending request to model...")
-        response = self.client.chat.completions.create(model=self.model_name, messages=messages, timeout=15, max_completion_tokens=1024)
+        response = self.client.chat.completions.create(model=self.model_name, messages=messages, timeout=15)
         part_name = response.choices[0].message.content
         if logging:
             pprint(response.model_dump())

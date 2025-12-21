@@ -8,7 +8,7 @@ from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTE
 from benchmark1_grounding.system_prompts.qwen3vl_object_recognition import SYSTEM_PROMPT as QWEN3_CLASSIFY_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_single_bbox import SYSTEM_PROMPT as QWEN3_LOCALIZE_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_multi_bbox import SYSTEM_PROMPT as QWEN3_MULTILOCALIZE_SYSTEM_PROMPT
-from src.bechmark_base import BenchmarkBase, BenchmarkCli
+from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
 from src.llm_wrapper import BoundingBox, Point, Qwen3VLLLMWrapper, UiTarsLLMWrapper
 from src.results_model import SingleTaskResult

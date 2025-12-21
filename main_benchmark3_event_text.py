@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from typing import List, override
 
@@ -14,7 +15,7 @@ from benchmark3_event.system_prompts.qwen3vl_cause_text import \
 from benchmark3_event.system_prompts.qwen3vl_effect_text import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_TEXT
 
-from src.bechmark_base import BenchmarkBase, BenchmarkCli
+from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.llm_wrapper import Qwen3VLLLMWrapper
 from src.results_model import SingleTaskResult
 from utils import load_json
@@ -27,9 +28,7 @@ class EventBenchmarkType(BenchmarkBase):
     
     @override
     def get_model_name(self) -> str:
-        match self:
-            case _:
-                return "qwen/qwen3-vl-235b-a22b-instruct"
+        pass
             
     @override
     def get_system_prompt(self) -> str:
@@ -65,37 +64,16 @@ class EventBenchmarkType(BenchmarkBase):
             file_paths.extend([p for p in folder.glob("*.json")])
         return sorted(file_paths)
 
-def evaluate_response_deep_eval(openrouter_llm: DeepEvalBaseLLM, input: str, expected_output: str, actual_output: str,
-                                retrieval_context: List[str]):
-    # Initialize Metric with the custom model
-    metric = ContextualPrecisionMetric(
-        threshold=0.9,
-        model=openrouter_llm,
-        include_reason=True,
-        strict_mode = True
-    )
-
-    test_case = LLMTestCase(
-        input=input,
-        actual_output=actual_output,
-        expected_output=expected_output,
-        retrieval_context=retrieval_context
-    )
-
-    results = evaluate(test_cases=[test_case], metrics=[metric])
-
-    return results.test_results[0].success
-
 
 if __name__ == "__main__":
-    cli = BenchmarkCli(name="benchmark3_event_visual", benchmark_types=list(EventBenchmarkType))
+    cli = BenchmarkCli(name="benchmark3_event_text", benchmark_types=list(EventBenchmarkType))
     benchmark = EventBenchmarkType(cli.benchmark)
     benchmark_files = benchmark.get_relevant_files()
 
     model_name = benchmark.get_model_name()
     system_prompt = benchmark.get_system_prompt()
 
-    model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+    model = cli.model
 
     for i, file_path in enumerate(benchmark_files):
         input_png = file_path.with_suffix(".png").resolve()
@@ -115,7 +93,7 @@ if __name__ == "__main__":
 
         result = SingleTaskResult(
             benchmark_type=benchmark.value,
-            model=benchmark.get_model_name(),
+            model=cli.model_name,
             final_score=score,
             iou=None,
             classification_correct=score,
@@ -128,6 +106,6 @@ if __name__ == "__main__":
         )
         
         cli.results.append(result)
-        
+        # time.sleep(30)
     if cli.save:
         cli.save_results()

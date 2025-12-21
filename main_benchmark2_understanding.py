@@ -8,7 +8,7 @@ from benchmark2_understanding.system_prompts.qwen3vl_object_property_ident_witho
     SYSTEM_PROMPT as SYSTEM_PROMPT_WITHOUT
 from benchmark2_understanding.system_prompts.qwen3vl_object_state_ident import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_STATE_IDENT
-from src.bechmark_base import BenchmarkBase, BenchmarkCli
+from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.llm_wrapper import Qwen3VLLLMWrapper
 from src.results_model import SingleTaskResult
 from utils import load_json, parse_response, evaluate_response
