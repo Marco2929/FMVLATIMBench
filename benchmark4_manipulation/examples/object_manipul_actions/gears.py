@@ -1,1 +1,1 @@
-"Cut the rope connection with the left gear and attach it to the right gear."
+"Detach the rope from the left gear and attach it to the right gear. Then, click on the green flag to start the puzzle."

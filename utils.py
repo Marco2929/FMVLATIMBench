@@ -53,8 +53,8 @@ def draw_bounding_box(image_path: Path, bbox: list[int]) -> Path:
     cv2.imwrite(str(output_path), image)
     return output_path
 
-def get_api_key() -> str:
-    API_KEY = os.getenv("OPENROUTER_API_KEY")
+def get_api_key(name) -> str:
+    API_KEY = os.getenv(name)
     if API_KEY:
         return API_KEY
     else:
@@ -63,9 +63,9 @@ def get_api_key() -> str:
                 for line in f:
                     key, value = line.strip().split('=', 1)
                     os.environ[key] = value
-            API_KEY = os.getenv("OPENROUTER_API_KEY")
+            API_KEY = os.getenv(name)
         except FileNotFoundError:
-            raise ValueError("Please set the OPENROUTER_API_KEY environment variable (e.g. in .env)")
+            raise ValueError(f"Please set the {name} environment variable (e.g. in .env)")
     return API_KEY
 
 def calculate_iou(box1, box2):
@@ -99,6 +99,44 @@ def calculate_iou(box1, box2):
     
     iou = intersection_area / union_area
     return iou
+
+
+def calculate_intersection(box1, box2):
+    """
+    Calculate intersection ratio between two bounding boxes.
+    Returns 1.0 if boxes intersect completely (smaller box inside larger box),
+    0.0 if they don't intersect at all.
+    
+    :param box1: Tuple (x1, y1, x2, y2) for first box (ground truth)
+    :param box2: Tuple (x1, y1, x2, y2) for second box (detected)
+    :return: Intersection score (0-1)
+    """
+    # Calculate intersection area
+    x1_inter = max(box1[0], box2[0])
+    y1_inter = max(box1[1], box2[1])
+    x2_inter = min(box1[2], box2[2])
+    y2_inter = min(box1[3], box2[3])
+    
+    # Check if there's an intersection
+    if x2_inter < x1_inter or y2_inter < y1_inter:
+        return 0.0
+    
+    intersection_area = (x2_inter - x1_inter) * (y2_inter - y1_inter)
+    
+    # Calculate areas of both boxes
+    box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
+    box2_area = (box2[2] - box2[0]) * (box2[3] - box2[1])
+    
+    # Use minimum area as denominator (smaller box)
+    min_area = min(box1_area, box2_area)
+    
+    if min_area == 0:
+        return 0.0
+    
+    # Calculate intersection ratio
+    intersection_ratio = intersection_area / min_area
+    return intersection_ratio
+
 
 def load_json(json_path: Path) -> tuple[str, str]:
     with open(json_path, "r") as f:

@@ -1,1 +1,1 @@
-"Rotate and move the cue stick in a position such that the eight ball is hit into the corner pocket."
+"Rotate the cue stick 5 times. Then place it in front of the eight ball. Finally, click on the green flag to start the puzzle."

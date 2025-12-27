@@ -440,9 +440,12 @@ def parsing_response_to_pyautogui_code(responses,
                 ey = round(float((y1 + y2) / 2) * image_height, 3)
                 ey = round(ey + (ey * y_offset_factor), 3)  # Apply y-axis offset correction
                 pyautogui_code += (
-                    f"\npyautogui.moveTo({sx}, {sy})\n"
-                    f"\npyautogui.dragTo({ex}, {ey}, duration=1.0)\n")
-                    #f"\npyautogui.click({ex}, {ey}, button='left')\n")
+                    # f"\npyautogui.moveTo({sx}, {sy})\n"
+                    # f"\npyautogui.dragTo({ex}, {ey}, duration=1.0)\n"
+                    # f"\npyautogui.click({ex}, {ey}, button='left')\n")
+                    f"\npyautogui.click({sx}, {sy}, button='left')\n"
+                    f"\npyautogui.moveTo({ex}, {ey}, duration=1.0)\n"
+                    f"\npyautogui.click({ex}, {ey}, button='left')\n")
 
         elif action_type == "scroll":
             # Parsing scroll action

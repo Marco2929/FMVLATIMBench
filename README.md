@@ -55,6 +55,10 @@ Model provider:
 
 `python main_benchmark3_event_visual.py --benchmark cause_visual`
 
+## Benchmark 4: Manipulation
+
+`python main_benchmark4_manipulation.py --input "benchmark4_manipulation/examples/object_manipul_actions/wall" --category "manipul_actions"`
+
 ## Scratchbook (to be deleted)
 
 - qwen/qwen3-vl-8b-instruct

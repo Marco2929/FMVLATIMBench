@@ -1,1 +1,1 @@
-"Extend the brickwall's size by one unit. Then run the puzzle."
+"Extend the brickwall's size by one unit. Then click on the green flag to run the puzzle."

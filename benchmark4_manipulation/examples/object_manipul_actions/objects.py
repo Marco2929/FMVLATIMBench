@@ -1,1 +1,1 @@
-"Move the boxing gloves to the right side of the tree and rotate the trap door once."
+"Move the boxing gloves to the right side of the tree and flip the trap door. Start by flipping the trap door first."

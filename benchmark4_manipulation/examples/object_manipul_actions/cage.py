@@ -1,1 +1,1 @@
-"Place the basketball over the hedge trimmers, run the puzzle and rescue the mouse from certain death."
+"Place the basketball right over the hedge trimmers' handles. Then, click on the green flag to start the puzzle."

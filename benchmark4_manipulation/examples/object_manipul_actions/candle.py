@@ -1,1 +1,1 @@
-"Light up the candle using the magnifying glass and the flashlight."
+"Place the magnifying glass to the right of the candle. Then rotate the flashlight and place it to the right of the magnifying glass. After that, click on the green flag to start the puzzle."

@@ -1,14 +1,22 @@
 {
-    "targets": {
-        "brickwall": [1600, null]
-    },
-    "templates": {
-        "brickwall": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\brickwall.png"
-    },
-    "threshold": 15,
-    "use_iou": true,
-    "target_boxes": {
-        "brickwall": [950, 0, 1200, 1920]
-    },
-    "iou_threshold": 0.5
+  "targets": {
+    "brickwall": [
+      1600,
+      null
+    ]
+  },
+  "templates": {
+    "brickwall": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\brickwall.png"
+  },
+  "threshold": 300,
+  "use_iou": true,
+  "target_boxes": {
+    "brickwall": [
+      950,
+      0,
+      1920,
+      1200
+    ]
+  },
+  "iou_threshold": 0.5
 }
