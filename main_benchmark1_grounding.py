@@ -266,7 +266,7 @@ if __name__ == "__main__":
                 response = cli.model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
 
                 parsed_response = cli.model.parse_response_bbox(response, image_height=image_height, image_width=image_width)
-                iou = 0 if parsed_response is None else evaluate_response_bbox(ground_truth_bbox, parsed_response)
+                iou = 0 if parsed_response is None else evaluate_response_bbox(ground_truth_bbox, parsed_response, check_label=False)
                 distance = 0 if parsed_response is None else evaluate_response_bbox_distance(ground_truth_bbox, parsed_response)
 
                 result = SingleTaskResult(
@@ -340,29 +340,31 @@ if __name__ == "__main__":
                 assert isinstance(ground_truth, list)
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
-                additional_user_prompt = f"Click the {ground_truth_bbox.label}"
+                additional_user_prompt = f"Select the {ground_truth_bbox.label}"
                 if not cli.model:
                     cli.model = UiTarsLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
                 response = cli.model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
-                parsed_response_tuple = cli.model.parse_response_point(response)
-                parsed_response = Point(x=parsed_response_tuple[0], y=parsed_response_tuple[1])
-                if parsed_response.x < 0 or parsed_response.y < 0:
+                parsed_response_bbox = cli.model.parse_response_bbox(response, image_height=image_height, image_width=image_width)
+                iou = 0
+                if parsed_response_bbox is None:
+                    print("No bbox parsed from response.")
                     distance = None
                 else:
-                    distance = ground_truth_bbox.center().euclidian_distance_to(parsed_response)
+                    iou = evaluate_response_bbox(ground_truth_bbox, parsed_response_bbox, check_label=False)
+                    distance = ground_truth_bbox.center().euclidian_distance_to(parsed_response_bbox.center())
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
                     model=cli.model.model_name,
                     final_score=distance if distance is not None else -1,
-                    iou=None,
+                    iou=iou,
                     classification_correct=None,
                     distance=distance,
-                    score_formula="euclidean distance",
+                    score_formula="IoU and distance",
                     input_file=str(file_path),
                     ground_truth=ground_truth_bbox,
                     user_prompt=additional_user_prompt,
-                    response=parsed_response
+                    response=parsed_response_bbox if parsed_response_bbox is not None else response
                 )
 
             case _:

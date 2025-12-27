@@ -212,6 +212,28 @@ class UiTarsLLMWrapper(LLMWrapperBase):
 
     def encode_image(self, image_path: Path) -> str:
         return super().encode_image(pad_image(image_path, 28))
+
+    @override
+    def parse_response_bbox(self, response: str, image_width: int, image_height: int) -> BoundingBox|None:
+        response_text = response.strip()
+        for line in response_text.splitlines():
+            if line.startswith("Action:"):
+                # regex Action: drag(start_point='(130,150)', end_point='(170,200)')
+                import re
+                match = re.search(r"drag.*\((\d+),(\d+)\).*\((\d+),(\d+)\)", line)
+                if match:
+                    x1 = int(match.group(1))
+                    y1 = int(match.group(2))
+                    x2 = int(match.group(3))
+                    y2 = int(match.group(4))
+                    return BoundingBox(
+                        label="DRAG",
+                        x_min=min(x1, x2),
+                        y_min=min(y1, y2),
+                        x_max=max(x1, x2),
+                        y_max=max(y1, y2)
+                    )
+        return None
     
     @override
     def parse_response_point(self, response: str) -> tuple[int, int]:

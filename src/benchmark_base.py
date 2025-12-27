@@ -7,7 +7,7 @@ from pathlib import Path
 import time
 from typing import Dict, Optional
 
-from src.llm_wrapper import LLMWrapperBase, Qwen3VLLLMWrapper, OpenAILLMWrapper, GeminiLLMWrapper
+from src.llm_wrapper import LLMWrapperBase, Qwen3VLLLMWrapper, OpenAILLMWrapper, GeminiLLMWrapper, UiTarsLLMWrapper
 from src.results_model import SingleTaskResult
 
 class BenchmarkBase(Enum):
@@ -70,11 +70,18 @@ class BenchmarkCli:
             if args.model in self.openrouter_model_list:
                 self.API_KEY = get_api_keys('OPENROUTER_API_KEY')
                 self.BASE_URL = get_base_url('BASE_URL')
-                self.model = Qwen3VLLLMWrapper(
-                    api_key=self.API_KEY,
-                    base_url=self.BASE_URL,
-                    model_name=args.model
-                )
+                if 'ui-tars' in args.model:
+                    self.model = UiTarsLLMWrapper(
+                        api_key=self.API_KEY,
+                        base_url=self.BASE_URL,
+                        model_name=args.model
+                    )
+                else:
+                    self.model = Qwen3VLLLMWrapper(
+                        api_key=self.API_KEY,
+                        base_url=self.BASE_URL,
+                        model_name=args.model
+                    )
             elif args.model in self.openai_model_list:
                 self.API_KEY = get_api_keys('OPENAI_API_KEY')
                 self.model = OpenAILLMWrapper(

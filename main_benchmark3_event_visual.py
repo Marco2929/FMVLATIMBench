@@ -1,8 +1,8 @@
+import json
 from pathlib import Path
 from typing import override
 
 from tqdm import tqdm
-
 
 from benchmark3_event.system_prompts.qwen3vl_outcome_visual import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_OUTCOME_VISUAL
@@ -11,10 +11,17 @@ from benchmark3_event.system_prompts.qwen3vl_cause_visual import \
 from benchmark3_event.system_prompts.qwen3vl_effect_visual import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_VISUAL
 
+from main_benchmark1_grounding import evaluate_response_bbox, evaluate_response_bbox_distance
 from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
-from src.llm_wrapper import Qwen3VLLLMWrapper
-from utils import draw_bounding_box, load_json
+from src.llm_wrapper import BoundingBox, Qwen3VLLLMWrapper
+from src.results_model import SingleTaskResult
+from utils import draw_bounding_box
+
+def load_json_bench3visual(json_path: Path) -> tuple[str, dict]:
+    with open(json_path, "r") as f:
+        data = json.load(f)
+    return data['TASK_DESCRIPTION'], data['solution']
 
 class EventVisualBenchmarkType(BenchmarkBase):
     OUTCOME_VISUAL = 'outcome_visual'
@@ -67,7 +74,8 @@ if __name__ == "__main__":
     benchmark = EventVisualBenchmarkType(cli.benchmark)
     benchmark_files = benchmark.get_relevant_files()
 
-    model_name = benchmark.get_model_name()
+    if cli.model is None:
+        model_name = benchmark.get_model_name()
     system_prompt = benchmark.get_system_prompt()
 
     pbar = tqdm(benchmark_files, desc="Processing files", unit="file")
@@ -76,40 +84,45 @@ if __name__ == "__main__":
         input_png = file_path.with_suffix(".png").resolve()
         input_json = file_path.with_suffix(".json").resolve()
 
-        model = cli.model or Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+        if cli.model is None:
+            cli.model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
 
-        user_prompt, ground_truth = load_json(input_json)
+        user_prompt, ground_truth = load_json_bench3visual(input_json)
+        ground_truth_bbox = None if ground_truth is None else BoundingBox(ground_truth['label'], ground_truth['bbox'][0], ground_truth['bbox'][1], ground_truth['bbox'][2], ground_truth['bbox'][3])
 
         image_width, image_height = get_image_dimensions(input_png)
 
-        response = model.generate_model_response(input_png, system_prompt, user_prompt) or ""
-        response = model.parse_response_bbox(response, image_width, image_height)
-        if response is None:
-            print(f"Could not parse response for file: {file_path}")
-            continue
-        image_with_bbox_path = draw_bounding_box(input_png.with_suffix('.g.png'), response.bbox_list())
-        print(f"Task: {user_prompt}")
-        print(f"Ground Truth: {ground_truth}")
-        print(f"Parsed Response: {response}")
+        response = cli.model.generate_model_response(input_png, system_prompt, user_prompt) or ""
+        response = cli.model.parse_response_bbox(response, image_width, image_height)
+        if response is not None:
+            image_with_bbox_path = draw_bounding_box(input_png, response.bbox_list())
+        iou = 0
+        if response is not None and ground_truth_bbox is not None:
+            iou = evaluate_response_bbox(ground_truth_bbox, response, check_label=False)
+        distance = 0
+        if response is not None and ground_truth_bbox is not None:
+            distance = evaluate_response_bbox_distance(ground_truth_bbox, response)
+        classification_correct = False
+        if response is None and ground_truth_bbox is None:
+            classification_correct = True
+        # print(f"Task: {user_prompt}")
+        # print(f"Ground Truth: {ground_truth_bbox}")
+        # print(f"Parsed Response: {response}")
         # print(f"Evaluation Score: {score}")
 
-        # TODO: calculate IoU etc.
-        
-        # result = SingleTaskResult(
-        #     benchmark_type=benchmark.value,
-        #     model=benchmark.get_model_name(),
-        #     final_score=score,
-        #     iou=None,
-        #     classification_correct=score,
-        #     distance=None,
-        #     score_formula="exact match",
-        #     input_file=str(file_path),
-        #     ground_truth=ground_truth,
-        #     user_prompt=user_prompt,
-        #     response=response,
-        # )
+        result = SingleTaskResult(
+            benchmark_type=benchmark.value,
+            model=cli.model.model_name,
+            final_score=-1,
+            iou=iou,
+            classification_correct=classification_correct,
+            distance=distance,
+            score_formula="iou and distance",
+            input_file=str(file_path),
+            ground_truth=ground_truth_bbox or 'None',
+            user_prompt=user_prompt,
+            response=response or 'None',
+        )
 
-        # cli.results.append(result)
-        
-    if cli.save:
-        cli.save_results()
+        if cli.save:
+            cli.save_result(result)
