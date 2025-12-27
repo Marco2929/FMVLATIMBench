@@ -157,9 +157,9 @@ def parse_bbox(part: dict) -> BoundingBox|None:
 def evaluate_response(ground_truth: str, response: str):
     return ground_truth == response
 
-def evaluate_response_bbox(ground_truth: BoundingBox, response: BoundingBox):
+def evaluate_response_bbox(ground_truth: BoundingBox, response: BoundingBox, check_label=True):
     # calc IoU for bbox and compare labels
-    if ground_truth.label != response.label:
+    if check_label and ground_truth.label != response.label:
         return 0.0
     if not ground_truth or not response:
         return 0.0
@@ -215,7 +215,8 @@ if __name__ == "__main__":
     benchmark = GroundingBenchmarkType(cli.benchmark)
     benchmark_files = benchmark.get_relevant_files()
 
-    model_name = benchmark.get_model_name()
+    if not cli.model:
+        model_name = benchmark.get_model_name()
     system_prompt = benchmark.get_system_prompt()
 
     pbar = tqdm(benchmark_files, desc="Processing files", unit="file")
@@ -235,14 +236,15 @@ if __name__ == "__main__":
         match benchmark:
             case GroundingBenchmarkType.QWEN3_CLASSIFY:
                 assert isinstance(ground_truth, str)
-                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
-                response = model.generate_model_response(input_png, system_prompt=system_prompt) or ""
-                response = model.parse_response_text(response)
+                if not cli.model:
+                    cli.model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+                response = cli.model.generate_model_response(input_png, system_prompt=system_prompt) or ""
+                response = cli.model.parse_response_text(response)
                 score = evaluate_response(ground_truth, response)
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
-                    model=model_name,
+                    model=cli.model.model_name,
                     final_score=score,
                     iou=None,
                     classification_correct=score,
@@ -259,16 +261,17 @@ if __name__ == "__main__":
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
                 additional_user_prompt = f"Locate the {ground_truth_bbox.label}"
-                model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
-                response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
+                if not cli.model:
+                    cli.model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+                response = cli.model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
 
-                parsed_response = model.parse_response_bbox(response, image_height=image_height, image_width=image_width)
+                parsed_response = cli.model.parse_response_bbox(response, image_height=image_height, image_width=image_width)
                 iou = 0 if parsed_response is None else evaluate_response_bbox(ground_truth_bbox, parsed_response)
                 distance = 0 if parsed_response is None else evaluate_response_bbox_distance(ground_truth_bbox, parsed_response)
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
-                    model=model_name,
+                    model=cli.model.model_name,
                     final_score=-1,
                     iou=iou,
                     classification_correct=None,
@@ -307,16 +310,16 @@ if __name__ == "__main__":
                     object_list = ", ".join([gt.label for gt in combo_ground_truth if gt.label is not None])
                     additional_user_prompt = f"Locate the following objects: {object_list}"
                     combo_pbar.set_description(f"{file_path.name} - {len(combo_ground_truth)} obj(s): {object_list[:30]}")
-                    
-                    model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
-                    response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
-                    parsed_response = model.parse_response_bboxes(response, image_height=image_height, image_width=image_width)
+                    if not cli.model:
+                        cli.model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+                    response = cli.model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
+                    parsed_response = cli.model.parse_response_bboxes(response, image_height=image_height, image_width=image_width)
                     iou = evaluate_response_bboxes(combo_ground_truth, parsed_response)
                     distance = evaluate_response_bboxes_distance(combo_ground_truth, parsed_response)
 
                     result = SingleTaskResult(
                         benchmark_type=benchmark.value,
-                        model=model_name,
+                        model=cli.model.model_name,
                         final_score=-1,
                         iou=iou,
                         classification_correct=None,
@@ -338,9 +341,10 @@ if __name__ == "__main__":
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
                 additional_user_prompt = f"Click the {ground_truth_bbox.label}"
-                model = UiTarsLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
-                response = model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
-                parsed_response_tuple = model.parse_response_point(response)
+                if not cli.model:
+                    cli.model = UiTarsLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
+                response = cli.model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
+                parsed_response_tuple = cli.model.parse_response_point(response)
                 parsed_response = Point(x=parsed_response_tuple[0], y=parsed_response_tuple[1])
                 if parsed_response.x < 0 or parsed_response.y < 0:
                     distance = None
@@ -349,7 +353,7 @@ if __name__ == "__main__":
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
-                    model=model_name,
+                    model=cli.model.model_name,
                     final_score=distance if distance is not None else -1,
                     iou=None,
                     classification_correct=None,

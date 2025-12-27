@@ -50,6 +50,9 @@ class BoundingBox:
     def bbox_list(self) -> list[int]:
         return [self.x_min, self.y_min, self.x_max, self.y_max]
 
+    def __str__(self):
+        return f"BoundingBox(label={self.label}, x_min={self.x_min}, y_min={self.y_min}, x_max={self.x_max}, y_max={self.y_max})"
+
 
 class LLMWrapperBase:
     INVALID_BBOX = ('', [])
@@ -106,7 +109,7 @@ class LLMWrapperBase:
         ]
         if logging:
             print("Sending request to model...")
-        response = self.client.chat.completions.create(model=self.model_name, messages=messages, temperature=0.1, timeout=15, max_tokens=1024)
+        response = self.client.chat.completions.create(model=self.model_name, messages=messages, temperature=0.1, timeout=60, max_tokens=4096)
         part_name = response.choices[0].message.content
         if logging:
             pprint(response.model_dump())
@@ -268,7 +271,7 @@ class OpenAILLMWrapper(LLMWrapperBase):
             print(f"Model Response: {part_name}")
         return part_name
 
-class GeminiLLMWrapper(LLMWrapperBase):
+class GeminiLLMWrapper(Qwen3VLLLMWrapper):
     def __init__(self, api_key: str, base_url: str, model_name: str):
         super().__init__(api_key, base_url, model_name)
 
