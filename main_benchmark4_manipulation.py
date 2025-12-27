@@ -18,6 +18,7 @@ from benchmark4_manipulation.system_prompts.ui_tars_1_5_7B_object_placement impo
     SYSTEM_PROMPT as SYSTEM_PROMPT_PLACEMENT
 from benchmark4_manipulation.system_prompts.ui_tars_1_5_7B_object_manipul_cot import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_MANIPUL_COT
+from src.image_processing import get_image_dimensions
 
 allowed_categories = ["manipul_actions", "placement", "manipul_cot"]
 
@@ -176,35 +177,6 @@ def get_initial_message(SYSTEM_PROMPT: str, instruct_prompt: str):
     return message
 
 
-def parse_model_response(response: str):
-    """Parse and normalize model response.
-    
-    Args:
-        response: Raw model response string
-        
-    Returns:
-        Parsed and normalized response
-    """
-    # Get actual screen size
-    if _have_pyautogui:
-        screen_size = pyautogui.size()
-        original_image_width, original_image_height = screen_size.width, screen_size.height
-        print(f"Detected screen size via pyautogui: {original_image_width}x{original_image_height}")
-    else:
-        original_image_width, original_image_height = MY_RESOLUTION
-    
-    print(f"Screen resolution: {original_image_width}x{original_image_height}")
-    
-    parsed_dict = parse_action_to_structure_output(
-        response,
-        factor=1000,
-        origin_resized_height=original_image_height,
-        origin_resized_width=original_image_width,
-        model_type="qwen25vl"
-    )
-    print(f"Parsed action: {parsed_dict}")
-    
-    return parsed_dict
 
 
 def evaluate_response(ground_truth_data: dict, screenshot_path: str = None, screenshot_image: Image.Image = None):
@@ -593,7 +565,16 @@ if __name__ == "__main__":
 
             response = model.generate_model_response(full_messages=message, logging=True) or ""
 
-            parsed_dict = parse_model_response(response)
+            # Get actual screen size
+            if _have_pyautogui:
+                screen_size = pyautogui.size()
+                original_image_width, original_image_height = screen_size.width, screen_size.height
+                print(f"Detected screen size via pyautogui: {original_image_width}x{original_image_height}")
+            else:
+                original_image_width, original_image_height = MY_RESOLUTION
+            print(f"Screen resolution: {original_image_width}x{original_image_height}")
+
+            parsed_dict = model.parse_response_actions(response, image_width=original_image_width, image_height=original_image_height)
             action_type = parsed_dict[0].get("action_type", "N/A")
             
             # Get screen size for code generation

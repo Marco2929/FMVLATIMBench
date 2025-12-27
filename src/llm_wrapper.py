@@ -7,6 +7,8 @@ from typing import override
 
 from openai import OpenAI
 
+from ui_tars_1_5_7B.action_parser import parse_action_to_structure_output
+
 from .image_processing import b64encode_image, convert_to_webp, get_image_dimensions, pad_image
 
 @dataclass
@@ -81,6 +83,10 @@ class LLMWrapperBase:
     @abstractmethod
     def parse_response_point(self, response: str) -> tuple[int, int]:
         raise NotImplementedError("This method should be implemented by subclasses.")
+    
+    @abstractmethod
+    def parse_response_actions(self, response: str, image_width: int, image_height: int) -> list[dict]:
+        raise NotImplementedError("This method should be implemented by subclasses.")
 
     def generate_model_response(self, image_path:Path|None=None, system_prompt:str|None=None, additional_user_prompt="", logging=False, full_messages:list|None=None):
         assert full_messages is not None or (image_path is not None and system_prompt is not None), "Either provide full_messages or image_path and system_prompt."
@@ -88,6 +94,7 @@ class LLMWrapperBase:
         if full_messages is not None:
                 messages = full_messages
         else:
+            assert image_path is not None
             encoded_image = self.encode_image(image_path)
             data_url = f"data:image/webp;base64,{encoded_image}"
             user_prompt = []
@@ -207,6 +214,25 @@ class Qwen3VLLLMWrapper(LLMWrapperBase):
             print("Failed to parse JSON from model response.")
             print("Raw response:", response_text)
             return []
+        
+    def parse_response_actions(self, response: str, image_width: int, image_height: int) -> list[dict]:
+        """Parse and normalize model response.
+        Args:
+            response: Raw model response string
+            image_width: Original image width in pixels
+            image_height: Original image height in pixels
+        Returns:
+            Parsed and normalized response
+        """
+        parsed_dict = parse_action_to_structure_output(
+            response,
+            factor=1000,
+            origin_resized_height=image_height,
+            origin_resized_width=image_width,
+            model_type="qwen3vl"
+        )
+        print(f"Parsed action: {parsed_dict}")
+        return parsed_dict
 
 class UiTarsLLMWrapper(LLMWrapperBase):
     def __init__(self, api_key: str, base_url: str, model_name: str):
@@ -228,3 +254,24 @@ class UiTarsLLMWrapper(LLMWrapperBase):
                     y = int(match.group(2))
                     return (x, y)
         return (-1, -1)
+    
+    @override
+    def parse_response_actions(self, response: str, image_width: int, image_height: int) -> list[dict]:
+        """Parse and normalize model response.
+        Args:
+            response: Raw model response string
+            
+        Returns:
+            Parsed and normalized response
+        """
+        
+        parsed_dict = parse_action_to_structure_output(
+            response,
+            factor=1000,
+            origin_resized_height=image_height,
+            origin_resized_width=image_width,
+            model_type="qwen25vl"
+        )
+        print(f"Parsed action: {parsed_dict}")
+        
+        return parsed_dict
