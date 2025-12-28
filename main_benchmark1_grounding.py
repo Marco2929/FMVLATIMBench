@@ -8,6 +8,9 @@ from benchmark1_grounding.system_prompts.ui_tars_1_5_7B_single_bbox import SYSTE
 from benchmark1_grounding.system_prompts.qwen3vl_object_recognition import SYSTEM_PROMPT as QWEN3_CLASSIFY_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_single_bbox import SYSTEM_PROMPT as QWEN3_LOCALIZE_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen3vl_multi_bbox import SYSTEM_PROMPT as QWEN3_MULTILOCALIZE_SYSTEM_PROMPT
+from benchmark1_grounding.system_prompts.qwen25vl_object_recognition import SYSTEM_PROMPT as QWEN25_CLASSIFY_SYSTEM_PROMPT
+from benchmark1_grounding.system_prompts.qwen25vl_single_bbox import SYSTEM_PROMPT as QWEN25_LOCALIZE_SYSTEM_PROMPT
+from benchmark1_grounding.system_prompts.qwen25vl_multi_bbox import SYSTEM_PROMPT as QWEN25_MULTILOCALIZE_SYSTEM_PROMPT
 from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
 from src.llm_wrapper import BoundingBox, Point, Qwen3VLLLMWrapper, UiTarsLLMWrapper
@@ -19,17 +22,9 @@ class GroundingBenchmarkType(BenchmarkBase):
     QWEN3_LOCALIZE = 'qwen3_localize'
     QWEN3_LOCALIZE_MULTI = 'qwen3_localize_multi'
     UITARS_LOCALIZE = 'uitars_localize'
-
-    @override
-    def get_model_name(self) -> str:
-        match self:
-            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
-                # return "qwen/qwen3-vl-8b-instruct"
-                return "qwen/qwen3-vl-235b-a22b-instruct"
-            case GroundingBenchmarkType.UITARS_LOCALIZE:
-                return "bytedance/ui-tars-1.5-7b"
-            case _:
-                raise ValueError(f"Benchmark type not implemented: {self}")
+    QWEN25_CLASSIFY = 'qwen25_classify'
+    QWEN25_LOCALIZE = 'qwen25_localize'
+    QWEN25_LOCALIZE_MULTI = 'qwen25_localize_multi'
 
     @override
     def get_system_prompt(self) -> str:
@@ -42,6 +37,12 @@ class GroundingBenchmarkType(BenchmarkBase):
                 return QWEN3_MULTILOCALIZE_SYSTEM_PROMPT
             case GroundingBenchmarkType.UITARS_LOCALIZE:
                 return UITARS_LOCALIZE_SYSTEM_PROMPT
+            case GroundingBenchmarkType.QWEN25_CLASSIFY:
+                return QWEN25_CLASSIFY_SYSTEM_PROMPT
+            case GroundingBenchmarkType.QWEN25_LOCALIZE:
+                return QWEN25_LOCALIZE_SYSTEM_PROMPT
+            case GroundingBenchmarkType.QWEN25_LOCALIZE_MULTI:
+                return QWEN25_MULTILOCALIZE_SYSTEM_PROMPT
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
 
@@ -52,11 +53,11 @@ class GroundingBenchmarkType(BenchmarkBase):
         multi_object = base_path / "multi_object"
         
         match self:
-            case GroundingBenchmarkType.QWEN3_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY:
                 folders = [single_object]
-            case GroundingBenchmarkType.QWEN3_LOCALIZE:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.QWEN25_LOCALIZE:
                 folders = [single_object, multi_object]
-            case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI | GroundingBenchmarkType.QWEN25_LOCALIZE_MULTI:
                 folders = [multi_object]
             case GroundingBenchmarkType.UITARS_LOCALIZE:
                 folders = [single_object, multi_object]
@@ -116,10 +117,10 @@ which converts to:
     parts: list[BoundingBox] = []
     for part in data.get("parts", []):
         match benchmark_type:
-            case GroundingBenchmarkType.QWEN3_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY:
                 part_name = parse_classification(part)
                 return part_name if part_name else "NONE"
-            case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.UITARS_LOCALIZE | GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.UITARS_LOCALIZE | GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI | GroundingBenchmarkType.QWEN25_LOCALIZE | GroundingBenchmarkType.QWEN25_LOCALIZE_MULTI:
                 bbox = parse_bbox(part)
                 if bbox:
                     assert 'UNKNOWN' not in bbox.label, "Ground truth contains UNKNOWN label. Model won't be able to predict it."
@@ -215,8 +216,8 @@ if __name__ == "__main__":
     benchmark = GroundingBenchmarkType(cli.benchmark)
     benchmark_files = benchmark.get_relevant_files()
 
-    if not cli.model:
-        model_name = benchmark.get_model_name()
+    assert cli.model is not None, "Set the model via --model argument."
+
     system_prompt = benchmark.get_system_prompt()
 
     pbar = tqdm(benchmark_files, desc="Processing files", unit="file")
@@ -234,10 +235,8 @@ if __name__ == "__main__":
         result: SingleTaskResult
 
         match benchmark:
-            case GroundingBenchmarkType.QWEN3_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY:
                 assert isinstance(ground_truth, str)
-                if not cli.model:
-                    cli.model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
                 response = cli.model.generate_model_response(input_png, system_prompt=system_prompt) or ""
                 response = cli.model.parse_response_text(response)
                 score = evaluate_response(ground_truth, response)
@@ -256,13 +255,11 @@ if __name__ == "__main__":
                     response=response
                 )
 
-            case GroundingBenchmarkType.QWEN3_LOCALIZE:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.QWEN25_LOCALIZE:
                 assert isinstance(ground_truth, list)
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
                 additional_user_prompt = f"Locate the {ground_truth_bbox.label}"
-                if not cli.model:
-                    cli.model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
                 response = cli.model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
 
                 parsed_response = cli.model.parse_response_bbox(response, image_height=image_height, image_width=image_width)
@@ -283,7 +280,7 @@ if __name__ == "__main__":
                     response=parsed_response if parsed_response is not None else response
                 )
 
-            case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI | GroundingBenchmarkType.QWEN25_LOCALIZE_MULTI:
                 assert isinstance(ground_truth, list)
                 ground_truth_bbox = ground_truth
                 assert len(ground_truth_bbox) >= 1
@@ -310,8 +307,6 @@ if __name__ == "__main__":
                     object_list = ", ".join([gt.label for gt in combo_ground_truth if gt.label is not None])
                     additional_user_prompt = f"Locate the following objects: {object_list}"
                     combo_pbar.set_description(f"{file_path.name} - {len(combo_ground_truth)} obj(s): {object_list[:30]}")
-                    if not cli.model:
-                        cli.model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
                     response = cli.model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
                     parsed_response = cli.model.parse_response_bboxes(response, image_height=image_height, image_width=image_width)
                     iou = evaluate_response_bboxes(combo_ground_truth, parsed_response)
@@ -341,8 +336,6 @@ if __name__ == "__main__":
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
                 additional_user_prompt = f"Select the {ground_truth_bbox.label}"
-                if not cli.model:
-                    cli.model = UiTarsLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
                 response = cli.model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
                 parsed_response_bbox = cli.model.parse_response_bbox(response, image_height=image_height, image_width=image_width)
                 iou = 0

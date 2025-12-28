@@ -117,7 +117,7 @@ class LLMWrapperBase:
         return part_name
 
 class Qwen3VLLLMWrapper(LLMWrapperBase):
-    def __init__(self, api_key: str, base_url: str, model_name: str):
+    def __init__(self, api_key: str, base_url: str|None, model_name: str):
         super().__init__(api_key, base_url, model_name)
     
     def encode_image(self, image_path: Path) -> str:
@@ -250,12 +250,9 @@ class UiTarsLLMWrapper(LLMWrapperBase):
         return (-1, -1)
 
 
-class OpenAILLMWrapper(LLMWrapperBase):
+class OpenAILLMWrapper(Qwen3VLLLMWrapper):
     def __init__(self, api_key: str, base_url: None, model_name: str):
         super().__init__(api_key, base_url, model_name)
-
-    def encode_image(self, image_path: Path) -> str:
-        return super().encode_image(pad_image(image_path, 28))
 
     @override
     def parse_response_point(self, response: str) -> tuple[int, int]:
@@ -303,3 +300,99 @@ class GeminiLLMWrapper(Qwen3VLLLMWrapper):
     @override
     def parse_response_point(self, response: str) -> tuple[int, int]:
         pass
+
+
+class Qwen25VLLLMWrapper(LLMWrapperBase):
+    def __init__(self, api_key: str, base_url: str|None, model_name: str):
+        super().__init__(api_key, base_url, model_name)
+    
+    def encode_image(self, image_path: Path) -> str:
+        return super().encode_image(pad_image(image_path, 28))
+
+    @override
+    def generate_model_response(self, image_path:Path, system_prompt:str, additional_user_prompt="", logging=False):
+        # time.sleep(3) # rate limit: 60 per minute
+        return super().generate_model_response(image_path, system_prompt, additional_user_prompt, logging)
+    
+    @override
+    def parse_response_bbox(self, response: str, image_width: int, image_height: int) -> BoundingBox|None:
+        '''Uses absolute coordinates in pixels
+        '''
+        response_text = response.strip().replace('```json', '').replace('```', '')
+        try:
+            bbox_data = json.loads(response_text)
+            if not isinstance(bbox_data, dict):
+                print("Response JSON is not an object.")
+                print("Raw response:", response_text)
+                return None
+            bbox = bbox_data.get("bbox")
+            if not isinstance(bbox, list) or len(bbox) != 4:
+                return None
+            
+            label = bbox_data.get("label")
+            if not isinstance(label, str) or not label:
+                print("No label given.")
+                return None
+            
+            x_min, y_min, x_max, y_max = bbox
+            x_min_px = x_min
+            y_min_px = y_min
+            x_max_px = x_max
+            y_max_px = y_max
+
+            bounding_box = BoundingBox(
+                label=label.upper(),
+                x_min=x_min_px,
+                y_min=y_min_px,
+                x_max=x_max_px,
+                y_max=y_max_px
+            )
+            
+            return bounding_box
+        except json.JSONDecodeError:
+            print("Failed to parse JSON from model response.")
+            print("Raw response:", response_text)
+            return None
+        
+    @override
+    def parse_response_bboxes(self, response: str, image_width: int, image_height: int) -> list[BoundingBox]:
+        response_text = response.strip().replace('```json', '').replace('```', '')
+        results = []
+        try:
+            bbox_list = json.loads(response_text)
+            if not isinstance(bbox_list, list):
+                raise ValueError("Invalid bounding boxes format.")
+            
+            for bbox_data in bbox_list:
+                if not isinstance(bbox_data, dict):
+                    print("Invalid bounding box entry, skipping.", bbox_data)
+                    continue
+                bbox = bbox_data.get("bbox")
+                if not isinstance(bbox, list) or len(bbox) != 4:
+                    print("Invalid bounding box format, skipping.", bbox)
+                    continue
+                
+                label = bbox_data.get("label")
+                if not isinstance(label, str) or not label:
+                    print("No label given, skipping.")
+                    continue
+                
+                x_min, y_min, x_max, y_max = bbox
+                x_min_px = x_min
+                y_min_px = y_min
+                x_max_px = x_max
+                y_max_px = y_max
+                
+                results.append(BoundingBox(
+                    label=label.upper(),
+                    x_min=x_min_px,
+                    y_min=y_min_px,
+                    x_max=x_max_px,
+                    y_max=y_max_px
+                ))
+            return results
+        
+        except json.JSONDecodeError:
+            print("Failed to parse JSON from model response.")
+            print("Raw response:", response_text)
+            return []
