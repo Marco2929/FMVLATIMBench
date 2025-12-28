@@ -21,6 +21,7 @@ class GroundingBenchmarkType(BenchmarkBase):
     QWEN3_CLASSIFY = 'qwen3_classify'
     QWEN3_LOCALIZE = 'qwen3_localize'
     QWEN3_LOCALIZE_MULTI = 'qwen3_localize_multi'
+    UITARS_CLASSIFY = 'uitars_classify'
     UITARS_LOCALIZE = 'uitars_localize'
     QWEN25_CLASSIFY = 'qwen25_classify'
     QWEN25_LOCALIZE = 'qwen25_localize'
@@ -29,7 +30,7 @@ class GroundingBenchmarkType(BenchmarkBase):
     @override
     def get_system_prompt(self) -> str:
         match self:
-            case GroundingBenchmarkType.QWEN3_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.UITARS_CLASSIFY:
                 return QWEN3_CLASSIFY_SYSTEM_PROMPT
             case GroundingBenchmarkType.QWEN3_LOCALIZE:
                 return QWEN3_LOCALIZE_SYSTEM_PROMPT
@@ -53,7 +54,7 @@ class GroundingBenchmarkType(BenchmarkBase):
         multi_object = base_path / "multi_object"
         
         match self:
-            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY | GroundingBenchmarkType.UITARS_CLASSIFY:
                 folders = [single_object]
             case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.QWEN25_LOCALIZE:
                 folders = [single_object, multi_object]
@@ -117,7 +118,7 @@ which converts to:
     parts: list[BoundingBox] = []
     for part in data.get("parts", []):
         match benchmark_type:
-            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY | GroundingBenchmarkType.UITARS_CLASSIFY:
                 part_name = parse_classification(part)
                 return part_name if part_name else "NONE"
             case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.UITARS_LOCALIZE | GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI | GroundingBenchmarkType.QWEN25_LOCALIZE | GroundingBenchmarkType.QWEN25_LOCALIZE_MULTI:
@@ -235,7 +236,7 @@ if __name__ == "__main__":
         result: SingleTaskResult
 
         match benchmark:
-            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY:
+            case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY | GroundingBenchmarkType.UITARS_CLASSIFY:
                 assert isinstance(ground_truth, str)
                 response = cli.model.generate_model_response(input_png, system_prompt=system_prompt) or ""
                 response = cli.model.parse_response_text(response)
