@@ -2,10 +2,14 @@ import os
 import csv
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 # --- CONFIGURATION ---
 ROOT_DIR = 'results'
-DISTANCE_THRESHOLD = 50.0  # Pixels: Distance < 50px counts as success
+OUTPUT_FILE = 'benchmark_results_plot_grounding.png'
+
+# Restore the style you liked
+plt.style.use('ggplot')
 
 
 def parse_benchmark_results(root_dir):
@@ -19,114 +23,127 @@ def parse_benchmark_results(root_dir):
             file_path = os.path.join(root, file)
 
             try:
-                # newline='' is required for the csv module to handle quotes correctly
                 with open(file_path, 'r', newline='', encoding='utf-8') as f:
                     reader = csv.reader(f)
-
                     for row in reader:
-                        # 1. Basic Validation
-                        # Ensure row has enough columns and starts with a timestamp (skips headers/garbage)
                         if len(row) < 3 or not row[0].startswith("20"):
                             continue
 
-                        # 2. Extract Metadata
                         category_raw = row[1].strip()
-                        model_raw = row[2].strip()
-                        model_name = model_raw.split('/')[-1]  # Clean model name
+                        model_name = row[2].strip().split('/')[-1]
 
-                        score = 0.0
-                        metric_type = "Unknown"
+                        score = np.nan
+                        distance = np.nan
                         category_label = None
 
-                        # 3. Extract Metrics based on Category
-
-                        # --- CLASSIFY ---
                         if "classify" in category_raw:
                             category_label = "Classify"
-                            # Col 3 is boolean string "True"/"False"
-                            is_correct = row[3].strip() == "True"
-                            score = 100.0 if is_correct else 0.0
-                            metric_type = "Accuracy"
-
-                        # --- LOCALIZE MULTI ---
-                        elif "localize_multi" in category_raw:
-                            category_label = "Localize Multi"
-                            try:
-                                # Col 4 is IoU
-                                score = float(row[4]) * 100.0
-                                metric_type = "Mean IoU"
-                            except (ValueError, IndexError):
-                                continue
-
-                        # --- LOCALIZE (SINGLE) ---
+                            score = 100.0 if row[3].strip() == "True" else 0.0
                         elif "localize" in category_raw:
-                            category_label = "Localize"
-
-                            # Check if it's Distance-based (UITars style) or IoU-based (Qwen style)
-                            # We check if the metric name (usually near the end, col 7) mentions 'euclidean'
-                            # Or if the IoU column (col 4) is -1 or empty.
-
-                            is_distance_metric = False
-                            if len(row) > 7 and "euclidean" in row[7].lower():
-                                is_distance_metric = True
-
-                            if is_distance_metric:
-                                try:
-                                    # Col 3 is Distance
-                                    dist = float(row[3])
-                                    score = 100.0 if dist < DISTANCE_THRESHOLD else 0.0
-                                    metric_type = f"Success Rate (<{DISTANCE_THRESHOLD}px)"
-                                except (ValueError, IndexError):
-                                    continue
-                            else:
-                                try:
-                                    # Col 4 is IoU
-                                    score = float(row[4]) * 100.0
-                                    metric_type = "Mean IoU"
-                                except (ValueError, IndexError):
-                                    continue
+                            category_label = "Localize Multi" if "multi" in category_raw else "Localize"
+                            try:
+                                val_iou = float(row[4])
+                                score = val_iou * 100.0 if val_iou >= 0 else 0.0
+                            except:
+                                pass
+                            try:
+                                d1 = float(row[3])
+                                d2 = float(row[6]) if len(row) > 6 else -1.0
+                                if d1 >= 0:
+                                    distance = d1
+                                elif d2 >= 0:
+                                    distance = d2
+                            except:
+                                pass
 
                         if category_label:
                             results.append({
                                 "Model": model_name,
                                 "Category": category_label,
                                 "Score": score,
-                                "Metric Type": metric_type
+                                "Distance": distance
                             })
-
             except Exception as e:
-                print(f"Error reading {file_path}: {e}")
+                print(f"Skipping {file}: {e}")
 
     return pd.DataFrame(results)
 
 
-# --- EXECUTION ---
-df = parse_benchmark_results(ROOT_DIR)
+def plot_benchmark(df):
+    if df.empty:
+        print("No data found.")
+        return
 
-if not df.empty:
-    # Aggregate: Mean Score per Model/Category
-    df_agg = df.groupby(['Model', 'Category'])['Score'].mean().reset_index()
+    # Aggregate Means
+    df_agg = df.groupby(['Model', 'Category']).mean(numeric_only=True).reset_index()
 
-    # Pivot: Model as Index, Categories as Columns
-    df_pivot = df_agg.pivot(index='Model', columns='Category', values='Score')
+    # --- COLOR MAPPING ---
+    default_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    unique_categories = sorted(df_agg['Category'].unique())
+    category_colors = {
+        cat: default_cycle[i % len(default_cycle)]
+        for i, cat in enumerate(unique_categories)
+    }
 
-    # Plot
-    ax = df_pivot.plot(kind='bar', figsize=(12, 6), width=0.8)
+    # Pivot Data
+    pivot_score = df_agg.pivot(index='Model', columns='Category', values='Score')
+    pivot_dist = df_agg.pivot(index='Model', columns='Category', values='Distance')
 
-    plt.title('Model Accuracy Grounding Classify vs Localize vs Localize Multi')
-    plt.ylabel('Score (Accuracy % / IoU % / Success Rate %)')
-    plt.xlabel('Model')
-    plt.xticks(rotation=45, ha='right')
-    plt.legend(title='Category')
-    plt.grid(axis='y', linestyle='--', alpha=0.5)
+    # --- SORTING LOGIC (CHANGED) ---
+    # Sort by Mean Score Ascending (Low -> High)
+    # This places the Best Model (Highest Score) on the RIGHT side of the plot
+    model_order = pivot_score.mean(axis=1).sort_values(ascending=True).index
+
+    pivot_score = pivot_score.reindex(model_order)
+    pivot_dist = pivot_dist.reindex(model_order)
+
+    # Setup Subplots
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
+
+    # --- PLOT 1: SCORES ---
+    colors_top = [category_colors[col] for col in pivot_score.columns]
+    pivot_score.plot(kind='bar', ax=ax1, width=0.7, color=colors_top,
+                     edgecolor='white', linewidth=0.7)
+
+    ax1.set_title('Model Accuracy: Grounding Benchmark', fontsize=12, fontweight='bold', pad=15)
+    ax1.set_ylabel('Accuracy (%) / IoU (%)')
+    ax1.legend(loc='upper left', frameon=True, facecolor='white', framealpha=1)
+    ax1.grid(axis='y', linestyle='--', alpha=0.6)
+
+    for container in ax1.containers:
+        ax1.bar_label(container, fmt='%.1f', padding=3, fontsize=9)
+
+    # --- PLOT 2: DISTANCE ---
+    dist_cols = [c for c in pivot_dist.columns if pivot_dist[c].sum() > 0]
+
+    if dist_cols:
+        colors_bottom = [category_colors[col] for col in dist_cols]
+        pivot_dist[dist_cols].plot(kind='bar', ax=ax2, width=0.7, color=colors_bottom,
+                                   edgecolor='white', linewidth=0.7)
+
+        ax2.set_title('Localization Error', fontsize=12, fontweight='bold', pad=15)
+        ax2.set_ylabel('Mean Distance (Pixels)')
+        ax2.grid(axis='y', linestyle='--', alpha=0.6)
+
+        # Moved legend to 'upper left' to match top graph usually
+        ax2.legend(loc='upper left', frameon=True, facecolor='white', framealpha=1)
+
+        for container in ax2.containers:
+            ax2.bar_label(container, fmt='%.1f', padding=3, fontsize=9)
+    else:
+        ax2.text(0.5, 0.5, "No Distance Metrics Available", ha='center', va='center')
+
+    # Final Layout
+    plt.xlabel('Model', fontsize=11, fontweight='bold', labelpad=10)
+    plt.xticks(rotation=0)
     plt.tight_layout()
 
-    # Save
-    output_file = 'benchmark_results_plot_grounding.png'
-    plt.savefig(output_file)
-    print(f"Plot saved to {output_file}")
+    plt.savefig(OUTPUT_FILE, dpi=300)
+    print(f"Plot saved to {OUTPUT_FILE}")
+    print("\nSummary Data (Sorted):")
+    print(pivot_score)
 
-    print("\nCorrected Aggregated Results:")
-    print(df_agg)
-else:
-    print("No valid data found.")
+
+# --- EXECUTION ---
+df_results = parse_benchmark_results(ROOT_DIR)
+plot_benchmark(df_results)
