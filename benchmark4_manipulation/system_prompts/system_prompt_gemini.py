@@ -12,6 +12,7 @@ It is crucial that you stick to this output format in every single one of your r
 ## Action Space
 
 click(point='(x1,y1)') # This performs a left mouse click at the given point.
+hover(point='(x1,y1)') # This moves the mouse cursor to the given point without clicking.
 drag(start_point='(x1,y1)', end_point='(x2,y2)') # This performs a left click at the start point, moves to the end point and again performs a left click.
 wait() #Sleep for 5s and take a screenshot to check for any changes.
 finished(content='xxx') # Use escape characters \\\\', \\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. 

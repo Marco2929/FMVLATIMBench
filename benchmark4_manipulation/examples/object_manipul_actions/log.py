@@ -1,1 +1,1 @@
-"Manipulate the log wall such that it switches from a horizontal to a vertical orientation."
+"Extend the log wall's size by one unit vertically. Then click on the green flag to run the puzzle."

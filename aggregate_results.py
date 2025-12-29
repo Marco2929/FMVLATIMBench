@@ -219,6 +219,11 @@ if __name__ == "__main__":
         help="Category name (e.g., 'manipul_actions') to aggregate all experiments within"
     )
     parser.add_argument(
+        "--model",
+        type=str,
+        help="Model name to specify the results/model/category/experiment folder structure"
+    )
+    parser.add_argument(
         "--output",
         type=str,
         help="Output CSV file path (optional, defaults to experiment folder with timestamp)"
@@ -234,7 +239,10 @@ if __name__ == "__main__":
         
     elif args.category:
         # Aggregate all experiments in a category
-        category_path = Path(args.benchmark) / "results" / args.category
+        if args.model:
+            category_path = Path(args.benchmark) / "results" / args.model / args.category
+        else:
+            category_path = Path(args.benchmark) / "results" / args.category
         output_dir = Path(args.output) if args.output else None
         aggregate_category(category_path, output_dir)
         
@@ -246,16 +254,45 @@ if __name__ == "__main__":
             print(f"Results directory not found: {results_root}")
             exit(1)
         
-        categories = [d for d in results_root.iterdir() if d.is_dir()]
-        
-        if not categories:
-            print(f"No category directories found in {results_root}")
-            exit(1)
-        
-        print(f"Found {len(categories)} category(ies)")
-        
-        for category_dir in sorted(categories):
-            print(f"\n{'#'*70}")
-            print(f"# Processing category: {category_dir.name}")
-            print(f"{'#'*70}")
-            aggregate_category(category_dir)
+        # Check if model is specified, otherwise iterate through model directories
+        if args.model:
+            model_path = results_root / args.model
+            if not model_path.exists():
+                print(f"Model directory not found: {model_path}")
+                exit(1)
+            
+            categories = [d for d in model_path.iterdir() if d.is_dir()]
+            
+            if not categories:
+                print(f"No category directories found in {model_path}")
+                exit(1)
+            
+            print(f"Found {len(categories)} category(ies) for model {args.model}")
+            
+            for category_dir in sorted(categories):
+                print(f"\n{'#'*70}")
+                print(f"# Processing category: {category_dir.name}")
+                print(f"{'#'*70}")
+                aggregate_category(category_dir)
+        else:
+            # Iterate through all model directories
+            model_dirs = [d for d in results_root.iterdir() if d.is_dir()]
+            
+            if not model_dirs:
+                print(f"No model directories found in {results_root}")
+                exit(1)
+            
+            print(f"Found {len(model_dirs)} model(s)")
+            
+            for model_dir in sorted(model_dirs):
+                print(f"\n{'='*70}")
+                print(f"= Processing model: {model_dir.name}")
+                print(f"{'='*70}")
+                
+                categories = [d for d in model_dir.iterdir() if d.is_dir()]
+                
+                for category_dir in sorted(categories):
+                    print(f"\n{'#'*70}")
+                    print(f"# Processing category: {category_dir.name}")
+                    print(f"{'#'*70}")
+                    aggregate_category(category_dir)

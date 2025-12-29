@@ -1,0 +1,1 @@
+"Place the bowling ball inside of the brickwall rectangle."

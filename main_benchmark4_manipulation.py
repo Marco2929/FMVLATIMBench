@@ -44,7 +44,7 @@ from utils import get_api_key, encode_image, DistanceTracker, VisualLocator, cal
 from PIL import Image, ImageDraw
 
 # Configuration constants
-MAX_MESSAGE_SIZE = 10  # maximum number of messages to keep in history (including user and assistant messages)
+MAX_MESSAGE_SIZE = 5  # maximum number of messages to keep in history (including user and assistant messages)
 HOTKEY = "ctrl+shift+s"
 MY_RESOLUTION = (1920, 1200)
 pyautogui.FAILSAFE = False  # Disable failsafe to allow clicks at corners
@@ -53,6 +53,7 @@ GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 MODEL = "bytedance/ui-tars-1.5-7b"
 GEMINI_MODEL = "gemini-2.5-flash"
 selected_model = GEMINI_MODEL
+max_actions = 10
 
 
 def get_system_prompt(input_category: str):
@@ -509,6 +510,7 @@ if __name__ == "__main__":
         d.mkdir(parents=True, exist_ok=True)
     
     error_log_path = run_dir / "error.log"
+    action_history = []  # Track all actions for path overlay
     
     try:
         input_json = Path(args.input).with_suffix(".json")
@@ -548,7 +550,6 @@ if __name__ == "__main__":
         )
 
         iter_idx = 0
-        action_history = []  # Track all actions for path overlay
         latest_response = ""  # Track latest model response for error reporting
         
         # Pause here until the user triggers the start
@@ -573,7 +574,6 @@ if __name__ == "__main__":
             raise RuntimeError("Failed to capture initial screenshot")
         
         action_type = "init"
-        max_actions = 20
         
         while action_type != "finished":
             # Check if maximum number of actions reached
@@ -625,7 +625,7 @@ if __name__ == "__main__":
                 messages=message,
                 #top_p=None,
                 temperature=0.0,
-                max_tokens=400,
+                max_tokens=4000,
                 stream=True,
                 # seed=None,
                 # stop=None,
@@ -842,6 +842,24 @@ if __name__ == "__main__":
         
         print(f"Error log saved to: {error_log_path}")
         print(f"{'='*60}")
+
+        pyautogui.click(0, 0)
+        b64 = _screenshot_to_base64(grey_out_regions=grey_out_regions)
+        if b64:
+            try:
+                screenshot_bytes = base64.b64decode(b64)
+                shot_path = screenshots_dir / f"screenshot_{iter_idx:04d}.png"
+                eval_path = eval_dir / "final_screenshot.png"
+                overlay_path = eval_dir / "final_screenshot_with_path.png"
+                with open(eval_path, "wb") as ef:
+                    ef.write(screenshot_bytes)
+                with open(shot_path, "wb") as sf:
+                    sf.write(screenshot_bytes)
+                
+                # Create action path overlay (reverse the y_offset_factor)
+                _create_action_path_overlay(str(eval_path), action_history, str(overlay_path), y_offset_factor=-441/4800)
+            except Exception as e:
+                print("Warning: failed to write per-iteration screenshot:", e)
         
         # Re-raise the exception
         raise

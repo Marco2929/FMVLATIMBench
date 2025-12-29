@@ -1,1 +1,1 @@
-"Destroy the wall by placing the nitro glass above it and starting the machine with the green flag."
+"Place the nitro glass above the brick wall. Then, click on the green flag to start the puzzle."

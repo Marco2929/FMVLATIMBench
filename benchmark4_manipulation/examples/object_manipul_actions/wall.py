@@ -1,1 +1,1 @@
-"Move the brick wall to the right of the screen and then place it there by clicking left mouse button. After that, press on the green flag. Once you did that, you are finished with the task"
+"Move the brick wall to the right half of the screen and then place it there."

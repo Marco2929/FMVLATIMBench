@@ -1,1 +1,1 @@
-"Position the pipe such that the ball falls off the screen when the green flag is clicked."
+"Flip the pipe on the right once. Then place it right under the basketball connecting it to the rest of the pipes. Then, click on the green flag to start the puzzle."

@@ -1,1 +1,1 @@
-"Place the basketball right over the hedge trimmers' handles. Then, click on the green flag to start the puzzle."
+"Place the basketball right over the hedge trimmers' handles."
