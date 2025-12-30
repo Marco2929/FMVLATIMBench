@@ -1,1 +1,1 @@
-"Place the wall next to the left of the tube."
+"Place the first wall from the parts bin so that the right bowling ball rolls into the box in the center."

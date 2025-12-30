@@ -1,0 +1,1 @@
+"Remove the tube so that the bowling ball rolls onto the mouse."

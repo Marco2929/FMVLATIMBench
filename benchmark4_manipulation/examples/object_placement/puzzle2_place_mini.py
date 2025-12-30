@@ -1,0 +1,1 @@
+"Place the first floor from the parts bin between the two ramps on the top right near the right bowling ball so that the right bowling ball can roll down."

@@ -1,0 +1,1 @@
+"Rotate the tube by 90 degrees so that the bowling ball falls onto the mouse."

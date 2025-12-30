@@ -1,0 +1,1 @@
+"Move the yellow brick wall between the left and the middle ramp."

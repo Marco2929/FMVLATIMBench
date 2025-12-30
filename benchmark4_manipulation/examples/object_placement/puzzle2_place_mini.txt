@@ -1,0 +1,5 @@
+Results:
+
+qwen3-vl-235b-a22b-instruct:
+ui-tars-1.5-7b: 
+gemini-2.5-flash: clicks in wrong place

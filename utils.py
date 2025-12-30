@@ -53,8 +53,8 @@ def draw_bounding_box(image_path: Path, bbox: list[int]) -> Path:
     cv2.imwrite(str(output_path), image)
     return output_path
 
-def get_api_key() -> str:
-    API_KEY = os.getenv("OPENROUTER_API_KEY")
+def get_api_key(name) -> str:
+    API_KEY = os.getenv(name)
     if API_KEY:
         return API_KEY
     else:
@@ -63,9 +63,9 @@ def get_api_key() -> str:
                 for line in f:
                     key, value = line.strip().split('=', 1)
                     os.environ[key] = value
-            API_KEY = os.getenv("OPENROUTER_API_KEY")
+            API_KEY = os.getenv(name)
         except FileNotFoundError:
-            raise ValueError("Please set the OPENROUTER_API_KEY environment variable (e.g. in .env)")
+            raise ValueError("Please set the GEMINI_API_KEY environment variable (e.g. in .env)")
     return API_KEY
 
 def calculate_iou(box1, box2):

@@ -1,0 +1,1 @@
+"Place the bowling ball and the yellow brick wall so that the bowling ball rolls onto the mouse."

@@ -1,0 +1,5 @@
+Results:
+
+qwen3-vl-235b-a22b-instruct: failed, but very close, tried to place the wall into an existing wall
+ui-tars-1.5-7b: failed, tried to move brick wall from the play field, did not follow prompt
+gemini-2.5-flash: failed, misclicked always a bit too high (tried 3 times, all too high with some variation)

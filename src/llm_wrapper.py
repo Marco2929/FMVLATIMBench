@@ -254,24 +254,58 @@ class UiTarsLLMWrapper(LLMWrapperBase):
                     y = int(match.group(2))
                     return (x, y)
         return (-1, -1)
-    
+
+
+class OpenAILLMWrapper(LLMWrapperBase):
+    def __init__(self, api_key: str, base_url: None, model_name: str):
+        super().__init__(api_key, base_url, model_name)
+
+    def encode_image(self, image_path: Path) -> str:
+        return super().encode_image(pad_image(image_path, 28))
+
     @override
-    def parse_response_actions(self, response: str, image_width: int, image_height: int) -> list[dict]:
-        """Parse and normalize model response.
-        Args:
-            response: Raw model response string
-            
-        Returns:
-            Parsed and normalized response
-        """
-        
-        parsed_dict = parse_action_to_structure_output(
-            response,
-            factor=1000,
-            origin_resized_height=image_height,
-            origin_resized_width=image_width,
-            model_type="qwen25vl"
-        )
-        print(f"Parsed action: {parsed_dict}")
-        
-        return parsed_dict
+    def parse_response_point(self, response: str) -> tuple[int, int]:
+        pass
+
+    @override
+    def generate_model_response(self, image_path:Path, system_prompt:str, additional_user_prompt="", logging=False):
+        encoded_image = self.encode_image(image_path)
+        data_url = f"data:image/webp;base64,{encoded_image}"
+        user_prompt = []
+        if additional_user_prompt:
+            user_prompt.append({"type": "text", "text": additional_user_prompt})
+        user_prompt.append({
+            "type": "image_url",
+            "image_url": {
+                "url": data_url
+            }
+        })
+        messages = [
+            {
+                "role": "system",
+                "content": system_prompt,
+            },
+            {
+                "role": "user",
+                "content": user_prompt
+            }
+        ]
+        if logging:
+            print("Sending request to model...")
+        response = self.client.chat.completions.create(model=self.model_name, messages=messages, timeout=15)
+        part_name = response.choices[0].message.content
+        if logging:
+            pprint(response.model_dump())
+            print(f"Model Response: {part_name}")
+        return part_name
+
+class GeminiLLMWrapper(Qwen3VLLLMWrapper):
+    def __init__(self, api_key: str, base_url: str, model_name: str):
+        super().__init__(api_key, base_url, model_name)
+
+    def encode_image(self, image_path: Path) -> str:
+        return super().encode_image(pad_image(image_path, 28))
+
+    @override
+    def parse_response_point(self, response: str) -> tuple[int, int]:
+        pass

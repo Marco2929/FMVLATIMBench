@@ -97,8 +97,8 @@ def get_api_key() -> str:
             raise ValueError("Please set the OPENROUTER_API_KEY environment variable (e.g. in .env)")
     return API_KEY
 
-def get_base_url() -> str:
-    BASE_URL = os.getenv("BASE_URL")
+def get_base_url(name) -> str:
+    BASE_URL = os.getenv(name)
     if BASE_URL:
         return BASE_URL
     else:
@@ -107,7 +107,7 @@ def get_base_url() -> str:
                 for line in f:
                     key, value = line.strip().split('=', 1)
                     os.environ[key] = value
-            BASE_URL = os.getenv("BASE_URL")
+            BASE_URL = os.getenv(name)
             if BASE_URL is None:
                 raise ValueError("Please set the OPENROUTER_BASE_URL environment variable (e.g. in .env)")
         except FileNotFoundError:
