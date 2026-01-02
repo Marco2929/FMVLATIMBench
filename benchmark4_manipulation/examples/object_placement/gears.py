@@ -1,0 +1,1 @@
+"Place the gear from the parts bin in the gap between the big and the small gear"

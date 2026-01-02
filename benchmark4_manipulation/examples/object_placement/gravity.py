@@ -1,0 +1,1 @@
+"Flip the egg timer once. Then, place the gravity pad directly under the balloon. Finally, click on the green flag."

@@ -1,1 +1,1 @@
-"Extend the log wall's size by one unit vertically. Then click on the green flag to run the puzzle."
+"Stretch the log wall by one unit vertically."

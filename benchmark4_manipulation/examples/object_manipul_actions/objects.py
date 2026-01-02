@@ -1,1 +1,1 @@
-"Move the boxing gloves to the right side of the tree. Then flip the trapdoor once. After that, click on the green flag to start the puzzle."
+"Flip the trapdoor once."

@@ -5,7 +5,7 @@
     "templates": {
         "logwall": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\logwall_vertical.png"
     },
-    "threshold": 15,
+    "threshold": 200,
     "use_iou": true,
     "target_boxes": {
         "logwall": [790, 350, 860, 585]

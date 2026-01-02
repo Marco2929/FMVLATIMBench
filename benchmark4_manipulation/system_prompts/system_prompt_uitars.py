@@ -17,8 +17,6 @@ drag(start_point='(x1,y1)', end_point='(x2,y2)') # This performs a left click at
 wait() #Sleep for 5s and take a screenshot to check for any changes.
 finished(content='xxx') # Use escape characters \\\\', \\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. 
 
-Coordinates are always given relative to the image size with 0 being 0% of the size and 1000 being 100%. Be as precise as possible when specifying coordinates.
-
 ## Note
 - Use English in `Thought` part.
 - Write a small plan and finally summarize your next action (with its target element) in one sentence in `Thought` part.

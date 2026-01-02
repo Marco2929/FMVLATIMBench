@@ -11,7 +11,7 @@ from datetime import datetime
 import time
 import traceback
 
-from benchmark4_manipulation.system_prompts.system_prompt_gemini import \
+from benchmark4_manipulation.system_prompts.system_prompt_uitars import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_MANIPUL_ACTIONS
 from benchmark4_manipulation.system_prompts.ui_tars_1_5_7B_object_placement import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_PLACEMENT
@@ -50,9 +50,13 @@ MY_RESOLUTION = (1920, 1200)
 pyautogui.FAILSAFE = False  # Disable failsafe to allow clicks at corners
 OPEN_ROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+HYPERBOLIC_BASE_URL="https://api.hyperbolic.xyz/v1"
 MODEL = "bytedance/ui-tars-1.5-7b"
 GEMINI_MODEL = "gemini-2.5-flash"
-selected_model = GEMINI_MODEL
+QWEN3_MODEL = "qwen/qwen3-vl-235b-a22b-instruct"
+QWEN25_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
+GPT_MODEL = "gpt-5-mini"
+selected_model = GPT_MODEL.split("/")[-1]
 max_actions = 10
 
 
@@ -61,9 +65,9 @@ def get_system_prompt(input_category: str):
     if input_category == allowed_categories[0]:
         return SYSTEM_PROMPT_MANIPUL_ACTIONS
     elif input_category == allowed_categories[1]:
-        return SYSTEM_PROMPT_PLACEMENT
+        return SYSTEM_PROMPT_MANIPUL_ACTIONS
     elif input_category == allowed_categories[2]:
-        return SYSTEM_PROMPT_MANIPUL_COT
+        return SYSTEM_PROMPT_MANIPUL_ACTIONS
     else:
         # Placeholder for future system prompt implementation
         pass
@@ -208,7 +212,7 @@ def parse_model_response(response: str):
         factor=1000,
         origin_resized_height=original_image_height,
         origin_resized_width=original_image_width,
-        model_type="gemini"
+        model_type="gpt"
     )
     print(f"Parsed action: {parsed_dict}")
     
@@ -537,10 +541,10 @@ if __name__ == "__main__":
         if grey_out_regions:
             print(f"Grey-out regions configured: {len(grey_out_regions)} region(s)")
         
-        API_KEY = get_api_key("GEMINI_API_KEY")
+        API_KEY = get_api_key("OPENAI_API_KEY")
         
         client = OpenAI(
-            base_url=GEMINI_BASE_URL,
+            #base_url=HYPERBOLIC_BASE_URL,
             api_key=API_KEY
         )
 
@@ -621,16 +625,16 @@ if __name__ == "__main__":
                 break
             
             chat_completion = client.chat.completions.create(
-                model=GEMINI_MODEL,
+                model=GPT_MODEL,
                 messages=message,
-                #top_p=None,
+                top_p=None,
                 temperature=0.0,
                 max_tokens=4000,
                 stream=True,
-                # seed=None,
-                # stop=None,
-                # frequency_penalty=None,
-                # presence_penalty=None
+                seed=None,
+                stop=None,
+                frequency_penalty=None,
+                presence_penalty=None
             )
             
             response = ""
@@ -844,7 +848,7 @@ if __name__ == "__main__":
         print(f"{'='*60}")
 
         pyautogui.click(0, 0)
-        b64 = _screenshot_to_base64(grey_out_regions=grey_out_regions)
+        b64 = _screenshot_to_base64()
         if b64:
             try:
                 screenshot_bytes = base64.b64decode(b64)

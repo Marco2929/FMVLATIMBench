@@ -1,1 +1,1 @@
-"Rotate the cue stick 5 times. Then place it in front of the eight ball. Finally, click on the green flag to start the puzzle."
+"Flip the cue stick twice."
