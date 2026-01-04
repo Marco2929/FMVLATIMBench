@@ -1,3 +1,4 @@
+from enum import Enum
 import json
 from pathlib import Path
 from typing import override
@@ -10,11 +11,15 @@ from benchmark3_event.system_prompts.qwen3vl_cause_visual import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_CAUSE_VISUAL
 from benchmark3_event.system_prompts.qwen3vl_effect_visual import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_VISUAL
+from benchmark3_event.system_prompts.absolute_point_visual import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_ABSOLUTE_POINT_VISUAL
+from benchmark3_event.system_prompts.absolute_bbox_visual import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_ABSOLUTE_BBOX_VISUAL
 
 from main_benchmark1_grounding import evaluate_response_bbox, evaluate_response_bbox_distance
 from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
-from src.llm_wrapper import BoundingBox, Qwen3VLLLMWrapper
+from src.llm_wrapper import BoundingBox, LLMWrapperBase, Qwen25VLLLMWrapper, Qwen3VLLLMWrapper, UiTarsLLMWrapper
 from src.results_model import SingleTaskResult
 from utils import draw_bounding_box
 
@@ -23,30 +28,42 @@ def load_json_bench3visual(json_path: Path) -> tuple[str, dict]:
         data = json.load(f)
     return data['TASK_DESCRIPTION'], data['solution']
 
-class EventVisualBenchmarkType(BenchmarkBase):
+
+class EventVisualBenchmarkType2(BenchmarkBase):
     OUTCOME_VISUAL = 'outcome_visual'
     EFFECT_VISUAL = 'effect_visual'
     CAUSE_VISUAL = 'cause_visual'
-    
-    @override
+
+class EventVisualBenchmarkType(Enum):
+    OUTCOME_VISUAL = 'outcome_visual'
+    EFFECT_VISUAL = 'effect_visual'
+    CAUSE_VISUAL = 'cause_visual'
+
     def get_model_name(self) -> str:
         match self:
             case _:
                 return "qwen/qwen3-vl-235b-a22b-instruct"
             
-    @override
-    def get_system_prompt(self) -> str:
+    def get_system_prompt(self, model: LLMWrapperBase) -> str:
+        if isinstance(model, UiTarsLLMWrapper):
+            print("Using UiTars system prompt for absolute point visual localization.")
+            return SYSTEM_PROMPT_ABSOLUTE_POINT_VISUAL
+        if isinstance(model, Qwen25VLLLMWrapper):
+            print("Using Qwen2.5-VL system prompt for absolute bbox visual localization.")
+            return SYSTEM_PROMPT_ABSOLUTE_BBOX_VISUAL
         match self:
             case EventVisualBenchmarkType.OUTCOME_VISUAL:
+                print("Using system prompt for outcome visual localization.")
                 return SYSTEM_PROMPT_OUTCOME_VISUAL
             case EventVisualBenchmarkType.EFFECT_VISUAL:
+                print("Using system prompt for effect visual localization.")
                 return SYSTEM_PROMPT_EFFECT_VISUAL
             case EventVisualBenchmarkType.CAUSE_VISUAL:
+                print("Using system prompt for cause visual localization.")
                 return SYSTEM_PROMPT_CAUSE_VISUAL
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
             
-    @override
     def get_relevant_files(self) -> list[Path]:
         base_path = Path("benchmark3_event/examples")
         outcome_visual = base_path / "outcome_visual"
@@ -70,13 +87,13 @@ class EventVisualBenchmarkType(BenchmarkBase):
 
 
 if __name__ == "__main__":
-    cli = BenchmarkCli(name="benchmark3_event_visual", benchmark_types=list(EventVisualBenchmarkType))
+    cli = BenchmarkCli(name="benchmark3_event_visual", benchmark_types=list(EventVisualBenchmarkType2))
     benchmark = EventVisualBenchmarkType(cli.benchmark)
     benchmark_files = benchmark.get_relevant_files()
 
-    if cli.model is None:
-        model_name = benchmark.get_model_name()
-    system_prompt = benchmark.get_system_prompt()
+    assert cli.model is not None
+
+    system_prompt = benchmark.get_system_prompt(cli.model)
 
     pbar = tqdm(benchmark_files, desc="Processing files", unit="file")
     for file_path in pbar:
@@ -84,16 +101,20 @@ if __name__ == "__main__":
         input_png = file_path.with_suffix(".png").resolve()
         input_json = file_path.with_suffix(".json").resolve()
 
-        if cli.model is None:
-            cli.model = Qwen3VLLLMWrapper(api_key=cli.API_KEY, base_url=cli.BASE_URL, model_name=model_name)
-
         user_prompt, ground_truth = load_json_bench3visual(input_json)
         ground_truth_bbox = None if ground_truth is None else BoundingBox(ground_truth['label'], ground_truth['bbox'][0], ground_truth['bbox'][1], ground_truth['bbox'][2], ground_truth['bbox'][3])
 
         image_width, image_height = get_image_dimensions(input_png)
 
         response = cli.model.generate_model_response(input_png, system_prompt, user_prompt) or ""
-        response = cli.model.parse_response_bbox(response, image_width, image_height)
+        if isinstance(cli.model, UiTarsLLMWrapper):
+            response_tuple = cli.model.parse_response_point(response)
+            if response_tuple is not None:
+                response = BoundingBox("point", response_tuple[0], response_tuple[1], response_tuple[0], response_tuple[1])
+            else:
+                response = None
+        else:
+            response = cli.model.parse_response_bbox(response, image_width, image_height)
         if response is not None:
             image_with_bbox_path = draw_bounding_box(input_png, response.bbox_list())
         iou = 0
