@@ -1,0 +1,1 @@
+"Place the football above the button of the flash light and move the aquarium from the left to the right to the empty space."

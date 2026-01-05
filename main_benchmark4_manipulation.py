@@ -1,28 +1,19 @@
 import base64
 import json
 from pathlib import Path
-import re
-from openai import OpenAI
 import argparse
 from typing import List
 import os
 import io
-import importlib
 from datetime import datetime
 import traceback
 import subprocess
 from PIL import Image
 
-from benchmark4_manipulation.system_prompts import system_prompt_gemini
-from benchmark4_manipulation.system_prompts.ui_tars_1_5_7B_object_manipul_actions import \
-    SYSTEM_PROMPT as SYSTEM_PROMPT_MANIPUL_ACTIONS
-from benchmark4_manipulation.system_prompts.ui_tars_1_5_7B_object_placement import \
-    SYSTEM_PROMPT as SYSTEM_PROMPT_PLACEMENT
-from benchmark4_manipulation.system_prompts.ui_tars_1_5_7B_object_manipul_cot import \
-    SYSTEM_PROMPT as SYSTEM_PROMPT_MANIPUL_COT
-from src.image_processing import get_image_dimensions
+from benchmark4_manipulation.system_prompts import system_prompt_gemini, system_prompt_gemini_bench5, system_prompt_ui_tars
+from benchmark4_manipulation.system_prompts import system_prompt_ui_tars_bench5
 
-allowed_categories = ["manipul_actions", "placement", "manipul_cot", "move", "extend", "rotate", "remove", "multi"]
+allowed_categories = ["placement", "move", "extend", "rotate", "remove", "multi", "bench5"]
 
 try:
     import pyautogui
@@ -44,7 +35,7 @@ except Exception:
     _have_pynput = False
 
 from src.bechmark_base import get_base_url
-from src.llm_wrapper import GeminiLLMWrapper, Qwen3VLLLMWrapper, UiTarsLLMWrapper
+from src.llm_wrapper import GeminiLLMWrapper, OpenAILLMWrapper, Qwen25VLLLMWrapper, Qwen3VLLLMWrapper, UiTarsLLMWrapper
 from ui_tars_1_5_7B.action_parser import parse_action_to_structure_output, parsing_response_to_pyautogui_code, parsing_response_to_pydirectinput_code
 from utils import get_api_key, encode_image, DistanceTracker, VisualLocator, calculate_iou
 
@@ -107,35 +98,15 @@ def _get_readable_model_name(model_name: str) -> str:
         return 'uitars'
     elif 'gemini' in model_name.lower():
         return 'gemini'
+    elif 'qwen2.5' in model_name.lower():
+        return 'qwen25'
+    elif 'gpt-5-mini' in model_name.lower():
+        return 'gpt5mini'
     else:
         # Fallback: use the part before the slash, or the whole name
         if '/' in model_name:
             return model_name.split('/')[0]
         return model_name
-
-
-def get_system_prompt(input_category: str):
-    """Get the appropriate system prompt based on input category."""
-    if input_category == allowed_categories[0]:
-        return system_prompt_gemini.SYSTEM_PROMPT
-    elif input_category == allowed_categories[1]:
-        return system_prompt_gemini.SYSTEM_PROMPT
-    elif input_category == allowed_categories[2]:
-        return system_prompt_gemini.SYSTEM_PROMPT
-    elif input_category == allowed_categories[3]:
-        return system_prompt_gemini.SYSTEM_PROMPT
-    elif input_category == allowed_categories[4]:
-        return system_prompt_gemini.SYSTEM_PROMPT
-    elif input_category == allowed_categories[5]:
-        return system_prompt_gemini.SYSTEM_PROMPT
-    elif input_category == allowed_categories[6]:
-        return system_prompt_gemini.SYSTEM_PROMPT
-    elif input_category == allowed_categories[7]:
-        return system_prompt_gemini.SYSTEM_PROMPT
-    else:
-        # Placeholder for future system prompt implementation
-        pass
-    return ""
 
 
 def parse_ground_truth(json_path: Path) -> dict:
@@ -593,7 +564,7 @@ if __name__ == "__main__":
     parser.add_argument("--category", type=str, default="manipul_cot",
                         help="Category of manipulation task")
     parser.add_argument("--model", type=str, default="qwen/qwen3-vl-235b-a22b-instruct",
-                        choices=["qwen/qwen3-vl-235b-a22b-instruct", "bytedance/ui-tars-1.5-7b", "gemini-2.5-flash"],
+                        choices=["qwen/qwen3-vl-235b-a22b-instruct", "bytedance/ui-tars-1.5-7b", "gemini-2.5-flash", "Qwen/Qwen2.5-VL-7B-Instruct", "gpt-5-mini"],
                         help="Model to use for the benchmark")
     
     args = parser.parse_args()
@@ -624,8 +595,6 @@ if __name__ == "__main__":
         if input_category not in allowed_categories:
             raise ValueError(f"Category {input_category} is not supported.")
         
-        SYSTEM_PROMPT = get_system_prompt(input_category)
-        
         # Parse ground truth data
         ground_truth_data = parse_ground_truth(input_json)
         print(f"Ground truth loaded: {len(ground_truth_data['targets'])} targets, {len(ground_truth_data['templates'])} templates")
@@ -636,10 +605,34 @@ if __name__ == "__main__":
         
         if model_name == "qwen/qwen3-vl-235b-a22b-instruct":
             model = Qwen3VLLLMWrapper(get_api_key('OPENROUTER_API_KEY'), get_base_url('BASE_URL'), model_name)
+            if input_category == "bench5":
+                system_prompt = system_prompt_gemini_bench5.SYSTEM_PROMPT_GEMINI
+            else:
+                system_prompt = system_prompt_gemini.SYSTEM_PROMPT_GEMINI
         elif model_name == "bytedance/ui-tars-1.5-7b":
             model = UiTarsLLMWrapper(get_api_key('OPENROUTER_API_KEY'), get_base_url('BASE_URL'), model_name)
+            if input_category == "bench5":
+                system_prompt = system_prompt_ui_tars_bench5.SYSTEM_PROMPT_UI_TARS
+            else:
+                system_prompt = system_prompt_ui_tars.SYSTEM_PROMPT_UI_TARS
         elif model_name == "gemini-2.5-flash":
             model = GeminiLLMWrapper(get_api_key('GEMINI_API_KEY'), get_base_url('GEMINI_BASE_URL'), model_name)
+            if input_category == "bench5":
+                system_prompt = system_prompt_gemini_bench5.SYSTEM_PROMPT_GEMINI
+            else:
+                system_prompt = system_prompt_gemini.SYSTEM_PROMPT_GEMINI
+        elif model_name == "Qwen/Qwen2.5-VL-7B-Instruct":
+            model = Qwen25VLLLMWrapper(get_api_key('HYPERBOLIC_API_KEY'), get_base_url('HYPERBOLIC_BASE_URL'), model_name)
+            if input_category == "bench5":
+                system_prompt = system_prompt_ui_tars_bench5.SYSTEM_PROMPT_UI_TARS
+            else:
+                system_prompt = system_prompt_ui_tars.SYSTEM_PROMPT_UI_TARS
+        elif model_name == "gpt-5-mini":
+            model = OpenAILLMWrapper(get_api_key('OPENAI_API_KEY'), None, model_name)
+            if input_category == "bench5":
+                system_prompt = system_prompt_gemini_bench5.SYSTEM_PROMPT_GEMINI
+            else:
+                system_prompt = system_prompt_gemini.SYSTEM_PROMPT_GEMINI
         else:
             raise ValueError(f"Unknown model: {model_name}")
         
@@ -653,7 +646,7 @@ if __name__ == "__main__":
             
             # Reset for new run
             message = get_initial_message(
-                SYSTEM_PROMPT=SYSTEM_PROMPT,
+                SYSTEM_PROMPT=system_prompt,
                 instruct_prompt=instruct_prompt
             )
             iter_idx = 0

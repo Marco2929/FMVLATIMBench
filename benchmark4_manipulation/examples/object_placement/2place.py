@@ -1,0 +1,1 @@
+"Place the balloon on the left of the play area above the top floor so that it would be blown away by the fan. No need to press the green flag."

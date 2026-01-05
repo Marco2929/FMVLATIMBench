@@ -1,0 +1,1 @@
+"Flip the fan so that it blows to the right so that the wind mill starts spinning."

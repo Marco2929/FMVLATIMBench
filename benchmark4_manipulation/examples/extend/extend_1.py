@@ -1,1 +1,1 @@
-"Stretch the existing floor (caution wall) to the right so the ball does not fall off."
+"Stretch (extend) the existing floor (caution wall) to the right so the ball does not fall off, but the other objects do not fall off either."

@@ -1,0 +1,1 @@
+"Remove the wind mill from the play area."

@@ -1,1 +1,1 @@
-"Place the bowling ball and the yellow brick wall so that the bowling ball rolls onto the mouse."
+"Place the bowling ball at the top right and the yellow brick wall so that the bowling ball rolls through the pipe onto the mouse."

@@ -1,3 +1,4 @@
+from benchmark4_manipulation.system_prompts import parts_description
 from . import game_instructions
 from . import additional_infos
 SYSTEM_PROMPT_GEMINI= f"""You are a Puzzle Game solving agent. You are given a task and your action history, with screenshots. You need to perform the next action to complete the task.
@@ -26,6 +27,9 @@ Coordinates are always given relative to the image size with 0 being 0% of the s
 
 ## Level Manual
 {game_instructions.GAME_INSTRUCTIONS}
+
+## Full user manual
+{parts_description.FULL_MANUAL}
 
 ## User Instruction
 """

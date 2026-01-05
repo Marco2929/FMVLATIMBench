@@ -1,0 +1,254 @@
+[
+    {
+        "model_name": "gemini",
+        "category": "bench5",
+        "num_runs": 5,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "gpt5mini",
+        "category": "bench5",
+        "num_runs": 5,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen25",
+        "category": "bench5",
+        "num_runs": 5,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen3",
+        "category": "bench5",
+        "num_runs": 5,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "uitars",
+        "category": "bench5",
+        "num_runs": 5,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "gemini",
+        "category": "extend",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "gpt5mini",
+        "category": "extend",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen25",
+        "category": "extend",
+        "num_runs": 11,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen3",
+        "category": "extend",
+        "num_runs": 10,
+        "num_success": 1,
+        "success_rate": 0.1
+    },
+    {
+        "model_name": "uitars",
+        "category": "extend",
+        "num_runs": 10,
+        "num_success": 1,
+        "success_rate": 0.1
+    },
+    {
+        "model_name": "gemini",
+        "category": "move",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "gpt5mini",
+        "category": "move",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen25",
+        "category": "move",
+        "num_runs": 12,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen3",
+        "category": "move",
+        "num_runs": 10,
+        "num_success": 2,
+        "success_rate": 0.2
+    },
+    {
+        "model_name": "uitars",
+        "category": "move",
+        "num_runs": 10,
+        "num_success": 2,
+        "success_rate": 0.2
+    },
+    {
+        "model_name": "gemini",
+        "category": "multi",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "gpt5mini",
+        "category": "multi",
+        "num_runs": 9,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen25",
+        "category": "multi",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen3",
+        "category": "multi",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "uitars",
+        "category": "multi",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "wall.py",
+        "category": "object_placement",
+        "num_runs": 1,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "gemini",
+        "category": "placement",
+        "num_runs": 10,
+        "num_success": 3,
+        "success_rate": 0.3
+    },
+    {
+        "model_name": "gpt5mini",
+        "category": "placement",
+        "num_runs": 10,
+        "num_success": 3,
+        "success_rate": 0.3
+    },
+    {
+        "model_name": "qwen25",
+        "category": "placement",
+        "num_runs": 10,
+        "num_success": 1,
+        "success_rate": 0.1
+    },
+    {
+        "model_name": "qwen3",
+        "category": "placement",
+        "num_runs": 10,
+        "num_success": 6,
+        "success_rate": 0.6
+    },
+    {
+        "model_name": "uitars",
+        "category": "placement",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "gemini",
+        "category": "remove",
+        "num_runs": 11,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "gpt5mini",
+        "category": "remove",
+        "num_runs": 10,
+        "num_success": 4,
+        "success_rate": 0.4
+    },
+    {
+        "model_name": "qwen25",
+        "category": "remove",
+        "num_runs": 11,
+        "num_success": 8,
+        "success_rate": 0.7272727272727273
+    },
+    {
+        "model_name": "qwen3",
+        "category": "remove",
+        "num_runs": 14,
+        "num_success": 1,
+        "success_rate": 0.07142857142857142
+    },
+    {
+        "model_name": "uitars",
+        "category": "remove",
+        "num_runs": 15,
+        "num_success": 4,
+        "success_rate": 0.26666666666666666
+    },
+    {
+        "model_name": "gemini",
+        "category": "rotate",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "gpt5mini",
+        "category": "rotate",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen25",
+        "category": "rotate",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    },
+    {
+        "model_name": "qwen3",
+        "category": "rotate",
+        "num_runs": 10,
+        "num_success": 1,
+        "success_rate": 0.1
+    },
+    {
+        "model_name": "uitars",
+        "category": "rotate",
+        "num_runs": 10,
+        "num_success": 0,
+        "success_rate": 0.0
+    }
+]
