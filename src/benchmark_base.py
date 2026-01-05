@@ -7,7 +7,7 @@ from pathlib import Path
 import time
 from typing import Dict, Optional
 
-from src.llm_wrapper import LLMWrapperBase, Qwen25VLLLMWrapper, Qwen3VLLLMWrapper, OpenAILLMWrapper, GeminiLLMWrapper, UiTarsLLMWrapper
+from src.llm_wrapper import GrokLLMWrapper, LLMWrapperBase, Qwen25VLLLMWrapper, Qwen3VLLLMWrapper, OpenAILLMWrapper, GeminiLLMWrapper, UiTarsLLMWrapper
 from src.results_model import SingleTaskResult
 
 class BenchmarkBase(Enum):
@@ -39,6 +39,7 @@ class BenchmarkCli:
         self.openai_model_list = ['gpt-5-mini']
         self.gemini_model_list = ['gemini-2.5-flash']
         self.hyperbolic_model_list = ['Qwen/Qwen2.5-VL-7B-Instruct']
+        self.xai_model_list = ['grok-4-1-fast-non-reasoning']
         self.name = name
         self.parser = argparse.ArgumentParser(description=name)
         self.parser.add_argument("--nosave", action="store_true", help="Flag to not save the results in results/*.csv at the end.")
@@ -52,7 +53,7 @@ class BenchmarkCli:
         self.parser.add_argument(
             "--model",
             type=str,
-            choices=self.openrouter_model_list + self.gemini_model_list + self.openai_model_list + self.hyperbolic_model_list,
+            choices=self.openrouter_model_list + self.gemini_model_list + self.openai_model_list + self.hyperbolic_model_list + self.xai_model_list,
             required=False,
             help="Optional model name override.",
         )
@@ -111,6 +112,17 @@ class BenchmarkCli:
                 self.BASE_URL = get_base_url('HYPERBOLIC_BASE_URL')
                 if 'Qwen2.5' in args.model:
                     self.model = Qwen25VLLLMWrapper(
+                        api_key=self.API_KEY,
+                        base_url=self.BASE_URL,
+                        model_name=args.model
+                    )
+                else:
+                    raise ValueError(f"Model not implemented: {args.model}")
+            elif args.model in self.xai_model_list:
+                self.API_KEY = get_api_keys('XAI_API_KEY')
+                self.BASE_URL = get_base_url('XAI_BASE_URL')
+                if 'grok' in args.model:
+                    self.model = GrokLLMWrapper(
                         api_key=self.API_KEY,
                         base_url=self.BASE_URL,
                         model_name=args.model
