@@ -1,0 +1,1 @@
+"Place the lamp between the pipes"

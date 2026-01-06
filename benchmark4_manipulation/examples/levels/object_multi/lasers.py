@@ -1,0 +1,1 @@
+"Place the laser in the scene rotate it once so it looks vertically to the top"

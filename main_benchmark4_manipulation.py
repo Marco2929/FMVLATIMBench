@@ -45,8 +45,8 @@ from PIL import Image, ImageDraw
 
 # Configuration constants
 MAX_MESSAGE_SIZE = 5  # maximum number of messages to keep in history (including user and assistant messages)
-HOTKEY = "ctrl+shift+s"
-MY_RESOLUTION = (1920, 1200)
+HOTKEY = "f9"
+MY_RESOLUTION = (1920, 1080)
 pyautogui.FAILSAFE = False  # Disable failsafe to allow clicks at corners
 OPEN_ROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"

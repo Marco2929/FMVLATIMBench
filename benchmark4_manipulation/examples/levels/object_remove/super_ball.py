@@ -1,0 +1,1 @@
+"Remove the super ball from the scene"

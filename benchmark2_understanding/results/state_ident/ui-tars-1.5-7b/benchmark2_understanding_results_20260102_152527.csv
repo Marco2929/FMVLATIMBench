@@ -1,0 +1,21 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-02T15:25:29.163175,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE1.json,YES,YES,Is the lamp on?
+2026-01-02T15:25:29.898570,state_ident,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE10.json,YES,NO,Is the laser connected with a socket?
+2026-01-02T15:25:31.130538,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE11.json,NO,NO,Is the electic mixer connected with a socket?
+2026-01-02T15:25:32.018708,state_ident,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE12.json,YES,NO,Is the electic mixer connected with a socket?
+2026-01-02T15:25:32.731170,state_ident,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE13.json,YES,NO,Is the laser activated?
+2026-01-02T15:25:33.389454,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE14.json,NO,NO,Is the laser activated?
+2026-01-02T15:25:34.066319,state_ident,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE15.json,YES,NO,Is the ball inside the bucket?
+2026-01-02T15:25:34.777626,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE16.json,NO,NO,Is the ball inside the bucket?
+2026-01-02T15:25:35.603191,state_ident,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE17.json,YES,NO,Is the mouse inside the basket?
+2026-01-02T15:25:36.290475,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE18.json,NO,NO,Is the mouse inside the basket?
+2026-01-02T15:25:37.036736,state_ident,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE19.json,NONE,NO,Is the lamp on?
+2026-01-02T15:25:37.753376,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE2.json,NO,NO,Is the lamp on?
+2026-01-02T15:25:38.674807,state_ident,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE20.json,NONE,NO,Is the laser activated?
+2026-01-02T15:25:39.493842,state_ident,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE3.json,YES,NO,Is the aquarium broken?
+2026-01-02T15:25:40.399448,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE4.json,NO,NO,Is the aquarium broken?
+2026-01-02T15:25:41.072980,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE5.json,YES,YES,Is the candle burning?
+2026-01-02T15:25:41.920479,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE6.json,NO,NO,Is the candle burning?
+2026-01-02T15:25:42.966709,state_ident,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE7.json,YES,NO,Is something connected to the conveyor belt?
+2026-01-02T15:25:43.776939,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE8.json,NO,NO,Is something connected to the conveyor belt?
+2026-01-02T15:25:44.543135,state_ident,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE9.json,NO,NO,Is the laser connected with a socket?

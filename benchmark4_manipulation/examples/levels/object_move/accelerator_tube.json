@@ -1,0 +1,14 @@
+{
+    "targets": {
+        "queue": [750, 570]
+    },
+    "templates": {
+        "queue": "D:\\Uni Stuttgart\\Foundation Models\\Repositories\\FMVLATIMBench\\templates\\queue.png"
+    },
+    "threshold": 15,
+    "use_iou": true,
+    "target_boxes": {
+        "queue": [710, 500, 830, 625]
+    },
+    "iou_threshold": 0.5
+}

@@ -2,11 +2,6 @@ import time
 from pathlib import Path
 from typing import List, override
 
-from deepeval import evaluate
-from deepeval.test_case import LLMTestCase
-from deepeval.metrics import ContextualPrecisionMetric
-from deepeval.models.base_model import DeepEvalBaseLLM
-
 from llm_evaluator import llm_evaluate
 from benchmark3_event.system_prompts.qwen3vl_outcome_text import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_OUTCOME_TEXT

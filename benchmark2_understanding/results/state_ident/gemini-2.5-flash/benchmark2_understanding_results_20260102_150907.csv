@@ -1,0 +1,21 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-02T15:09:10.087448,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE1.json,YES,YES,Is the lamp on?
+2026-01-02T15:09:12.233801,state_ident,gemini-2.5-flash,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE10.json,YES,NO,Is the laser connected with a socket?
+2026-01-02T15:09:14.179662,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE11.json,NO,NO,Is the electic mixer connected with a socket?
+2026-01-02T15:09:15.815451,state_ident,gemini-2.5-flash,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE12.json,YES,NO,Is the electic mixer connected with a socket?
+2026-01-02T15:09:20.773732,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE13.json,YES,YES,Is the laser activated?
+2026-01-02T15:09:22.371420,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE14.json,NO,NO,Is the laser activated?
+2026-01-02T15:09:23.407142,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE15.json,YES,YES,Is the ball inside the bucket?
+2026-01-02T15:09:25.444666,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE16.json,NO,NO,Is the ball inside the bucket?
+2026-01-02T15:09:28.516555,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE17.json,YES,YES,Is the mouse inside the basket?
+2026-01-02T15:09:30.147255,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE18.json,NO,NO,Is the mouse inside the basket?
+2026-01-02T15:09:32.202530,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE19.json,NONE,NONE,Is the lamp on?
+2026-01-02T15:09:35.172257,state_ident,gemini-2.5-flash,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE2.json,NO,NONE,Is the lamp on?
+2026-01-02T15:09:37.015258,state_ident,gemini-2.5-flash,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE20.json,NONE,NO,Is the laser activated?
+2026-01-02T15:09:38.962225,state_ident,gemini-2.5-flash,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE3.json,YES,NONE,Is the aquarium broken?
+2026-01-02T15:09:40.906671,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE4.json,NO,NO,Is the aquarium broken?
+2026-01-02T15:09:42.210315,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE5.json,YES,YES,Is the candle burning?
+2026-01-02T15:09:43.461725,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE6.json,NO,NO,Is the candle burning?
+2026-01-02T15:09:45.310530,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE7.json,YES,YES,Is something connected to the conveyor belt?
+2026-01-02T15:09:47.459807,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE8.json,NO,NO,Is something connected to the conveyor belt?
+2026-01-02T15:09:49.303690,state_ident,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE9.json,NO,NO,Is the laser connected with a socket?

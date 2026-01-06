@@ -1,0 +1,15 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-02T15:26:00.098996,with_instruct,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP1.json,SUPER_BALL,SUPER_BALL,Which ball has the highest elasticity
+2026-01-02T15:26:00.945520,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP10.json,FISH_TANK,BASKETBALL,Which object breaks in case something falls on it
+2026-01-02T15:26:01.658941,with_instruct,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP11.json,ANGLED_MIRROR,ANGLED_MIRROR,Which object reflects a laser beam
+2026-01-02T15:26:02.373219,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP12.json,LOG_WALL,CINDER_BLOCK_WALL,Which wall is affected by an explosion?
+2026-01-02T15:26:03.167860,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP13.json,NONE,SUPER_BALL,Which ball has the highest elasticity
+2026-01-02T15:26:04.105291,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP14.json,NONE,HOT_AIR_BALLOON,Which object rises?
+2026-01-02T15:26:04.789928,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP2.json,CURIE_CAT,NEWTON_MOUSE,What makes the Newton Mouse run away?
+2026-01-02T15:26:05.503315,with_instruct,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP3.json,ALLIGATOR,ALLIGATOR,What is dangerous for Mel Schlemming
+2026-01-02T15:26:06.323633,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP4.json,BALLOON,HOT_AIR_BALLOON,Which object rises?
+2026-01-02T15:26:07.031028,with_instruct,bytedance/ui-tars-1.5-7b,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP5.json,BOWLING_BALL,BOWLING_BALL,Which ball weights the most?
+2026-01-02T15:26:07.655427,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP6.json,MELS_HOUSE,MEL_SCHLEMMINGTON,What house is in the scene?
+2026-01-02T15:26:08.283423,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP7.json,CHEESE,NEWTON_MOUSE,Which object the newton mouse will come after
+2026-01-02T15:26:09.002947,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP8.json,YELLOW_BRICK_WALL,GRASS_FLOOR,Which wall is the most slippery?
+2026-01-02T15:26:09.908637,with_instruct,bytedance/ui-tars-1.5-7b,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP9.json,CANDLE,NONE,Which object is able to burn

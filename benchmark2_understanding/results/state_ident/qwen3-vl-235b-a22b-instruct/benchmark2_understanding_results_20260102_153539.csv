@@ -1,0 +1,21 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-02T15:35:40.297000,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE1.json,YES,YES,Is the lamp on?
+2026-01-02T15:35:41.107560,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE10.json,YES,YES,Is the laser connected with a socket?
+2026-01-02T15:35:41.614471,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE11.json,NO,NO,Is the electic mixer connected with a socket?
+2026-01-02T15:35:42.332438,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE12.json,YES,YES,Is the electic mixer connected with a socket?
+2026-01-02T15:35:42.888973,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE13.json,YES,YES,Is the laser activated?
+2026-01-02T15:35:43.351520,state_ident,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE14.json,NO,NONE,Is the laser activated?
+2026-01-02T15:35:43.832181,state_ident,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE15.json,YES,NO,Is the ball inside the bucket?
+2026-01-02T15:35:44.588060,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE16.json,NO,NO,Is the ball inside the bucket?
+2026-01-02T15:35:45.123902,state_ident,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE17.json,YES,NO,Is the mouse inside the basket?
+2026-01-02T15:35:45.595900,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE18.json,NO,NO,Is the mouse inside the basket?
+2026-01-02T15:35:46.418093,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE19.json,NONE,NONE,Is the lamp on?
+2026-01-02T15:35:47.239832,state_ident,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE2.json,NO,NONE,Is the lamp on?
+2026-01-02T15:35:47.861900,state_ident,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE20.json,NONE,NO,Is the laser activated?
+2026-01-02T15:35:48.372867,state_ident,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE3.json,YES,NONE,Is the aquarium broken?
+2026-01-02T15:35:48.936017,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE4.json,NO,NO,Is the aquarium broken?
+2026-01-02T15:35:49.684955,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE5.json,YES,YES,Is the candle burning?
+2026-01-02T15:35:50.246194,state_ident,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE6.json,NO,YES,Is the candle burning?
+2026-01-02T15:35:51.137960,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE7.json,YES,YES,Is something connected to the conveyor belt?
+2026-01-02T15:35:51.604913,state_ident,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE8.json,NO,NO,Is something connected to the conveyor belt?
+2026-01-02T15:35:52.459847,state_ident,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE9.json,NO,YES,Is the laser connected with a socket?

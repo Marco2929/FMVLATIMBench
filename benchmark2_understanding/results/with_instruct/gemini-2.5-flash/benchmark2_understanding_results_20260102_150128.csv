@@ -1,0 +1,19 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-02T15:01:32.764150,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP1.json,SUPER_BALL,SUPER_BALL,Which ball has the highest elasticity
+2026-01-02T15:01:36.028093,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP10.json,FISH_TANK,FISH_TANK,Which object breaks in case something falls on it
+2026-01-02T15:01:40.114437,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP11.json,ANGLED_MIRROR,ANGLED_MIRROR,Which object reflects a laser beam
+2026-01-02T15:01:45.141374,with_instruct,gemini-2.5-flash,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP12.json,LOG_WALL,YELLOW_BRICK_WALL,Which wall is affected by an explosion?
+2026-01-02T15:01:48.306154,with_instruct,gemini-2.5-flash,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP13.json,NONE,SUPER_BALL,Which ball has the highest elasticity
+2026-01-02T15:02:01.412039,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP14.json,NONE,NONE,Which object rises?
+2026-01-02T15:02:04.393324,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP2.json,CURIE_CAT,CURIE_CAT,What makes the Newton Mouse run away?
+2026-01-02T15:02:06.831588,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP3.json,ALLIGATOR,ALLIGATOR,What is dangerous for Mel Schlemming
+2026-01-02T15:02:10.814779,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP4.json,BALLOON,BALLOON,Which object rises?
+2026-01-02T15:02:22.759557,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP5.json,BOWLING_BALL,BOWLING_BALL,Which ball weights the most?
+2026-01-02T15:02:24.649513,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP6.json,MELS_HOUSE,MELS_HOUSE,What house is in the scene?
+2026-01-02T15:02:26.687854,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP7.json,CHEESE,CHEESE,Which object the newton mouse will come after
+2026-01-02T15:02:46.491471,with_instruct,gemini-2.5-flash,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP8.json,YELLOW_BRICK_WALL,"THE_IMAGE_DISPLAYS_THREE_TYPES_OF_WALLS_WITHIN_THE_BLUE_GAME_PLAY_AREA:
+1.__THE_TOP_WALL_IS_A_WOODEN_WALL._ACCORDING_TO_THE_LIST,_THIS_IS_A_**WOODEN_WALL**,_AND_ITS_DESCRIPTION_STATES:_""ITS_SURFACE_ISN'T_VERY_SLIPPERY.""
+2.__THE_MIDDLE_WALL_IS_A_YELLOW_BRICK_WALL._ACCORDING_TO_THE_LIST,_THIS_IS_A_**YELLOW_BRICK_WALL**,_AND_ITS_DESCRIPTION_STATES:_""ITS_SURFACE_IS_PRETTY_SLIPPERY.""
+3.__THE_BOTTOM_WALL_IS_A_RED_BRICK_WALL._THERE_ISN'T_AN_EXACT_""RED_BRICK_WALL""_IN_THE_LIST._WE_MUST_CHOOSE_THE_BEST_FIT_FROM_THE_AVAILABLE_OPTIONS:
+____*___**CINDER_BLOCK_WALL**:_""THIS_IS_A_CINDER_BLOCK_WALL_OR_FLOOR._..._ITS_SURFACE_ISN'",Which wall is the most slippery?
+2026-01-02T15:02:50.386625,with_instruct,gemini-2.5-flash,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP9.json,CANDLE,CANDLE,Which object is able to burn

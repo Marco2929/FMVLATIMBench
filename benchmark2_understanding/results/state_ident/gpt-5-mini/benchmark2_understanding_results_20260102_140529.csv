@@ -1,0 +1,21 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-02T14:05:37.861276,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE1.json,YES,YES,Is the lamp on?
+2026-01-02T14:05:43.111810,state_ident,gpt-5-mini,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE10.json,YES,NO,Is the laser connected with a socket?
+2026-01-02T14:05:49.995149,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE11.json,NO,NO,Is the electic mixer connected with a socket?
+2026-01-02T14:05:59.700771,state_ident,gpt-5-mini,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE12.json,YES,NO,Is the electic mixer connected with a socket?
+2026-01-02T14:06:07.687500,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE13.json,YES,YES,Is the laser activated?
+2026-01-02T14:06:13.729451,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE14.json,NO,NO,Is the laser activated?
+2026-01-02T14:06:22.019934,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE15.json,YES,YES,Is the ball inside the bucket?
+2026-01-02T14:06:31.240492,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE16.json,NO,NO,Is the ball inside the bucket?
+2026-01-02T14:06:41.991167,state_ident,gpt-5-mini,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE17.json,YES,NO,Is the mouse inside the basket?
+2026-01-02T14:06:48.954477,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE18.json,NO,NO,Is the mouse inside the basket?
+2026-01-02T14:06:57.681452,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE19.json,NONE,NONE,Is the lamp on?
+2026-01-02T14:07:11.168521,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE2.json,NO,NO,Is the lamp on?
+2026-01-02T14:07:18.959316,state_ident,gpt-5-mini,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE20.json,NONE,NO,Is the laser activated?
+2026-01-02T14:07:27.048309,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE3.json,YES,YES,Is the aquarium broken?
+2026-01-02T14:07:32.467567,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE4.json,NO,NO,Is the aquarium broken?
+2026-01-02T14:07:37.084403,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE5.json,YES,YES,Is the candle burning?
+2026-01-02T14:07:40.668435,state_ident,gpt-5-mini,False,,False,,exact match,benchmark2_understanding/examples/object_state_ident/STATE6.json,NO,YES,Is the candle burning?
+2026-01-02T14:07:55.687746,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE7.json,YES,YES,Is something connected to the conveyor belt?
+2026-01-02T14:08:17.933863,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE8.json,NO,NO,Is something connected to the conveyor belt?
+2026-01-02T14:08:25.022241,state_ident,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_state_ident/STATE9.json,NO,NO,Is the laser connected with a socket?

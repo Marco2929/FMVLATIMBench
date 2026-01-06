@@ -240,6 +240,9 @@ debug
 .vscode
 .deepeval
 results
+main_benchmark4_manipulation_marco.py
+run_understanding.zsh
+run_manipulation.zsh
 !benchmark1*/results
 !benchmark2*/results
 !benchmark3*/results

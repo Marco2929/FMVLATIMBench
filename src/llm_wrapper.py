@@ -283,7 +283,7 @@ class OpenAILLMWrapper(Qwen3VLLLMWrapper):
         ]
         if logging:
             print("Sending request to model...")
-        response = self.client.chat.completions.create(model=self.model_name, messages=messages, timeout=15)
+        response = self.client.chat.completions.create(model=self.model_name, messages=messages, timeout=60)
         part_name = response.choices[0].message.content
         if logging:
             pprint(response.model_dump())

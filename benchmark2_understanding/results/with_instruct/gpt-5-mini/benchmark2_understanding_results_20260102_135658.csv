@@ -1,0 +1,15 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-02T13:57:03.846868,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP1.json,SUPER_BALL,SUPER_BALL,Which ball has the highest elasticity
+2026-01-02T13:57:07.526524,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP10.json,FISH_TANK,FISH_TANK,Which object breaks in case something falls on it
+2026-01-02T13:57:13.562728,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP11.json,ANGLED_MIRROR,ANGLED_MIRROR,Which object reflects a laser beam
+2026-01-02T13:57:22.411013,with_instruct,gpt-5-mini,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP12.json,LOG_WALL,YELLOW_BRICK_WALL,Which wall is affected by an explosion?
+2026-01-02T13:57:35.068234,with_instruct,gpt-5-mini,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP13.json,NONE,SUPER_BALL,Which ball has the highest elasticity
+2026-01-02T13:57:43.873404,with_instruct,gpt-5-mini,False,,False,,exact match,benchmark2_understanding/examples/object_property_ident/PROP14.json,NONE,BALLOON,Which object rises?
+2026-01-02T13:57:48.855900,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP2.json,CURIE_CAT,CURIE_CAT,What makes the Newton Mouse run away?
+2026-01-02T13:57:53.709747,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP3.json,ALLIGATOR,ALLIGATOR,What is dangerous for Mel Schlemming
+2026-01-02T13:57:58.516365,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP4.json,BALLOON,BALLOON,Which object rises?
+2026-01-02T13:58:06.435007,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP5.json,BOWLING_BALL,BOWLING_BALL,Which ball weights the most?
+2026-01-02T13:58:09.349624,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP6.json,MELS_HOUSE,MELS_HOUSE,What house is in the scene?
+2026-01-02T13:58:14.075868,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP7.json,CHEESE,CHEESE,Which object the newton mouse will come after
+2026-01-02T13:58:23.400468,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP8.json,YELLOW_BRICK_WALL,YELLOW_BRICK_WALL,Which wall is the most slippery?
+2026-01-02T13:58:26.894951,with_instruct,gpt-5-mini,True,,True,,exact match,benchmark2_understanding/examples/object_property_ident/PROP9.json,CANDLE,CANDLE,Which object is able to burn

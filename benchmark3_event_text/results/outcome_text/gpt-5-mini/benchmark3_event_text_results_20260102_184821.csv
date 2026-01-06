@@ -1,0 +1,26 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-02T18:48:35.011995,outcome_text,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME1.json,The ball falls down in the pipe because of the gravity and after going through it lands on the ground where it bounces a bit,"The ball falls onto the brick platform, rolls to the right across it, and then falls off.",What happens to the ball when the machine is started?
+2026-01-02T18:48:43.956348,outcome_text,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME10.json,The ball won't move and stay on the platfrom,"The ball will roll into the pipe, travel through it, and pop out onto the wooden seesaw (the plank on the right).",Where will the ball land?
+2026-01-02T18:48:54.443342,outcome_text,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME2.json,The mouse runs away from the cat and triggers the conveyor belt this moves the cheese and it falls into the bucket,The mouse starts running on its exercise wheel (causing the mechanism to move).,What does the mouse do after simulation is started?
+2026-01-02T18:49:08.343102,outcome_text,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME3.json,The electric motor activates the conveyor belt that moves the cheese and it hits the button of the boxing glove,"- The electric motor spins.
+- Its output pinion turns the meshing yellow gears (gear train).
+- The gear train drives the crank/arm linkage that turns the two small sprockets/rollers.
+- The rotating rollers drive the short conveyor belt.
+- The pancake/donut on the belt is carried rightward to the boxing glove at the end of the belt.
+- The glove punches the pancake off the belt, sending it leftward across the screen (toward the ball).",Describe the chain of events starting from the electric motor
+2026-01-02T18:49:53.902901,outcome_text,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME4.json,The monkey get triggered by the banana that turns the belt which turns three gears after it moves the trans-roto-matic,"1) The monkey walks/stands on the little conveyor platform at the left.  
+2) The conveyor turns, which in turn rotates the three large meshing yellow gears beneath it.  
+3) Those gears drive the small geared winch/crank assembly on the right.  
+4) The winch winds the rope that holds the hanging bucket, so the bucket is pulled up toward the small triangular pulley.  
+5) As the bucket/rope is pulled up, that motion transfers to the short linkage/ratchet on the far right and rotates the horizontal shaft there (the little crank/axle assembly).  
+
+So: monkey → conveyor → three gears → winch/crank → rope → bucket rises → right‑hand linkage/shaft is turned. (There are no further visible devices connected beyond that shaft in the screenshot, so the sequence stops there.)",Describe the chain of events starting from the monkey
+2026-01-02T18:50:37.939485,outcome_text,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME5.json,The laser is plugged into the socked powering the ballon to go upwards,The outlet supplies power to the small electric blower/motor sitting to its right. When the socket is on the motor spins and produces an airflow; that air pushes the hot‑air balloon and drives the balloon to the right.,Describe the chain of events starting from the socket
+2026-01-02T18:50:47.540998,outcome_text,gpt-5-mini,True,,True,,exact match,benchmark3_event/examples/outcome_text/OUTCOME6.json,The bowling ball travels through the pipes and lands on the wooden floor and triggers....,"The ball will drop into the top pipe, travel through the S-shaped pipe, exit the rightmost opening and fall onto the right end of the seesaw (the plank).",Where will the bowling ball land?
+2026-01-02T18:51:06.681766,outcome_text,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME7.json,Nothing triggers the socket lever,"The drill/motor has no power — it isn’t connected to any power source, so it won’t run.",What makes the machine not working?
+2026-01-02T18:51:25.524199,outcome_text,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME8.json,None,"- The monkey moves into the wind‑up toy to its left.
+- The collision sets the wind‑up toy running.
+- The toy runs into the lamp on the upper left platform and knocks it off.
+- The lamp tips/falls from the ledge and strikes the candle platform.
+- The falling lamp’s impact causes the candle to be lit (the final result of the chain).",Describe the chain of events starting from the monkey
+2026-01-02T18:51:32.947950,outcome_text,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME9.json,Nothing there’s no event that triggers the mouse,The mouse runs to the right — it runs toward the soccer ball once the simulation starts.,What does the newton mouse after simulation is started?

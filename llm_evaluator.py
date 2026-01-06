@@ -8,7 +8,7 @@ eval_prompt = "You are a strict evaluation model designed for output verificatio
 def llm_evaluate(input, actual_output, expected_output, context, model_name="qwen/qwen3-vl-235b-a22b-instruct", eval_prompt=eval_prompt):
     base_url = "https://openrouter.ai/api/v1"
 
-    api_key = get_api_key()
+    api_key = get_api_key('OPENROUTER_API_KEY')
 
     client = OpenAI(api_key=api_key, base_url=base_url)
     messages = [
