@@ -1,3 +1,5 @@
+<img width="277" height="151" alt="grafik" src="https://github.com/user-attachments/assets/4251090d-691b-47fa-8d59-421910d6d1db" />
+
 # FmVlaTimBench
 
 Benchmarking VLAs and VLMs again The Incredible Machine 2 (TIM2) with increasing difficulty.

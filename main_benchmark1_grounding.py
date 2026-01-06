@@ -11,6 +11,7 @@ from benchmark1_grounding.system_prompts.qwen3vl_multi_bbox import SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen25vl_object_recognition import SYSTEM_PROMPT as QWEN25_CLASSIFY_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen25vl_single_bbox import SYSTEM_PROMPT as QWEN25_LOCALIZE_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen25vl_multi_bbox import SYSTEM_PROMPT as QWEN25_MULTILOCALIZE_SYSTEM_PROMPT
+from benchmark1_grounding.system_prompts.grok_single_bbox import SYSTEM_PROMPT as GROK_LOCALIZE_SYSTEM_PROMPT
 from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
 from src.llm_wrapper import BoundingBox, Point, Qwen3VLLLMWrapper, UiTarsLLMWrapper
@@ -26,6 +27,7 @@ class GroundingBenchmarkType(BenchmarkBase):
     QWEN25_CLASSIFY = 'qwen25_classify'
     QWEN25_LOCALIZE = 'qwen25_localize'
     QWEN25_LOCALIZE_MULTI = 'qwen25_localize_multi'
+    GROK_LOCALIZE = 'grok_localize'
 
     @override
     def get_system_prompt(self) -> str:
@@ -44,6 +46,8 @@ class GroundingBenchmarkType(BenchmarkBase):
                 return QWEN25_LOCALIZE_SYSTEM_PROMPT
             case GroundingBenchmarkType.QWEN25_LOCALIZE_MULTI:
                 return QWEN25_MULTILOCALIZE_SYSTEM_PROMPT
+            case GroundingBenchmarkType.GROK_LOCALIZE:
+                return GROK_LOCALIZE_SYSTEM_PROMPT
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
 
@@ -61,6 +65,8 @@ class GroundingBenchmarkType(BenchmarkBase):
             case GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI | GroundingBenchmarkType.QWEN25_LOCALIZE_MULTI:
                 folders = [multi_object]
             case GroundingBenchmarkType.UITARS_LOCALIZE:
+                folders = [single_object, multi_object]
+            case GroundingBenchmarkType.GROK_LOCALIZE:
                 folders = [single_object, multi_object]
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
@@ -121,7 +127,7 @@ which converts to:
             case GroundingBenchmarkType.QWEN3_CLASSIFY | GroundingBenchmarkType.QWEN25_CLASSIFY | GroundingBenchmarkType.UITARS_CLASSIFY:
                 part_name = parse_classification(part)
                 return part_name if part_name else "NONE"
-            case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.UITARS_LOCALIZE | GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI | GroundingBenchmarkType.QWEN25_LOCALIZE | GroundingBenchmarkType.QWEN25_LOCALIZE_MULTI:
+            case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.UITARS_LOCALIZE | GroundingBenchmarkType.QWEN3_LOCALIZE_MULTI | GroundingBenchmarkType.QWEN25_LOCALIZE | GroundingBenchmarkType.QWEN25_LOCALIZE_MULTI | GroundingBenchmarkType.GROK_LOCALIZE:
                 bbox = parse_bbox(part)
                 if bbox:
                     assert 'UNKNOWN' not in bbox.label, "Ground truth contains UNKNOWN label. Model won't be able to predict it."
@@ -256,7 +262,7 @@ if __name__ == "__main__":
                     response=response
                 )
 
-            case GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.QWEN25_LOCALIZE:
+            case GroundingBenchmarkType.GROK_LOCALIZE | GroundingBenchmarkType.QWEN3_LOCALIZE | GroundingBenchmarkType.QWEN25_LOCALIZE:
                 assert isinstance(ground_truth, list)
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
@@ -336,29 +342,23 @@ if __name__ == "__main__":
                 assert isinstance(ground_truth, list)
                 assert len(ground_truth) >= 1
                 ground_truth_bbox = ground_truth[0]
-                additional_user_prompt = f"Select the {ground_truth_bbox.label}"
+                additional_user_prompt = f"Click the {ground_truth_bbox.label}"
                 response = cli.model.generate_model_response(input_png, system_prompt=system_prompt, additional_user_prompt=additional_user_prompt) or ""
-                parsed_response_bbox = cli.model.parse_response_bbox(response, image_height=image_height, image_width=image_width)
-                iou = 0
-                if parsed_response_bbox is None:
-                    print("No bbox parsed from response.")
-                    distance = None
-                else:
-                    iou = evaluate_response_bbox(ground_truth_bbox, parsed_response_bbox, check_label=False)
-                    distance = ground_truth_bbox.center().euclidian_distance_to(parsed_response_bbox.center())
+                parsed_response_tuple = cli.model.parse_response_point(response)
+                distance = ground_truth_bbox.center().euclidian_distance_to(Point(*parsed_response_tuple))
 
                 result = SingleTaskResult(
                     benchmark_type=benchmark.value,
                     model=cli.model.model_name,
                     final_score=distance if distance is not None else -1,
-                    iou=iou,
+                    iou=None,
                     classification_correct=None,
                     distance=distance,
-                    score_formula="IoU and distance",
+                    score_formula="euclidean distance",
                     input_file=str(file_path),
                     ground_truth=ground_truth_bbox,
                     user_prompt=additional_user_prompt,
-                    response=parsed_response_bbox if parsed_response_bbox is not None else response
+                    response=response
                 )
 
             case _:

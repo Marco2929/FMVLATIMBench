@@ -396,3 +396,53 @@ class Qwen25VLLLMWrapper(LLMWrapperBase):
             print("Failed to parse JSON from model response.")
             print("Raw response:", response_text)
             return []
+
+class GrokLLMWrapper(Qwen3VLLLMWrapper):
+    def __init__(self, api_key: str, base_url: str, model_name: str):
+        super().__init__(api_key, base_url, model_name)
+
+    def encode_image(self, image_path: Path) -> str:
+        return super().encode_image(pad_image(image_path, 28))
+
+    @override
+    def parse_response_point(self, response: str) -> tuple[int, int]:
+        pass
+
+    @override
+    def parse_response_bbox(self, response: str, image_width: int, image_height: int) -> BoundingBox|None:
+        response_text = response.strip().replace('```json', '').replace('```', '')
+        try:
+            bbox_data = json.loads(response_text)
+            if not isinstance(bbox_data, dict):
+                print("Response JSON is not an object.")
+                print("Raw response:", response_text)
+                return None
+            bbox = bbox_data.get("bbox")
+            if not isinstance(bbox, list) or len(bbox) != 4:
+                return None
+            
+            label = bbox_data.get("label")
+            if not isinstance(label, str) or not label:
+                print("No label given.")
+                return None
+            
+            # Convert normalized coordinates (0-1) to absolute pixels
+            x_min, y_min, x_max, y_max = bbox
+            x_min_px = int((x_min) * image_width)
+            y_min_px = int((y_min) * image_height)
+            x_max_px = int((x_max) * image_width)
+            y_max_px = int((y_max) * image_height)
+
+            bounding_box = BoundingBox(
+                label=label.upper(),
+                x_min=x_min_px,
+                y_min=y_min_px,
+                x_max=x_max_px,
+                y_max=y_max_px
+            )
+            
+            return bounding_box
+        except json.JSONDecodeError:
+            print("Failed to parse JSON from model response.")
+            print("Raw response:", response_text)
+            return None
