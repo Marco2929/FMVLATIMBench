@@ -11,11 +11,11 @@ from benchmark1_grounding.system_prompts.qwen3vl_multi_bbox import SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen25vl_object_recognition import SYSTEM_PROMPT as QWEN25_CLASSIFY_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen25vl_single_bbox import SYSTEM_PROMPT as QWEN25_LOCALIZE_SYSTEM_PROMPT
 from benchmark1_grounding.system_prompts.qwen25vl_multi_bbox import SYSTEM_PROMPT as QWEN25_MULTILOCALIZE_SYSTEM_PROMPT
-from benchmark1_grounding.system_prompts.grok_single_bbox import SYSTEM_PROMPT as GROK_LOCALIZE_SYSTEM_PROMPT
 from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.image_processing import get_image_dimensions
 from src.llm_wrapper import BoundingBox, Point, Qwen3VLLLMWrapper, UiTarsLLMWrapper
 from src.results_model import SingleTaskResult
+GROK_LOCALIZE_SYSTEM_PROMPT=""
 
 
 class GroundingBenchmarkType(BenchmarkBase):

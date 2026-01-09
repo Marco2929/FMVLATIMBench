@@ -5,16 +5,24 @@ from typing import override
 
 from tqdm import tqdm
 
-from benchmark3_event.system_prompts.qwen3vl_outcome_visual import \
-    SYSTEM_PROMPT as SYSTEM_PROMPT_OUTCOME_VISUAL
-from benchmark3_event.system_prompts.qwen3vl_cause_visual import \
-    SYSTEM_PROMPT as SYSTEM_PROMPT_CAUSE_VISUAL
-from benchmark3_event.system_prompts.qwen3vl_effect_visual import \
-    SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_VISUAL
 from benchmark3_event.system_prompts.absolute_point_visual import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_ABSOLUTE_POINT_VISUAL
+from benchmark3_event.system_prompts.absolute_point_visual_partsdescriptions import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_ABSOLUTE_POINT_VISUAL_PARTSDESCRIPTIONS
+from benchmark3_event.system_prompts.absolute_point_visual_partslist import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_ABSOLUTE_POINT_VISUAL_PARTSLIST
 from benchmark3_event.system_prompts.absolute_bbox_visual import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_ABSOLUTE_BBOX_VISUAL
+from benchmark3_event.system_prompts.absolute_bbox_visual_partsdescriptions import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_ABSOLUTE_BBOX_VISUAL_PARTSDESCRIPTIONS
+from benchmark3_event.system_prompts.absolute_bbox_visual_partslist import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_ABSOLUTE_BBOX_VISUAL_PARTSLIST
+from benchmark3_event.system_prompts.relative_bbox_visual import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL
+from benchmark3_event.system_prompts.relative_bbox_visual_partsdescriptions import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL_PARTSDESCRIPTIONS
+from benchmark3_event.system_prompts.relative_bbox_visual_partslist import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL_PARTSLIST
 
 from main_benchmark1_grounding import evaluate_response_bbox, evaluate_response_bbox_distance
 from src.benchmark_base import BenchmarkBase, BenchmarkCli
@@ -34,10 +42,27 @@ class EventVisualBenchmarkType2(BenchmarkBase):
     EFFECT_VISUAL = 'effect_visual'
     CAUSE_VISUAL = 'cause_visual'
 
+    OUTCOME_VISUAL_PARTSLIST = 'outcome_visual_partslist'
+    EFFECT_VISUAL_PARTSLIST = 'effect_visual_partslist'
+    CAUSE_VISUAL_PARTSLIST = 'cause_visual_partslist'
+
+    OUTCOME_VISUAL_PARTSDESCRIPTIONS = 'outcome_visual_partsdescriptions'
+    EFFECT_VISUAL_PARTSDESCRIPTIONS = 'effect_visual_partsdescriptions'
+    CAUSE_VISUAL_PARTSDESCRIPTIONS = 'cause_visual_partsdescriptions'
+
+
 class EventVisualBenchmarkType(Enum):
     OUTCOME_VISUAL = 'outcome_visual'
     EFFECT_VISUAL = 'effect_visual'
     CAUSE_VISUAL = 'cause_visual'
+    
+    OUTCOME_VISUAL_PARTSLIST = 'outcome_visual_partslist'
+    EFFECT_VISUAL_PARTSLIST = 'effect_visual_partslist'
+    CAUSE_VISUAL_PARTSLIST = 'cause_visual_partslist'
+    
+    OUTCOME_VISUAL_PARTSDESCRIPTIONS = 'outcome_visual_partsdescriptions'
+    EFFECT_VISUAL_PARTSDESCRIPTIONS = 'effect_visual_partsdescriptions'
+    CAUSE_VISUAL_PARTSDESCRIPTIONS = 'cause_visual_partsdescriptions'
 
     def get_model_name(self) -> str:
         match self:
@@ -47,20 +72,62 @@ class EventVisualBenchmarkType(Enum):
     def get_system_prompt(self, model: LLMWrapperBase) -> str:
         if isinstance(model, UiTarsLLMWrapper):
             print("Using UiTars system prompt for absolute point visual localization.")
-            return SYSTEM_PROMPT_ABSOLUTE_POINT_VISUAL
+            if self in (EventVisualBenchmarkType.OUTCOME_VISUAL,
+                        EventVisualBenchmarkType.EFFECT_VISUAL,
+                        EventVisualBenchmarkType.CAUSE_VISUAL):
+                return SYSTEM_PROMPT_ABSOLUTE_POINT_VISUAL
+            if self in (EventVisualBenchmarkType.OUTCOME_VISUAL_PARTSLIST,
+                        EventVisualBenchmarkType.EFFECT_VISUAL_PARTSLIST,
+                        EventVisualBenchmarkType.CAUSE_VISUAL_PARTSLIST):
+                return SYSTEM_PROMPT_ABSOLUTE_POINT_VISUAL_PARTSLIST
+            if self in (EventVisualBenchmarkType.OUTCOME_VISUAL_PARTSDESCRIPTIONS,
+                        EventVisualBenchmarkType.EFFECT_VISUAL_PARTSDESCRIPTIONS,
+                        EventVisualBenchmarkType.CAUSE_VISUAL_PARTSDESCRIPTIONS):
+                return SYSTEM_PROMPT_ABSOLUTE_POINT_VISUAL_PARTSDESCRIPTIONS
+            raise ValueError(f"Benchmark type not implemented for UiTars: {self}")
         if isinstance(model, Qwen25VLLLMWrapper):
             print("Using Qwen2.5-VL system prompt for absolute bbox visual localization.")
-            return SYSTEM_PROMPT_ABSOLUTE_BBOX_VISUAL
+            if self in (EventVisualBenchmarkType.OUTCOME_VISUAL,
+                        EventVisualBenchmarkType.EFFECT_VISUAL,
+                        EventVisualBenchmarkType.CAUSE_VISUAL):
+                return SYSTEM_PROMPT_ABSOLUTE_BBOX_VISUAL
+            if self in (EventVisualBenchmarkType.OUTCOME_VISUAL_PARTSLIST,
+                        EventVisualBenchmarkType.EFFECT_VISUAL_PARTSLIST,
+                        EventVisualBenchmarkType.CAUSE_VISUAL_PARTSLIST):
+                return SYSTEM_PROMPT_ABSOLUTE_BBOX_VISUAL_PARTSLIST
+            if self in (EventVisualBenchmarkType.OUTCOME_VISUAL_PARTSDESCRIPTIONS,
+                        EventVisualBenchmarkType.EFFECT_VISUAL_PARTSDESCRIPTIONS,
+                        EventVisualBenchmarkType.CAUSE_VISUAL_PARTSDESCRIPTIONS):
+                return SYSTEM_PROMPT_ABSOLUTE_BBOX_VISUAL_PARTSDESCRIPTIONS
+            raise ValueError(f"Benchmark type not implemented for Qwen2.5-VL: {self}")
         match self:
             case EventVisualBenchmarkType.OUTCOME_VISUAL:
                 print("Using system prompt for outcome visual localization.")
-                return SYSTEM_PROMPT_OUTCOME_VISUAL
+                return SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL
             case EventVisualBenchmarkType.EFFECT_VISUAL:
                 print("Using system prompt for effect visual localization.")
-                return SYSTEM_PROMPT_EFFECT_VISUAL
+                return SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL
             case EventVisualBenchmarkType.CAUSE_VISUAL:
                 print("Using system prompt for cause visual localization.")
-                return SYSTEM_PROMPT_CAUSE_VISUAL
+                return SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL
+            case EventVisualBenchmarkType.OUTCOME_VISUAL_PARTSLIST:
+                print("Using system prompt with parts list for outcome visual localization.")
+                return SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL_PARTSLIST
+            case EventVisualBenchmarkType.EFFECT_VISUAL_PARTSLIST:
+                print("Using system prompt with parts list for effect visual localization.")
+                return SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL_PARTSLIST
+            case EventVisualBenchmarkType.CAUSE_VISUAL_PARTSLIST:
+                print("Using system prompt with parts list for cause visual localization.")
+                return SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL_PARTSLIST
+            case EventVisualBenchmarkType.OUTCOME_VISUAL_PARTSDESCRIPTIONS:
+                print("Using system prompt with parts descriptions for outcome visual localization.")
+                return SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL_PARTSDESCRIPTIONS
+            case EventVisualBenchmarkType.EFFECT_VISUAL_PARTSDESCRIPTIONS:
+                print("Using system prompt with parts descriptions for effect visual localization.")
+                return SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL_PARTSDESCRIPTIONS
+            case EventVisualBenchmarkType.CAUSE_VISUAL_PARTSDESCRIPTIONS:
+                print("Using system prompt with parts descriptions for cause visual localization.")
+                return SYSTEM_PROMPT_RELATIVE_BBOX_VISUAL_PARTSDESCRIPTIONS
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
             
@@ -71,11 +138,11 @@ class EventVisualBenchmarkType(Enum):
         cause_visual = base_path / "cause_visual"
         
         match self:
-            case EventVisualBenchmarkType.OUTCOME_VISUAL:
+            case EventVisualBenchmarkType.OUTCOME_VISUAL | EventVisualBenchmarkType.OUTCOME_VISUAL_PARTSLIST | EventVisualBenchmarkType.OUTCOME_VISUAL_PARTSDESCRIPTIONS:
                 folders = [outcome_visual]
-            case EventVisualBenchmarkType.EFFECT_VISUAL:
+            case EventVisualBenchmarkType.EFFECT_VISUAL | EventVisualBenchmarkType.EFFECT_VISUAL_PARTSLIST | EventVisualBenchmarkType.EFFECT_VISUAL_PARTSDESCRIPTIONS:
                 folders = [effect_visual]
-            case EventVisualBenchmarkType.CAUSE_VISUAL:
+            case EventVisualBenchmarkType.CAUSE_VISUAL | EventVisualBenchmarkType.CAUSE_VISUAL_PARTSLIST | EventVisualBenchmarkType.CAUSE_VISUAL_PARTSDESCRIPTIONS:
                 folders = [cause_visual]
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
@@ -94,6 +161,7 @@ if __name__ == "__main__":
     assert cli.model is not None
 
     system_prompt = benchmark.get_system_prompt(cli.model)
+    print(f"Using system prompt:\n{system_prompt}\n")
 
     pbar = tqdm(benchmark_files, desc="Processing files", unit="file")
     for file_path in pbar:
