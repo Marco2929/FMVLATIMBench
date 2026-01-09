@@ -9,6 +9,18 @@ from benchmark3_event.system_prompts.qwen3vl_cause_text import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_CAUSE_TEXT
 from benchmark3_event.system_prompts.qwen3vl_effect_text import \
     SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_TEXT
+from benchmark3_event.system_prompts.qwen3vl_outcome_text_partslist import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_OUTCOME_TEXT_PARTSLIST
+from benchmark3_event.system_prompts.qwen3vl_cause_text_partslist import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_CAUSE_TEXT_PARTSLIST
+from benchmark3_event.system_prompts.qwen3vl_effect_text_partslist import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_TEXT_PARTSLIST
+from benchmark3_event.system_prompts.qwen3vl_outcome_text_partsdescriptions import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_OUTCOME_TEXT_PARTSDESCRIPTIONS
+from benchmark3_event.system_prompts.qwen3vl_cause_text_partsdescriptions import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_CAUSE_TEXT_PARTSDESCRIPTIONS
+from benchmark3_event.system_prompts.qwen3vl_effect_text_partsdescriptions import \
+    SYSTEM_PROMPT as SYSTEM_PROMPT_EFFECT_TEXT_PARTSDESCRIPTIONS
 
 from src.benchmark_base import BenchmarkBase, BenchmarkCli
 from src.llm_wrapper import Qwen3VLLLMWrapper
@@ -20,6 +32,14 @@ class EventBenchmarkType(BenchmarkBase):
     OUTCOME_TEXT = 'outcome_text'
     EFFECT_TEXT = 'effect_text'
     CAUSE_TEXT = 'cause_text'
+    
+    OUTCOME_TEXT_PARTSLIST = 'outcome_text_partslist'
+    EFFECT_TEXT_PARTSLIST = 'effect_text_partslist'
+    CAUSE_TEXT_PARTSLIST = 'cause_text_partslist'
+    
+    OUTCOME_TEXT_PARTSDESCRIPTIONS = 'outcome_text_partsdescriptions'
+    EFFECT_TEXT_PARTSDESCRIPTIONS = 'effect_text_partsdescriptions'
+    CAUSE_TEXT_PARTSDESCRIPTIONS = 'cause_text_partsdescriptions'
     
     @override
     def get_model_name(self) -> str:
@@ -34,6 +54,18 @@ class EventBenchmarkType(BenchmarkBase):
                 return SYSTEM_PROMPT_EFFECT_TEXT
             case EventBenchmarkType.CAUSE_TEXT:
                 return SYSTEM_PROMPT_CAUSE_TEXT
+            case EventBenchmarkType.OUTCOME_TEXT_PARTSLIST:
+                return SYSTEM_PROMPT_OUTCOME_TEXT_PARTSLIST
+            case EventBenchmarkType.EFFECT_TEXT_PARTSLIST:
+                return SYSTEM_PROMPT_EFFECT_TEXT_PARTSLIST
+            case EventBenchmarkType.CAUSE_TEXT_PARTSLIST:
+                return SYSTEM_PROMPT_CAUSE_TEXT_PARTSLIST
+            case EventBenchmarkType.OUTCOME_TEXT_PARTSDESCRIPTIONS:
+                return SYSTEM_PROMPT_OUTCOME_TEXT_PARTSDESCRIPTIONS
+            case EventBenchmarkType.EFFECT_TEXT_PARTSDESCRIPTIONS:
+                return SYSTEM_PROMPT_EFFECT_TEXT_PARTSDESCRIPTIONS
+            case EventBenchmarkType.CAUSE_TEXT_PARTSDESCRIPTIONS:
+                return SYSTEM_PROMPT_CAUSE_TEXT_PARTSDESCRIPTIONS
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
             
@@ -45,11 +77,11 @@ class EventBenchmarkType(BenchmarkBase):
         cause_text = base_path / "cause_text"
         
         match self:
-            case EventBenchmarkType.OUTCOME_TEXT:
+            case EventBenchmarkType.OUTCOME_TEXT | EventBenchmarkType.OUTCOME_TEXT_PARTSLIST | EventBenchmarkType.OUTCOME_TEXT_PARTSDESCRIPTIONS:
                 folders = [outcome_text]
-            case EventBenchmarkType.EFFECT_TEXT:
+            case EventBenchmarkType.EFFECT_TEXT | EventBenchmarkType.EFFECT_TEXT_PARTSLIST | EventBenchmarkType.EFFECT_TEXT_PARTSDESCRIPTIONS:
                 folders = [effect_text]
-            case EventBenchmarkType.CAUSE_TEXT:
+            case EventBenchmarkType.CAUSE_TEXT | EventBenchmarkType.CAUSE_TEXT_PARTSLIST | EventBenchmarkType.CAUSE_TEXT_PARTSDESCRIPTIONS:
                 folders = [cause_text]
             case _:
                 raise ValueError(f"Benchmark type not implemented: {self}")
