@@ -246,3 +246,4 @@ run_manipulation.zsh
 !benchmark1*/results
 !benchmark2*/results
 !benchmark3*/results
+bench4-macos
