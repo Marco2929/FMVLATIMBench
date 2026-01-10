@@ -8,8 +8,40 @@ import numpy as np
 ROOT_DIR = 'results'
 OUTPUT_FILE = 'benchmark_results_plot_grounding.png'
 
-# Restore the style you liked
+# 1. Map Raw IDs (from CSV) to Display Names
+MODEL_MAPPING = {
+    'Qwen2.5-VL-7B-Instruct': 'Qwen2.5 VL',
+    'ui-tars-1.5-7b': 'UI-TARS 1.5',
+    'qwen3-vl-235b-a22b-instruct': 'Qwen3 VL',
+    'gemini-2.5-flash': 'Gemini 2.5 Flash',
+    'gpt-5-mini': 'GPT 5 Mini'
+}
+
+# 2. Define the exact order for the X-axis
+DESIRED_ORDER = [
+    'Qwen2.5 VL',
+    'UI-TARS 1.5',
+    'Qwen3 VL',
+    'Gemini 2.5 Flash',
+    'GPT 5 Mini'
+]
+
+# --- PRESENTATION STYLING ---
 plt.style.use('ggplot')
+
+# Apply global font scaling for PowerPoint visibility
+plt.rcParams.update({
+    'font.size': 16,  # Base font size
+    'axes.titlesize': 24,  # Main Title
+    'axes.labelsize': 20,  # X and Y axis labels
+    'xtick.labelsize': 16,  # X-axis tick values
+    'ytick.labelsize': 16,  # Y-axis tick values
+    'legend.fontsize': 16,  # Legend text
+    'figure.titlesize': 26,  # Figure super title
+    'font.weight': 'bold',  # Make text bolder generally
+    'axes.labelweight': 'bold',
+    'axes.titleweight': 'bold',
+})
 
 
 def parse_benchmark_results(root_dir):
@@ -26,11 +58,15 @@ def parse_benchmark_results(root_dir):
                 with open(file_path, 'r', newline='', encoding='utf-8') as f:
                     reader = csv.reader(f)
                     for row in reader:
+                        # Basic validation
                         if len(row) < 3 or not row[0].startswith("20"):
                             continue
 
                         category_raw = row[1].strip()
-                        model_name = row[2].strip().split('/')[-1]
+                        raw_model_name = row[2].strip().split('/')[-1]
+
+                        # Apply Mapping - Default to raw name if not found in dict
+                        model_name = MODEL_MAPPING.get(raw_model_name, raw_model_name)
 
                         score = np.nan
                         distance = np.nan
@@ -38,6 +74,7 @@ def parse_benchmark_results(root_dir):
 
                         if "classify" in category_raw:
                             category_label = "Classify"
+                            # Handle boolean strings safely
                             score = 100.0 if row[3].strip() == "True" else 0.0
                         elif "localize" in category_raw:
                             category_label = "Localize Multi" if "multi" in category_raw else "Localize"
@@ -89,61 +126,88 @@ def plot_benchmark(df):
     pivot_score = df_agg.pivot(index='Model', columns='Category', values='Score')
     pivot_dist = df_agg.pivot(index='Model', columns='Category', values='Distance')
 
-    # --- SORTING LOGIC (CHANGED) ---
-    # Sort by Mean Score Ascending (Low -> High)
-    # This places the Best Model (Highest Score) on the RIGHT side of the plot
-    model_order = pivot_score.mean(axis=1).sort_values(ascending=True).index
+    # --- SORTING LOGIC ---
+    existing_models = [m for m in DESIRED_ORDER if m in pivot_score.index]
+    unlisted_models = [m for m in pivot_score.index if m not in existing_models]
+    final_order = existing_models + unlisted_models
 
-    pivot_score = pivot_score.reindex(model_order)
-    pivot_dist = pivot_dist.reindex(model_order)
+    pivot_score = pivot_score.reindex(final_order)
+    pivot_dist = pivot_dist.reindex(final_order)
 
-    # Setup Subplots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
+    # --- PRINT COMPLETE TABLES TO CONSOLE ---
+    print("\n" + "=" * 50)
+    print("       BENCHMARK RESULTS: ACCURACY / IoU (%)")
+    print("=" * 50)
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', 1000):
+        print(pivot_score.round(2))
 
-    # --- PLOT 1: SCORES ---
-    colors_top = [category_colors[col] for col in pivot_score.columns]
-    pivot_score.plot(kind='bar', ax=ax1, width=0.7, color=colors_top,
-                     edgecolor='white', linewidth=0.7)
+    print("\n" + "=" * 50)
+    print("       BENCHMARK RESULTS: DISTANCE (Pixels)")
+    print("=" * 50)
+    # Filter out columns that are all NaN/Zero for distance (e.g., 'Classify')
+    pivot_dist_clean = pivot_dist.dropna(axis=1, how='all')
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', 1000):
+        if not pivot_dist_clean.empty:
+            print(pivot_dist_clean.round(2))
+        else:
+            print("No distance metrics available.")
+    print("=" * 50 + "\n")
 
-    ax1.set_title('Model Accuracy: Grounding Benchmark', fontsize=12, fontweight='bold', pad=15)
-    ax1.set_ylabel('Accuracy (%) / IoU (%)')
-    ax1.legend(loc='upper left', frameon=True, facecolor='white', framealpha=1)
+    # --- PLOTTING ---
+    # Increased height to (16, 12) to accommodate two subplots comfortably
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 12), sharex=True)
+
+    # 1. SCORES PLOT
+    colors_top = [category_colors.get(col, 'gray') for col in pivot_score.columns]
+    pivot_score.plot(kind='bar', ax=ax1, width=0.8, color=colors_top,
+                     edgecolor='white', linewidth=1.0)
+
+    ax1.set_title('Model Accuracy: Grounding Benchmark', pad=20)
+    ax1.set_ylabel('Accuracy / IoU (%)', labelpad=15)
+
+    # Place legend
+    ax1.legend(bbox_to_anchor=(1.01, 1), loc='upper left', frameon=True, facecolor='white', framealpha=1)
     ax1.grid(axis='y', linestyle='--', alpha=0.6)
+    ax1.set_ylim(0, 110)  # Fixed Y-axis for consistency
 
     for container in ax1.containers:
-        ax1.bar_label(container, fmt='%.1f', padding=3, fontsize=9)
+        # Show label only if value > 0
+        labels = [f'{v.get_height():.1f}' if v.get_height() > 0 else '' for v in container]
+        ax1.bar_label(container, labels=labels, padding=3, fontsize=12, fontweight='bold')
 
-    # --- PLOT 2: DISTANCE ---
+    # 2. DISTANCE PLOT
     dist_cols = [c for c in pivot_dist.columns if pivot_dist[c].sum() > 0]
 
     if dist_cols:
-        colors_bottom = [category_colors[col] for col in dist_cols]
-        pivot_dist[dist_cols].plot(kind='bar', ax=ax2, width=0.7, color=colors_bottom,
-                                   edgecolor='white', linewidth=0.7)
+        colors_bottom = [category_colors.get(col, 'gray') for col in dist_cols]
+        pivot_dist[dist_cols].plot(kind='bar', ax=ax2, width=0.8, color=colors_bottom,
+                                   edgecolor='white', linewidth=1.0)
 
-        ax2.set_title('Localization Error', fontsize=12, fontweight='bold', pad=15)
-        ax2.set_ylabel('Mean Distance (Pixels)')
+        ax2.set_title('Localization Error (Lower is Better)', pad=20)
+        ax2.set_ylabel('Mean Distance (Pixels)', labelpad=15)
         ax2.grid(axis='y', linestyle='--', alpha=0.6)
 
-        # Moved legend to 'upper left' to match top graph usually
-        ax2.legend(loc='upper left', frameon=True, facecolor='white', framealpha=1)
+        # Legend for bottom plot
+        ax2.legend(bbox_to_anchor=(1.01, 1), loc='upper left', frameon=True, facecolor='white', framealpha=1)
 
         for container in ax2.containers:
-            ax2.bar_label(container, fmt='%.1f', padding=3, fontsize=9)
+            labels = [f'{v.get_height():.1f}' if v.get_height() > 0 else '' for v in container]
+            ax2.bar_label(container, labels=labels, padding=3, fontsize=12, fontweight='bold')
     else:
-        ax2.text(0.5, 0.5, "No Distance Metrics Available", ha='center', va='center')
+        ax2.text(0.5, 0.5, "No Distance Metrics Available", ha='center', va='center', fontsize=16)
 
     # Final Layout
-    plt.xlabel('Model', fontsize=11, fontweight='bold', labelpad=10)
+    plt.xlabel('Model', labelpad=15)
     plt.xticks(rotation=0)
+
+    # Tight layout with extra padding for legends
     plt.tight_layout()
 
-    plt.savefig(OUTPUT_FILE, dpi=300)
+    plt.savefig(OUTPUT_FILE, dpi=300, bbox_inches='tight')
     print(f"Plot saved to {OUTPUT_FILE}")
-    print("\nSummary Data (Sorted):")
-    print(pivot_score)
 
 
 # --- EXECUTION ---
-df_results = parse_benchmark_results(ROOT_DIR)
-plot_benchmark(df_results)
+if __name__ == "__main__":
+    df_results = parse_benchmark_results(ROOT_DIR)
+    plot_benchmark(df_results)

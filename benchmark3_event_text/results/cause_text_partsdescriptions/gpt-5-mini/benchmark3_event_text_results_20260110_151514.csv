@@ -1,0 +1,36 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-10T15:15:24.420509,cause_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/cause_text/CAUSE1.json,"The ball fell down and pressed the switch to activate the laser, it bursted the ballon",The tin snips (the little metal scissors-like tool on the brick platform) cut/poppped the balloon.,What caused the ballon to burst?
+2026-01-10T15:16:03.130274,cause_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/cause_text/CAUSE10.json,"The description is wrong, the laser is on and was triggered by the solar panel","There are two common reasons in this setup — and the picture shows the likely one:
+
+- The laser is being powered through the solar-panel/outlet chain, but the flashlight in front of the solar panel is not turned on, so the panel isn’t producing electricity and the laser won’t fire. (The flashlight must be bumped/pressed to turn it on so it lights the solar panel.)
+
+Other things to check if that’s not it:
+- Make sure the laser is plugged into a real ELECTRICAL_OUTLET (one that has juice) and not into a LASER-ACTIVATED PLUG (those only power things when they themselves are hit by the correct color laser).
+- Some parts also have their own on/off switch — click the laser/plug to toggle it.
+
+Quick fix: bump the flashlight (or drop something on its button) so the solar panel gets light — the outlet will power the laser and it will turn on.",Why is the laser not on?
+2026-01-10T15:16:09.686701,cause_text_partsdescriptions,gpt-5-mini,True,,True,,exact match,benchmark3_event/examples/cause_text/CAUSE2.json,The ball rolled down the slope and hit the Aquarium,The soccer ball landed on (or fell onto) the fish tank and shattered it — fish tanks break if you drop/impact objects on them.,Why is the Aquarium destroyed?
+2026-01-10T15:16:28.521754,cause_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/cause_text/CAUSE3.json,"The bucket moved up the paper, that made the bananas visible. The monkey got addicted by the bananas moved the treadmill and generated electricity to move the mixer",The mixer was plugged into a powered electrical outlet — the outlet supplying power made the electric mixer spin.,What caused the electric mixer spinning?
+2026-01-10T15:16:35.792352,cause_text_partsdescriptions,gpt-5-mini,True,,True,,exact match,benchmark3_event/examples/cause_text/CAUSE4.json,The Blimp flew against the button of the boxing glove. Mel Schmelling fell down and walkes against a wall turned around fell down again and turn around. Next he walks to his house,"Because Mel can see his house from the starting platform. When Mel spots his house in his line of sight he heads home, so he walked toward the house.",Starting from the caution plattform. Why did Mel Schlemming walked to his house?
+2026-01-10T15:16:57.870191,cause_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/cause_text/CAUSE5.json,The ball constantly falls on the spring board and triggers it. As soon the blimp reaches it the spring board triggers a diagonal fly,"Because when the puzzle starts the blimp is intersecting/touching the arch. The game’s physics immediately resolves that overlap by pushing the blimp out along the contact normal, so its initial movement vector is diagonal instead of perfectly horizontal. 
+
+Fixes: move the blimp slightly clear of the arch (or place it on a flat surface) so it isn’t touching at start; then it will fly in the straight horizontal line you expect.",Starting on top of the archway. Why the blimp flew diagonal?
+2026-01-10T15:17:03.173898,cause_text_partsdescriptions,gpt-5-mini,True,,True,,exact match,benchmark3_event/examples/cause_text/CAUSE6.json,The curie cat went after the newton mouse but the newton mouse run to the lower plattform.,Because Curie Cat saw Newton Mouse (the little mouse) on the right platform — Curie Cat runs toward Newton Mouse when she can see him.,What caused the curie cat to run towards the right side?
+2026-01-10T15:17:22.809137,cause_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/cause_text/CAUSE7.json,The switch of the fan is not turned on,"Because the outlet you plugged the fan into isn’t providing power. In IM2 there are different outlet types — some are always-on (the electrical outlet), but the small square you have is the switch/outlet, which must be turned on (or pressed) or a laser/solar source must supply power to a laser-activated plug.
+
+How to fix:
+- If it’s an Electric Switch & Outlet (the little box with a switch), drop something on the switch or bump it to flip it on.
+- Or plug the fan into an always-on Electrical Outlet instead.
+- If you used a Laser-Activated Plug, make sure a laser of the correct color is hitting the plug and the laser is powered.
+- If you used a Solar Panel, shine a light on the panel (flashlight, lava lamp, etc.).
+- Also check you actually placed the Electric Fan (not a vacuum or motor) and that it isn’t flipped so the airflow is reversed in a way you don’t notice.
+
+One of those will get the fan blowing.",Why is the Fan not blowing air dispite plugged in?
+2026-01-10T15:17:38.195708,cause_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/cause_text/CAUSE8.json,None,Because the large bouncing ball on the platform rolled/bounced into the tank and shattered its glass — the big bouncing ball (the colorful Super Ball) hit the aquarium and destroyed it.,Why is the Aquarium destroyed?
+2026-01-10T15:17:54.087805,cause_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/cause_text/CAUSE9.json,The description is wrong the electric motor is powered by the solar panel,"Because the panel isn’t getting light (and/or the motor isn’t actually connected/switched on).
+
+What to check:
+- The Solar Panel only produces power when it’s illuminated — the flashlight next to it must be turned on (drop something on the flashlight button to turn it on).
+- Make sure the electric motor is plugged into the solar panel’s outlet and its switch is flipped on.
+
+In the screenshot the flashlight appears off, so the panel isn’t generating electricity. Turn the flashlight on and confirm the motor is plugged and switched on.",Why is the Solar Panel not powering the electric motor?

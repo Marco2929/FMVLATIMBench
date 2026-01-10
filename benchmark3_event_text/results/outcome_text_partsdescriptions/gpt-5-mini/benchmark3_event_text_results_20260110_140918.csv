@@ -1,0 +1,37 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-10T14:09:29.956426,outcome_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME1.json,The ball falls down in the pipe because of the gravity and after going through it lands on the ground where it bounces a bit,"When started the soccer ball drops onto the brick platform, rolls to the right off the edge, lands on the trap door (the small round plate) which pops open, and the ball falls through (drops out).",What happens to the ball when the machine is started?
+2026-01-10T14:09:53.626151,outcome_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME10.json,The ball won't move and stay on the platfrom,"It will roll off the brick platform into the vertical pipe, travel through the S‑shaped pipe, exit the right-hand opening and fall onto the left end of the teeter‑totter (the seesaw).",Where will the ball land?
+2026-01-10T14:09:58.886387,outcome_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME2.json,The mouse runs away from the cat and triggers the conveyor belt this moves the cheese and it falls into the bucket,The mouse runs toward (goes after) the cheese when the simulation starts.,What does the mouse do after simulation is started?
+2026-01-10T14:10:15.614059,outcome_text_partsdescriptions,gpt-5-mini,True,,True,,exact match,benchmark3_event/examples/outcome_text/OUTCOME3.json,The electric motor activates the conveyor belt that moves the cheese and it hits the button of the boxing glove,"1) The electric outlet supplies power to the electric motor.  
+2) The motor spins its output shaft.  
+3) The motor shaft turns the small gear on it; that gear drives the adjacent gears (gear train) so rotation is transmitted out to the right.  
+4) The gear train drives the belt(s) that run up to the little moving platform/conveyor above.  
+5) The conveyor/belt carries the ball sitting on it toward the red boxing glove on the right.  
+6) The ball strikes (or depresses) the boxing glove’s back button, causing the glove to fire (punch).  
+7) The glove’s punch then hits whatever is placed to its right (or knocks the ball away), completing the reaction chain.",Describe the chain of events starting from the electric motor
+2026-01-10T14:10:29.077494,outcome_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME4.json,The monkey get triggered by the banana that turns the belt which turns three gears after it moves the trans-roto-matic,"1) The monkey is standing on the short conveyor/platform at the far left. When it moves (steps forward or pushes), it drives the small conveyor it’s standing on.
+
+2) The conveyor’s motion engages the nearby gear train (the three visible interlocking gears) and transfers rotation to the right.
+
+3) That rotation is passed along to the winding/crank mechanism on the far right (the small rotary shaft and drum). As the crank turns it pulls in the rope.
+
+4) The rope runs up through the little guide/pulley above the gears and down to the hanging bucket, so the crank winding the rope lifts the bucket upward.
+
+5) As the bucket is raised it will interact with whatever is positioned above or beneath it next (not fully visible in the screenshot) — but the visible, complete chain shown is: monkey → conveyor → gears → crank/spool → rope → bucket (bucket rises).",Describe the chain of events starting from the monkey
+2026-01-10T14:10:42.508358,outcome_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME5.json,The laser is plugged into the socked powering the ballon to go upwards,"- The ELECTRICAL_OUTLET provides power to the laser gun plugged into it.
+- The (blue) LASER fires a beam to the right as soon as it has power.
+- The laser beam strikes the HOT_AIR_BALLOON.
+- Balloons pop when hit by laser beams, so the hot-air balloon bursts.
+- With the balloon popped, its lift is gone and the basket (and anything attached to it) falls under gravity, dropping onto whatever is below.",Describe the chain of events starting from the socket
+2026-01-10T14:10:55.319174,outcome_text_partsdescriptions,gpt-5-mini,True,,True,,exact match,benchmark3_event/examples/outcome_text/OUTCOME6.json,The bowling ball travels through the pipes and lands on the wooden floor and triggers....,"It will fall into the open top pipe, travel through the S‑shaped pipe, exit the right opening, and drop onto the left end of the teeter‑totter.",Where will the bowling ball land?
+2026-01-10T14:11:12.153770,outcome_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME7.json,Nothing triggers the socket lever,"Two things are stopping it:
+
+1) The balloon is tied down to the little cleat/anchor, so it can’t rise and pull or trigger anything. Untie it or attach the rope to the object you want lifted.  
+2) The green laser isn’t powered — lasers must be plugged into an electrical outlet (and the switch turned on) to fire. Plug the laser into a live outlet (or add a solar panel/light) if you need the beam.
+
+Unanchor the balloon and power the laser and the machine will start working.",What makes the machine not working?
+2026-01-10T14:11:36.482123,outcome_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME8.json,None,"- The Pavlov mandrill (Mandrill Motor) runs and bumps the match-on-a-spring.  
+- The match pops up lit.  
+- The lit match ignites the Aladdin’s lamp sitting on the left platform.  
+- With the lamp burning, its flame is then used to light the candle on the upper center platform.",Describe the chain of events starting from the monkey
+2026-01-10T14:11:45.097763,outcome_text_partsdescriptions,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME9.json,Nothing there’s no event that triggers the mouse,He runs toward any cheese he can see (if it's on the same level). If Curie Cat chases him he runs away (into a mouse hole if available).,What does the newton mouse after simulation is started?

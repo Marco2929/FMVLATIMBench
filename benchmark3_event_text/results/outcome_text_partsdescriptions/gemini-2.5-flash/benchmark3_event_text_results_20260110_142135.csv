@@ -1,0 +1,33 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-10T14:21:39.530352,outcome_text_partsdescriptions,gemini-2.5-flash,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME1.json,The ball falls down in the pipe because of the gravity and after going through it lands on the ground where it bounces a bit,"When the machine is started, the soccer ball, being affected by gravity, will fall downwards and land on the brick wall below it.",What happens to the ball when the machine is started?
+2026-01-10T14:21:45.440097,outcome_text_partsdescriptions,gemini-2.5-flash,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME10.json,The ball won't move and stay on the platfrom,The bowling ball will land on the left side of the teeter-totter.,Where will the ball land?
+2026-01-10T14:21:52.024139,outcome_text_partsdescriptions,gemini-2.5-flash,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME2.json,The mouse runs away from the cat and triggers the conveyor belt this moves the cheese and it falls into the bucket,"After the simulation starts, the Curie Cat will head towards the Newton Mouse. When the cat bumps the cage of the Mouse Motor, the mouse will run around in its wheel. The mouse will also be attracted to the cheese on the conveyor belt, which is connected to the Mouse Motor.",What does the mouse do after simulation is started?
+2026-01-10T14:21:57.335807,outcome_text_partsdescriptions,gemini-2.5-flash,True,,True,,exact match,benchmark3_event/examples/outcome_text/OUTCOME3.json,The electric motor activates the conveyor belt that moves the cheese and it hits the button of the boxing glove,"The chain of events starting from the electric motor is as follows:
+
+1.  The `PROGRAMMABLE_BALL` (striped ball) falls and hits the switch of the `ELECTRIC_SWITCH_AND_OUTLET`.
+2.  The `ELECTRIC_SWITCH_AND_OUTLET` turns on, providing power to the `ELECTRIC_MOTOR`.
+3.  The `ELECTRIC_MOTOR` starts running, turning the first `GEAR` via a `BELT`.
+4.  The first `GEAR` turns the second `GEAR` via another `BELT`.
+5.  The second `GEAR` drives the `CONVEYOR_BELT` via a third `BELT`.
+6.  The `CHEESE` on the `CONVEYOR_BELT` is moved along.
+7.  The `CHEESE` falls off the end of the `CONVEYOR_BELT` and lands on the button of the `BOXING_GLOVE`.
+8.  The `BOXING_GLOVE` is activated and punches.",Describe the chain of events starting from the electric motor
+2026-01-10T14:22:03.387098,outcome_text_partsdescriptions,gemini-2.5-flash,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME4.json,The monkey get triggered by the banana that turns the belt which turns three gears after it moves the trans-roto-matic,"The chain of events starts with the Leaky Bucket, which is initially heavy and pulls on the rope. This rope goes over a pulley and is tied to the shade of the Mandrill Motor.
+
+1.  The heavy **Leaky Bucket** pulls the rope, which in turn tugs the shade of the **Mandrill Motor**.
+2.  The **Mandrill Motor** (monkey) starts running on its treadmill.
+3.  A **belt** connects the Mandrill Motor's treadmill to the first of three **Gears**.
+4.  The Mandrill Motor turns the first gear, which then rotates the second and third gears in sequence.
+5.  A second **belt** connects the third gear to the **Roto-Trans Converter**.
+6.  The rotation of the third gear drives the Roto-Trans Converter, converting rotational motion into translational (back-and-forth) motion.
+7.  A rope attached to the Roto-Trans Converter is pulled.
+8.  This rope is connected to the trigger of the **Captain Z's Super Phaser**.
+9.  The pulling of the rope activates the Captain Z's Super Phaser, causing it to shoot pulses of energy.",Describe the chain of events starting from the monkey
+2026-01-10T14:22:07.171670,outcome_text_partsdescriptions,gemini-2.5-flash,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME5.json,The laser is plugged into the socked powering the ballon to go upwards,"1.  The **RED_LASER** is plugged into the **ELECTRICAL_OUTLET**, providing it with continuous power.
+2.  The **RED_LASER** will fire a laser beam.
+3.  The laser beam will light the candle on the **HOT_AIR_BALLOON**.
+4.  Lighting the candle on the **HOT_AIR_BALLOON** will create hot air, causing the balloon to rise into the air.",Describe the chain of events starting from the socket
+2026-01-10T14:22:10.681831,outcome_text_partsdescriptions,gemini-2.5-flash,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME6.json,The bowling ball travels through the pipes and lands on the wooden floor and triggers....,The bowling ball will land on the teeter-totter.,Where will the bowling ball land?
+2026-01-10T14:22:13.825616,outcome_text_partsdescriptions,gemini-2.5-flash,True,,True,,exact match,benchmark3_event/examples/outcome_text/OUTCOME7.json,Nothing triggers the socket lever,"The machine is not working because the **Electric Switch and Outlet** is in the ""off"" position. Something needs to bump the switch to turn on the power, which would then activate the **Green Laser**.",What makes the machine not working?
+2026-01-10T14:22:19.797471,outcome_text_partsdescriptions,gemini-2.5-flash,True,,True,,exact match,benchmark3_event/examples/outcome_text/OUTCOME8.json,None,"There is no ""monkey"" visible in the provided image. Therefore, a chain of events starting from a monkey cannot be described.",Describe the chain of events starting from the monkey
+2026-01-10T14:22:24.127165,outcome_text_partsdescriptions,gemini-2.5-flash,True,,True,,exact match,benchmark3_event/examples/outcome_text/OUTCOME9.json,Nothing there’s no event that triggers the mouse,"Based on the image and the description for ""NEWTON_MOUSE"", Newton Mouse will do nothing as there is no cheese for him to go after, no Curie Cat to run away from, and no mouse hole to enter.",What does the newton mouse after simulation is started?

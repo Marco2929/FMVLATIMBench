@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Configuration
-NUM_RUNS=1  # Change this to run multiple times
+NUM_RUNS=5  # Change this to run multiple times
 
 # Benchmarks to test
 BENCHMARKS=(
-    "outcome_text_partslist"
-    "effect_text_partslist"
-    "cause_text_partslist"
+#    "outcome_text_partslist"
+#    "effect_text_partslist"
+#    "cause_text_partslist"
     "outcome_text_partsdescriptions"
     "effect_text_partsdescriptions"
     "cause_text_partsdescriptions"

@@ -7,7 +7,7 @@ import numpy as np
 
 # --- CONFIGURATION ---
 ROOT_DIR = 'results'
-OUTPUT_FILE = 'benchmark_results_boxplot.png'
+OUTPUT_FILE = 'benchmark_results_boxplot.svg'
 
 # 1. Map Raw IDs (from CSV) to Display Names
 MODEL_MAPPING = {
@@ -20,8 +20,8 @@ MODEL_MAPPING = {
 
 # 2. Define the exact order for the X-axis
 DESIRED_ORDER = [
-    'Qwen2.5 VL',
     'UI-TARS 1.5',
+    'Qwen2.5 VL',
     'Qwen3 VL',
     'Gemini 2.5 Flash',
     'GPT 5 Mini'
@@ -108,25 +108,31 @@ def plot_benchmark_boxplot(df):
     category_colors = {cat: default_cycle[i % len(default_cycle)] for i, cat in enumerate(unique_categories)}
 
     # Setup Subplots (2 rows)
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 14), sharex=True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 14), sharex=True)
 
-    # --- PLOT 1: SCORES (Accuracy / IoU) ---
-    sns.boxplot(
-        data=df,
+    # --- PLOT 1: SCORES (Accuracy / IoU) - BAR CHART WITH MEANS ---
+    # Calculate mean scores for each Model-Category combination
+    df_means = df.groupby(['Model', 'Category'], as_index=False)['Score'].mean()
+    
+    sns.barplot(
+        data=df_means,
         x='Model',
         y='Score',
         hue='Category',
         order=DESIRED_ORDER,
         palette=category_colors,
         ax=ax1,
-        linewidth=1.2,
-        flierprops={"marker": "o", "markersize": 3, "alpha": 0.5},  # Style for outliers
-        showfliers = False
+        errorbar=None  # No error bars, just show means
     )
 
-    ax1.set_title('Model Accuracy Distribution', fontsize=14, fontweight='bold', pad=15)
-    ax1.set_ylabel('Accuracy (%) / IoU (%)', fontsize=12)
-    ax1.legend(loc='upper left', framealpha=1, facecolor='white')
+    # Add mean values on top of bars
+    for container in ax1.containers:
+        ax1.bar_label(container, fmt='%.1f', padding=3, fontsize=12)
+
+    ax1.set_title('Model Mean Accuracy', fontsize=18, fontweight='bold', pad=15)
+    ax1.set_ylabel('Mean Accuracy (%) / IoU (%)', fontsize=16)
+    ax1.tick_params(axis='both', which='major', labelsize=14)
+    ax1.legend(loc='upper left', framealpha=1, facecolor='white', fontsize=14)
     ax1.grid(True, axis='y', linestyle='--', alpha=0.6)
 
     # --- PLOT 2: DISTANCE (Error) ---
@@ -147,20 +153,40 @@ def plot_benchmark_boxplot(df):
             showfliers = False
         )
 
-        ax2.set_title('Localization Error Distribution', fontsize=14, fontweight='bold', pad=15)
-        ax2.set_ylabel('Pixel Distance', fontsize=12)
-        ax2.legend(loc='upper left', framealpha=1, facecolor='white')
+        # Add median values on top of boxplot median lines
+        # Get unique categories and models for positioning
+        medians_data = df_dist.groupby(['Model', 'Category'])['Distance'].median().reset_index()
+        
+        # Get the positions of the boxes
+        categories = sorted(df_dist['Category'].dropna().unique())
+        n_categories = len(categories)
+        
+        for i, model in enumerate(DESIRED_ORDER):
+            for j, category in enumerate(categories):
+                median_val = medians_data[(medians_data['Model'] == model) & 
+                                         (medians_data['Category'] == category)]['Distance']
+                if not median_val.empty:
+                    # Calculate x position (adjusted for grouped boxes)
+                    x_pos = i + (j - n_categories/2 + 0.5) * (0.8 / n_categories)
+                    y_pos = median_val.values[0]
+                    ax2.text(x_pos, y_pos, f'{y_pos:.1f}', 
+                            ha='center', va='bottom', fontsize=11, fontweight='bold')
+
+        ax2.set_title('Localization Error Distribution', fontsize=18, fontweight='bold', pad=15)
+        ax2.set_ylabel('Pixel Distance', fontsize=16)
+        ax2.tick_params(axis='both', which='major', labelsize=14)
+        ax2.legend(loc='upper left', framealpha=1, facecolor='white', fontsize=14)
         ax2.grid(True, axis='y', linestyle='--', alpha=0.6)
     else:
         ax2.text(0.5, 0.5, "No Distance Data Available", ha='center', va='center')
 
     # Final Layout
-    plt.xlabel('Model', fontsize=12, fontweight='bold', labelpad=10)
+    plt.xlabel('Model', fontsize=16, fontweight='bold', labelpad=10)
     plt.tight_layout()
 
-    # High Resolution Save
-    plt.savefig(OUTPUT_FILE, dpi=300, bbox_inches='tight')
-    print(f"Boxplot saved to {OUTPUT_FILE}")
+    # Save as SVG
+    plt.savefig(OUTPUT_FILE, format='svg', bbox_inches='tight')
+    print(f"Plot saved to {OUTPUT_FILE}")
 
 
 # --- EXECUTION ---

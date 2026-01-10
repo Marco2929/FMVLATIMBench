@@ -1,0 +1,37 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-10T13:09:40.925575,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT1.json,The laser burst the ballon,"If the laser is on, it will activate the laser-activated plug, which in turn powers the connected device (in this case, the electric motor attached to the conveyor belt). This causes the conveyor belt to start moving.",What happens if the laser is on?
+2026-01-10T13:09:42.343038,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT10.json,Nothing,The wooden wall breaks.,What happens if a bowling ball falls on the wooden wall?
+2026-01-10T13:09:45.771645,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT11.json,The flashlight generates a source to use the magnifying glass to ignite the candle,"When the flashlight is on, it emits a beam of light. In the context of ""The Incredible Machines 2"", this light can be used to activate light-sensitive components, such as a solar panel or a laser-activated plug, triggering subsequent actions in the machine.",What happens when the flashlight is on
+2026-01-10T13:09:53.053666,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark3_event/examples/effect_text/EFFECT2.json,The monkey walks and loves the banana what makes the belt with the three gears attached rotating,"In ""The Incredible Machines 2"", when the monkey (Mandril Motor) is triggered with a banana, it activates and begins to spin. This spinning motion can be used to power other parts of the machine, such as:
+
+- Rotating a conveyor belt
+- Turning a gear or pulley system
+- Driving a rotor or propeller
+- Activating a connected device that requires rotational force
+
+The monkey’s spinning action is typically harnessed to transfer mechanical energy to other components in the Rube Goldberg-style contraption you’ve built.
+
+*(Note: The monkey is not literally “triggered with a banana” in the game mechanics — rather, it is activated by a nearby object (like a ball or trigger) that simulates feeding it. The banana is often used as a visual cue or part of the puzzle setup.)*
+
+So, after activation: **The monkey spins, providing rotational power to connected parts.**",What happens after the monkey is triggered with the banana
+2026-01-10T13:09:56.516633,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT3.json,The bowling ball shifts the weight on the teeter-tooter and newton mouse jumps to the air lands on the plattform and the curie cat eats it,"If the bowling ball lands on the high end of the teeter-totter, the teeter-totter will tilt downward on that side, causing the other end to rise up. This can launch whatever is on the opposite end (like a small object or character) into the air, potentially triggering other parts of the machine or achieving a goal.",What happens if the bowling ball lands on the high end of the teeter-tooter
+2026-01-10T13:09:58.269415,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark3_event/examples/effect_text/EFFECT4.json,The mixer generates purple and hit a ball with the beam but don’t destroy it,"When the red laser and blue laser intersect in the laser mixer, they combine to produce a purple laser.",What happens if the red laser and blue laser intersects in the laser mixer
+2026-01-10T13:10:06.076565,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark3_event/examples/effect_text/EFFECT5.json,The cat runs to the fish bowl,"When the Curie Cat sees the fish tank (often called a ""fish bowl"" in the game), it will jump towards it in an attempt to catch the fish inside. This action is a key part of many puzzles in *The Incredible Machines 2*, as the cat’s movement can be used to trigger other parts of the machine — for example, by landing on a teeter-totter, activating a switch, or knocking over objects.
+
+In the image you provided, the Curie Cat is positioned to the left of the fish tank on a wooden platform. If the cat sees the fish tank (within its line of sight and range), it will leap toward it — potentially falling off the platform or interacting with other objects in its path.
+
+This behavior is predictable and often exploited by players to create chain reactions in their Rube Goldberg-style machines.
+
+✅ **Short Answer**: The Curie Cat jumps toward the fish tank when it sees it.",What happens when the curie cat sees the fish bowl
+2026-01-10T13:10:07.687063,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark3_event/examples/effect_text/EFFECT6.json,It lands on the wooden floor and explodes this causes the ball to fall down from the explosion,"If the nitroglycerin canister falls down, it will explode.",What occurs if the nitroglycerin canister falls down?
+2026-01-10T13:10:14.717044,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT7.json,Nothing the electric motor is not moving and also not connected to the conveyor belt,"In *The Incredible Machines 2*, the **motor**, **generator**, and **conveyor belt** work together as part of a power transmission system:
+
+- The **electric motor** (green part with a gear) is powered by electricity (from an outlet or battery) and spins when activated.
+- It is connected via a **belt** to a **generator** (red part with a gear), which converts the mechanical rotation into electricity.
+- The generator then powers the **conveyor belt** (the long flat belt with rollers), causing it to move objects placed on it.
+
+So, when the motor is turned on, it drives the generator, which in turn powers the conveyor belt — allowing it to transport items across the screen.
+
+This setup is often used to move balls, blocks, or other objects to trigger switches, activate devices, or complete objectives in the game’s Rube Goldberg-style puzzles.","What happens with the motor, generator, conveyor belt?"
+2026-01-10T13:10:16.649682,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark3_event/examples/effect_text/EFFECT8.json,None,"The red laser is not present in the image. Therefore, nothing happens with the red laser in this scene.",What happens with the red laser?
+2026-01-10T13:10:19.530289,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT9.json,Nothing the dynamite can't destroy the flash light,"Nothing happens. The dynamite will not be ignited by the flashlight. In ""The Incredible Machines 2"", the flashlight is not a heat or spark source capable of triggering the dynamite. Dynamite typically requires a direct ignition source like a match, fuse, or electrical spark to explode.",What happens if the dynamite is placed next to a flashlight?

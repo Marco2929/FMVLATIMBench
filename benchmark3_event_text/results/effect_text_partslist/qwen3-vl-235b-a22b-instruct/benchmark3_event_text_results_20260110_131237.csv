@@ -1,0 +1,59 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-10T13:12:44.943352,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT1.json,The laser burst the ballon,"If the laser is on, it will activate the laser-activated plug, which in turn powers the electric motor connected to the conveyor belt. The conveyor belt will then start moving, potentially transporting any object placed on it.",What happens if the laser is on?
+2026-01-10T13:12:46.476591,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT10.json,Nothing,The wooden wall breaks.,What happens if a bowling ball falls on the wooden wall?
+2026-01-10T13:12:53.747890,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT11.json,The flashlight generates a source to use the magnifying glass to ignite the candle,"When the flashlight is on in *The Incredible Machines 2*, it emits a beam of light that can activate light-sensitive components in the game, such as:
+
+- **Laser-activated plugs** (if the flashlight beam hits them)
+- **Laser detectors** (if aligned properly)
+- Possibly **solar panels** (depending on game logic and proximity)
+
+The flashlight itself does not move or trigger mechanical actions directly — its primary function is to provide a directed light source to trigger optical sensors or activate devices that respond to light.
+
+In the image you provided, the flashlight is placed on a brick platform next to a fan and a candle. If turned on, its beam would shine to the right (as flashlights in TIM2 typically emit light in a fixed direction unless redirected by mirrors). If anything sensitive to light is in its path, it may activate.
+
+**Note**: In some levels, the flashlight may also be used to “scare” or trigger reactions from animals (like the Curie Cat or Newton Mouse), though this is less common and usually requires specific setup.
+
+✅ **Summary**: When the flashlight is on, it emits a beam of light that can activate light-sensitive devices or sensors in the game.",What happens when the flashlight is on
+2026-01-10T13:13:00.826194,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT2.json,The monkey walks and loves the banana what makes the belt with the three gears attached rotating,"In *The Incredible Machines 2*, when the monkey (Curie Cat or Newton Mouse, depending on the level) is triggered with a banana, it typically activates a mechanism or chain reaction. Based on the image provided:
+
+- The monkey is sitting on a **teeter-totter**.
+- A **banana** is likely placed to trigger the monkey (though not visible in this screenshot, it’s implied by the question).
+- When triggered, the monkey will **move or react**, causing the teeter-totter to **tilt**.
+- This tilt will likely **launch or activate** the objects connected to the other end — in this case, the **three pinball bumpers** below.
+
+**What happens after:**
+> The teeter-totter tilts, causing the pinball bumpers to activate or be launched upward, potentially triggering further chain reactions (e.g., hitting balls, activating switches, etc.).
+
+This is a classic Rube Goldberg-style setup — the monkey’s action is a catalyst for a larger mechanical sequence.
+
+✅ **Final Answer:** The teeter-totter tilts, launching or activating the pinball bumpers below, which may trigger further chain reactions in the machine.",What happens after the monkey is triggered with the banana
+2026-01-10T13:13:04.730895,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT3.json,The bowling ball shifts the weight on the teeter-tooter and newton mouse jumps to the air lands on the plattform and the curie cat eats it,"If the bowling ball lands on the high end of the teeter-totter, the teeter-totter will tilt downward on that side, causing the other end to rise up. This is the standard physics-based behavior of a teeter-totter (seesaw) in *The Incredible Machines 2*: a heavy object on one end causes that end to go down and the opposite end to go up. This can be used to launch objects, trigger switches, or activate other parts placed on the rising end.",What happens if the bowling ball lands on the high end of the teeter-tooter
+2026-01-10T13:13:12.687785,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT4.json,The mixer generates purple and hit a ball with the beam but don’t destroy it,"When the red laser and blue laser intersect in the laser mixer, they combine to produce a **purple laser**. This is a core mechanic of the Laser Mixer part in *The Incredible Machine 2* — it mixes the colors of incoming lasers according to additive color mixing:
+
+- Red + Blue = Purple (Magenta)
+- Red + Green = Yellow
+- Blue + Green = Cyan
+- Red + Green + Blue = White
+
+So, in your case, red and blue intersecting in the laser mixer results in a **purple laser beam** exiting the mixer.",What happens if the red laser and blue laser intersects in the laser mixer
+2026-01-10T13:13:17.465276,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark3_event/examples/effect_text/EFFECT5.json,The cat runs to the fish bowl,"When the Curie Cat sees the fish tank (not ""fish bowl""), it will jump toward it in an attempt to catch the fish inside. This behavior is part of the game’s physics and animal logic — the cat is attracted to the fish tank and will leap at it if within range, often triggering chain reactions or helping complete objectives depending on level design.
+
+Note: The object in the image is labeled **FISH_TANK**, not “fish bowl.” There is no “fish bowl” part in the game — only **FISH_TANK**.
+
+So, in short:  
+👉 **Curie Cat jumps at the FISH_TANK when it sees it.**",What happens when the curie cat sees the fish bowl
+2026-01-10T13:13:19.263971,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark3_event/examples/effect_text/EFFECT6.json,It lands on the wooden floor and explodes this causes the ball to fall down from the explosion,"If the nitroglycerin canister falls down, it will explode.",What occurs if the nitroglycerin canister falls down?
+2026-01-10T13:13:26.606815,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT7.json,Nothing the electric motor is not moving and also not connected to the conveyor belt,"In ""The Incredible Machines 2"", the motor, generator, and conveyor belt work together as part of a chain reaction or Rube Goldberg-style machine:
+
+- The **electric motor** (green part with a gear) is powered by an **electrical outlet** (or sometimes a switch and outlet combo). When activated, it spins.
+- The spinning motor is connected via a **belt** to a **conveyor belt** (red part with rollers). This causes the conveyor belt to move.
+- The **generator** (not explicitly visible in this image, but often part of such setups) would typically be driven by the motor or conveyor to produce electricity — though in this specific image, the motor is directly driving the conveyor belt, not a generator.
+
+So, in this setup:  
+**The motor turns on → spins the belt → moves the conveyor belt.**
+
+This is a classic mechanical linkage used to move objects across the screen or trigger other parts of the machine.
+
+*(Note: The image shows a motor connected to a conveyor belt via a belt — no generator is visibly present in this particular setup.)*","What happens with the motor, generator, conveyor belt?"
+2026-01-10T13:13:28.525389,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,True,,True,,exact match,benchmark3_event/examples/effect_text/EFFECT8.json,None,"The red laser is not present in the image. Therefore, nothing happens with the red laser in this scene.",What happens with the red laser?
+2026-01-10T13:13:31.760041,effect_text_partslist,qwen/qwen3-vl-235b-a22b-instruct,False,,False,,exact match,benchmark3_event/examples/effect_text/EFFECT9.json,Nothing the dynamite can't destroy the flash light,"Nothing happens. The dynamite will not be triggered by the flashlight. In ""The Incredible Machines 2"", dynamite is typically ignited by direct contact with fire (like a candle or match), an explosion, or sometimes by being hit by a fast-moving object. A flashlight emits light but no heat or flame, so it will not cause the dynamite to explode.",What happens if the dynamite is placed next to a flashlight?

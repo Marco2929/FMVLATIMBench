@@ -1,0 +1,30 @@
+timestamp,benchmark_type,model,final_score,iou,classification_correct,distance,score_formula,input_file,ground_truth,response,user_prompt
+2026-01-10T11:27:50.104972,outcome_text_partslist,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME1.json,The ball falls down in the pipe because of the gravity and after going through it lands on the ground where it bounces a bit,When started the soccer ball drops straight down onto the brick platform below and comes to rest there.,What happens to the ball when the machine is started?
+2026-01-10T11:28:01.497320,outcome_text_partslist,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME10.json,The ball won't move and stay on the platfrom,The ball will drop out of the pipe and land on the right end of the teeter-totter (the seesaw).,Where will the ball land?
+2026-01-10T11:28:11.162963,outcome_text_partslist,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME2.json,The mouse runs away from the cat and triggers the conveyor belt this moves the cheese and it falls into the bucket,"The mouse starts running on the exercise wheel, turning the wheel ( powering the belt ).",What does the mouse do after simulation is started?
+2026-01-10T11:28:29.458411,outcome_text_partslist,gpt-5-mini,True,,True,,exact match,benchmark3_event/examples/outcome_text/OUTCOME3.json,The electric motor activates the conveyor belt that moves the cheese and it hits the button of the boxing glove,"1) The electric motor (left) is powered and its output shaft spins.  
+2) The motor turns the adjacent yellow gears (gear train) mounted on the short linkage.  
+3) Those gears drive the two diagonal drive belts/ropes that run up to the right-hand assembly.  
+4) The driven pulley at the end of those belts turns the small conveyor belt above.  
+5) The conveyor carries the ring‑shaped object (the donut) to the right until it meets the red boxing glove.  
+6) The glove is driven/triggered by the same drive train and punches the incoming object, flinging it back toward the left (toward the loose ball).",Describe the chain of events starting from the electric motor
+2026-01-10T11:28:53.814862,outcome_text_partslist,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME4.json,The monkey get triggered by the banana that turns the belt which turns three gears after it moves the trans-roto-matic,"- The monkey walks/runs on the short blue conveyor/platform at the left.  
+- That motion turns the conveyor’s shaft and the three yellow gears under it (gear train).  
+- The gears transmit rotation to the crank/winch assembly to the right.  
+- The crank/winch winds the rope, so the hanging bucket is pulled upward.  
+- As the bucket is raised, the small pulley/connector on the rope moves up and the crank’s connecting rod on the far right oscillates/rotates with the winch motion.
+
+In short: monkey motion → conveyor turns → gears turn → crank/winch turns → rope winds → bucket is lifted (and the right‑hand rod/crank oscillates as the winch turns).",Describe the chain of events starting from the monkey
+2026-01-10T11:29:11.513999,outcome_text_partslist,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME5.json,The laser is plugged into the socked powering the ballon to go upwards,"- ELECTRICAL_OUTLET supplies power.
+- The powered outlet activates the flint-and-starter (the small black igniter next to it).
+- The flint-and-starter produces a spark/ignition.
+- The spark lights the hot-air balloon’s burner/flame.
+- The burner heats the air inside the envelope.
+- The balloon fills with hot air and rises.",Describe the chain of events starting from the socket
+2026-01-10T11:29:28.707111,outcome_text_partslist,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME6.json,The bowling ball travels through the pipes and lands on the wooden floor and triggers....,It will drop straight down into the short open vertical pipe on the left (not onto the seesaw).,Where will the bowling ball land?
+2026-01-10T11:29:49.027048,outcome_text_partslist,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME7.json,Nothing triggers the socket lever,"The green laser/laser-emitter sitting on the pipe isn't powered — there's no electrical outlet/switch/power source, so it never turns on (and won't pop the balloon). Add a power source/switch to activate it.",What makes the machine not working?
+2026-01-10T11:30:15.196745,outcome_text_partslist,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME8.json,None,"- The mandrill motor (the monkey) starts moving and runs/bumps left.
+- It hits the spring-mounted match (MATCH_ON_A_SPRING) sitting on the lower brick.
+- The collision releases the spring and shoots the match upward.
+- The launched match reaches the upper brick and lights the candle (CANDLE) on the top platform.",Describe the chain of events starting from the monkey
+2026-01-10T11:30:22.956682,outcome_text_partslist,gpt-5-mini,False,,False,,exact match,benchmark3_event/examples/outcome_text/OUTCOME9.json,Nothing there’s no event that triggers the mouse,"When the simulation starts the Newton mouse runs to the right and bumps/knocks the soccer ball, sending the ball rolling.",What does the newton mouse after simulation is started?
