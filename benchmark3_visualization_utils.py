@@ -44,13 +44,14 @@ def setup_plot_style():
     })
 
 
-def load_csv_data(base_dir, score_column='final_score'):
+def load_csv_data(base_dir, score_column='final_score', skip_none_response=True):
     """
     Load CSV data from benchmark results directory.
     
     Args:
         base_dir: Path to results directory
         score_column: Name of the score column to extract
+        skip_none_response: If True, skip rows with None response. If False, keep them (for IoU scoring)
         
     Returns:
         tuple: (success_count, total_count, data_dict)
@@ -146,10 +147,11 @@ def load_csv_data(base_dir, score_column='final_score'):
                             rows_skipped_no_ground_truth += 1
                             continue
                         
-                        # Skip if response is None or empty string
-                        if pd.isna(resp) or str(resp).strip() == '' or str(resp).strip().lower() == 'none':
-                            rows_skipped_no_response += 1
-                            continue
+                        # Skip if response is None or empty string (only if skip_none_response=True)
+                        if skip_none_response:
+                            if pd.isna(resp) or str(resp).strip() == '' or str(resp).strip().lower() == 'none':
+                                rows_skipped_no_response += 1
+                                continue
                         
                         rows_kept += 1
                         

@@ -27,8 +27,8 @@ INSTRUCTION_MAPPING = {
 }
 
 def main():
-    # Load CSV data
-    success_count, csv_count, data_dict = load_csv_data(BASE_DIR, score_column='iou')
+    # Load CSV data (keep response=None rows for IoU scoring - they count as IoU=0)
+    success_count, csv_count, data_dict = load_csv_data(BASE_DIR, score_column='iou', skip_none_response=False)
     
     print(f"Found {csv_count} CSV files, successfully loaded {success_count}")
     print(f"Total data rows: {len(data_dict['benchmark_type'])}")
