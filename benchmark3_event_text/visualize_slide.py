@@ -43,7 +43,8 @@ def main():
         data_dict,
         INSTRUCTION_MAPPING,
         title,
-        OUTPUT_FILE
+        OUTPUT_FILE,
+        ylabel='Success Rate (%)'
     )
 
 if __name__ == "__main__":

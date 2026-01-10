@@ -61,6 +61,13 @@ def load_csv_data(base_dir, score_column='final_score'):
     
     csv_count = 0
     success_count = 0
+    skipped_files = []
+    
+    # Statistics tracking
+    total_rows_read = 0
+    rows_skipped_no_ground_truth = 0
+    rows_skipped_no_response = 0
+    rows_kept = 0
     
     data_dict = {'benchmark_type': [], 'model': [], 'score': []}
     
@@ -70,39 +77,133 @@ def load_csv_data(base_dir, score_column='final_score'):
                 csv_count += 1
                 file_path = os.path.join(root, file)
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        lines = f.readlines()
-                        # Skip header, process data lines
-                        for line in lines[1:]:
-                            parts = line.strip().split(',')
-                            if len(parts) >= 4:
-                                benchmark_type = parts[1]
-                                model = parts[2]
+                    # Use pandas for proper CSV parsing with quoted fields
+                    df = None
+                    rows_in_file = 0
+                    
+                    try:
+                        df = pd.read_csv(file_path)
+                        rows_in_file = len(df)
+                    except (pd.errors.ParserError, pd.errors.EmptyDataError) as e:
+                        # If standard parsing fails, try manual line-by-line parsing
+                        print(f"WARNING: Parsing issues in {file_path}, attempting manual recovery...")
+                        
+                        try:
+                            # Read file manually and parse only valid lines
+                            import csv
+                            valid_rows = []
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                # Read header
+                                header = f.readline().strip().split(',')
                                 
-                                # Handle different score formats
-                                if score_column == 'final_score':
-                                    score_str = parts[3].strip().lower()
-                                    score = 1.0 if score_str == 'true' else 0.0
-                                elif score_column == 'iou':
-                                    try:
-                                        score = float(parts[4])
-                                    except:
-                                        score = 0.0
-                                else:
-                                    score = 0.0
+                                # Read data lines
+                                for line_num, line in enumerate(f, start=2):
+                                    # Only process lines that start with a timestamp
+                                    if not line.strip() or not line[0].isdigit():
+                                        continue
+                                    
+                                    # Split and take first 12 columns (up to user_prompt)
+                                    parts = line.strip().split(',')
+                                    if len(parts) >= 10:  # At least up to response column
+                                        valid_rows.append(parts[:12] if len(parts) >= 12 else parts)
+                            
+                            if valid_rows:
+                                # Create DataFrame from valid rows
+                                df = pd.DataFrame(valid_rows, columns=header[:len(valid_rows[0])])
+                                rows_in_file = len(df)
+                                print(f"  Recovered {rows_in_file} rows from {file_path}")
+                            else:
+                                print(f"ERROR: No valid rows recovered from {file_path}")
+                                skipped_files.append((file_path, f"No valid rows after manual parsing"))
+                                continue
                                 
-                                data_dict['benchmark_type'].append(benchmark_type)
-                                data_dict['model'].append(model)
-                                data_dict['score'].append(score)
-                    success_count += 1
+                        except Exception as e2:
+                            print(f"ERROR: Manual parsing failed for {file_path}: {e2}")
+                            skipped_files.append((file_path, f"CSV parsing failed: {e}"))
+                            continue
+                    
+                    if df is None or len(df) == 0:
+                        continue
+                    
+                    # Validate required columns exist
+                    required_cols = ['benchmark_type', 'model', 'ground_truth', 'response', score_column]
+                    missing_cols = [col for col in required_cols if col not in df.columns]
+                    if missing_cols:
+                        print(f"WARNING: {file_path} missing columns: {missing_cols}")
+                        skipped_files.append((file_path, f"Missing columns: {missing_cols}"))
+                        continue
+                    
+                    rows_added = 0
+                    for idx, row in df.iterrows():
+                        total_rows_read += 1
+                        
+                        # Check if ground_truth or response is None/empty
+                        gt = row.get('ground_truth')
+                        resp = row.get('response')
+                        
+                        # Skip if ground_truth is None or empty string
+                        if pd.isna(gt) or str(gt).strip() == '' or str(gt).strip().lower() == 'none':
+                            rows_skipped_no_ground_truth += 1
+                            continue
+                        
+                        # Skip if response is None or empty string
+                        if pd.isna(resp) or str(resp).strip() == '' or str(resp).strip().lower() == 'none':
+                            rows_skipped_no_response += 1
+                            continue
+                        
+                        rows_kept += 1
+                        
+                        benchmark_type = row['benchmark_type']
+                        model = row['model']
+                        
+                        # Handle different score formats
+                        if score_column == 'final_score':
+                            score_str = str(row['final_score']).strip().lower()
+                            score = 1.0 if score_str == 'true' else 0.0
+                        elif score_column == 'iou':
+                            try:
+                                score = float(row['iou'])
+                            except (ValueError, TypeError):
+                                print(f"WARNING: Invalid IoU value in {file_path} row {idx}: {row.get('iou')}")
+                                score = 0.0
+                        else:
+                            score = 0.0
+                        
+                        data_dict['benchmark_type'].append(benchmark_type)
+                        data_dict['model'].append(model)
+                        data_dict['score'].append(score)
+                        rows_added += 1
+                    
+                    if rows_added > 0:
+                        success_count += 1
+                    
                 except Exception as e:
-                    pass
+                    print(f"ERROR reading {file_path}: {type(e).__name__}: {e}")
+                    skipped_files.append((file_path, f"{type(e).__name__}: {e}"))
+                    raise  # Re-raise to fail loudly
+    
+    # Print filtering statistics
+    print(f"\n{'='*70}")
+    print("DATA FILTERING STATISTICS")
+    print(f"{'='*70}")
+    print(f"Total rows read from CSVs:              {total_rows_read:,}")
+    print(f"Rows skipped (no ground_truth):         {rows_skipped_no_ground_truth:,}")
+    print(f"Rows skipped (no response):             {rows_skipped_no_response:,}")
+    print(f"Rows kept (valid data):                 {rows_kept:,}")
+    print(f"{'='*70}\n")
+    
+    if skipped_files:
+        print(f"Skipped {len(skipped_files)} files:")
+        for path, reason in skipped_files[:10]:  # Show first 10
+            print(f"  - {path}: {reason}")
+        if len(skipped_files) > 10:
+            print(f"  ... and {len(skipped_files) - 10} more")
     
     return success_count, csv_count, data_dict
 
 
 def create_instruction_plot(data_dict, instruction_mapping, title, output_file, 
-                            model_mapping=None, model_order=None):
+                            model_mapping=None, model_order=None, ylabel=None):
     """
     Create a grouped bar plot comparing instruction types across models.
     
@@ -113,11 +214,14 @@ def create_instruction_plot(data_dict, instruction_mapping, title, output_file,
         output_file: Output filename
         model_mapping: Optional model name mapping
         model_order: Optional desired model order
+        ylabel: Optional y-axis label (default: 'Accuracy (%) / IoU (%)')
     """
     if model_mapping is None:
         model_mapping = MODEL_MAPPING
     if model_order is None:
         model_order = DESIRED_MODEL_ORDER
+    if ylabel is None:
+        ylabel = 'Accuracy (%) / IoU (%)'
     
     # Create DataFrame
     full_df = pd.DataFrame({
@@ -164,7 +268,7 @@ def create_instruction_plot(data_dict, instruction_mapping, title, output_file,
     
     plt.title(title, pad=20)
     plt.xlabel('Model', labelpad=15)
-    plt.ylabel('Accuracy (%) / IoU (%)', labelpad=15)
+    plt.ylabel(ylabel, labelpad=15)
     
     plt.xticks(rotation=0)
     
