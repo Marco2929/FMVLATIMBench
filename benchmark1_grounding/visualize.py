@@ -151,6 +151,49 @@ def plot_benchmark(df):
             print(pivot_dist_clean.round(2))
         else:
             print("No distance metrics available.")
+    
+    # Calculate distance-based score: 100% - 100 * distance / sqrt(640^2 + 441^2)
+    max_distance = np.sqrt(640**2 + 441**2)  # ≈777.1
+    pivot_dist_score = 100 - (100 * pivot_dist / max_distance)
+    
+    # For Localize Multi NaN values, use Localize values
+    if 'Localize Multi' in pivot_dist_score.columns and 'Localize' in pivot_dist_score.columns:
+        pivot_dist_score['Localize Multi'] = pivot_dist_score['Localize Multi'].fillna(pivot_dist_score['Localize'])
+    
+    pivot_dist_score_clean = pivot_dist_score.dropna(axis=1, how='all')
+    
+    print("\n" + "=" * 50)
+    print("   BENCHMARK RESULTS: DISTANCE-BASED SCORE (%)")
+    print("   (100% - 100 * distance / diagonal)")
+    print("=" * 50)
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', 1000):
+        if not pivot_dist_score_clean.empty:
+            print(pivot_dist_score_clean.round(2))
+        else:
+            print("No distance metrics available.")
+    
+    # Calculate combined metric: 1/5 * (classify + iou_localize + iou_multi + dist_localize + dist_multi)
+    # Only average across available (non-NaN) values for each model
+    combined_metric = pd.DataFrame(index=pivot_score.index)
+    
+    # Add each component (keep NaN for missing data)
+    combined_metric['Classify'] = pivot_score.get('Classify', pd.Series(index=pivot_score.index, dtype=float))
+    combined_metric['IoU_Localize'] = pivot_score.get('Localize', pd.Series(index=pivot_score.index, dtype=float))
+    combined_metric['IoU_Multi'] = pivot_score.get('Localize Multi', pd.Series(index=pivot_score.index, dtype=float))
+    
+    # For distance scores, use original pivot_dist_score without fillna
+    pivot_dist_score_original = 100 - (100 * pivot_dist / max_distance)
+    combined_metric['Dist_Localize'] = pivot_dist_score_original.get('Localize', pd.Series(index=pivot_score.index, dtype=float))
+    combined_metric['Dist_Multi'] = pivot_dist_score_original.get('Localize Multi', pd.Series(index=pivot_score.index, dtype=float))
+    
+    # Calculate the average only across non-NaN values for each model
+    combined_metric['Overall'] = combined_metric[['Classify', 'IoU_Localize', 'IoU_Multi', 'Dist_Localize', 'Dist_Multi']].mean(axis=1, skipna=True)
+    
+    print("\n" + "=" * 50)
+    print("      COMBINED METRIC (Average of Available Components)")
+    print("=" * 50)
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', 1000):
+        print(combined_metric[['Overall']].sort_values('Overall', ascending=False).round(2))
     print("=" * 50 + "\n")
 
     # --- PLOTTING ---
