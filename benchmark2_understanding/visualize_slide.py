@@ -15,7 +15,14 @@ MODEL_MAPPING = {
     'gpt-5-mini': 'GPT 5 Mini'
 }
 
-# 2. Define the exact order for the X-axis
+# 2. Map Category Names to Display Names
+CATEGORY_MAPPING = {
+    'state_ident': 'State Ident',
+    'with_instruct': 'Property Ident with instruct',
+    'without_instruct': 'Property Ident without instruct'
+}
+
+# 3. Define the exact order for the X-axis
 DESIRED_ORDER = [
     'UI-TARS 1.5',
     'Qwen2.5 VL',
@@ -41,7 +48,7 @@ plt.rcParams.update({
 
 all_data = []
 
-# 3. Load Data
+# 4. Load Data
 if os.path.exists(BASE_DIR):
     for root, dirs, files in os.walk(BASE_DIR):
         for file in files:
@@ -69,11 +76,11 @@ if not all_data:
 else:
     full_df = pd.concat(all_data, ignore_index=True)
 
-    # 4. Apply Model Naming Mapping
-    # Using replace ensures that if a model isn't in the map, it keeps its original name
+    # 5. Apply Model and Category Renaming
     full_df['Model'] = full_df['Model'].replace(MODEL_MAPPING)
+    full_df['Category'] = full_df['Category'].replace(CATEGORY_MAPPING)
 
-    # 5. Process Data
+    # 6. Process Data
     full_df['Result'] = full_df['Result'].astype(str).str.strip().str.lower() == 'true'
     accuracy_df = full_df.groupby(['Category', 'Model'])['Result'].mean().reset_index()
     accuracy_df['Accuracy'] = accuracy_df['Result'] * 100.0
@@ -81,29 +88,26 @@ else:
     # Pivot (Models as Index, Categories as Columns)
     pivot_df = accuracy_df.pivot(index='Model', columns='Category', values='Accuracy')
 
-    # 6. Apply Desired Order
-    # reindex forces the order. valid models not in DESIRED_ORDER will be dropped or pushed to end depending on logic.
-    # Here we strictly enforce the list. Models in the data but NOT in the list will become NaN rows (we drop them).
-    # Models in the list but NOT in the data will be NaN rows (we can fill them with 0 or drop).
+    # 7. Apply Desired Order
     pivot_df = pivot_df.reindex(DESIRED_ORDER)
-
-    # Optional: Drop rows that are completely empty if a model in DESIRED_ORDER wasn't found in data
     pivot_df = pivot_df.dropna(how='all')
 
-    # 7. Plotting
+    # 8. Plotting
     ax = pivot_df.plot(
         kind='bar',
-        figsize=(16, 9),
+        figsize=(20, 9),
         width=0.8,
         edgecolor='white',
         linewidth=1.0
     )
 
-    plt.title('Model Accuracy: Understanding Benchmark', pad=20)
+    # plt.title('Model Accuracy: Understanding Benchmark', pad=20)
     plt.xlabel('Model', labelpad=15)
     plt.ylabel('Accuracy (%)', labelpad=15)
 
-    # REVERTED ROTATION TO NORMAL (0)
+    # Fix Y-axis to 0-110 range
+    plt.ylim(0, 110)
+
     plt.xticks(rotation=0)
 
     plt.legend(
@@ -119,9 +123,11 @@ else:
 
     # Add Value Annotations
     for container in ax.containers:
+        # Only show labels > 0
+        labels = [f'{v.get_height():.1f}' if v.get_height() > 0 else '' for v in container]
         ax.bar_label(
             container,
-            fmt='%.1f',
+            labels=labels,
             padding=4,
             fontsize=12,
             fontweight='bold'
@@ -131,4 +137,5 @@ else:
 
     plt.savefig(OUTPUT_FILE, dpi=300, bbox_inches='tight')
     print(f"Sorted plot saved to {OUTPUT_FILE}")
-    print(pivot_df)
+    print("\nResults Table:")
+    print(pivot_df.round(2))

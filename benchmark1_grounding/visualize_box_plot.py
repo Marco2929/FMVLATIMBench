@@ -27,8 +27,23 @@ DESIRED_ORDER = [
     'GPT 5 Mini'
 ]
 
-# Set style (Seaborn works well with ggplot style too)
+# --- PRESENTATION STYLING ---
+# Apply ggplot style first
 plt.style.use('ggplot')
+
+# Apply global font scaling for PowerPoint visibility
+plt.rcParams.update({
+    'font.size': 16,  # Base font size
+    'axes.titlesize': 24,  # Main Title
+    'axes.labelsize': 20,  # X and Y axis labels
+    'xtick.labelsize': 16,  # X-axis tick values
+    'ytick.labelsize': 16,  # Y-axis tick values
+    'legend.fontsize': 16,  # Legend text
+    'figure.titlesize': 26,  # Figure super title
+    'font.weight': 'bold',  # Make text bolder generally
+    'axes.labelweight': 'bold',
+    'axes.titleweight': 'bold',
+})
 
 
 def parse_benchmark_results(root_dir):
@@ -99,21 +114,20 @@ def plot_benchmark_boxplot(df):
         print("No data found.")
         return
 
-    # Filter Data to only include models in DESIRED_ORDER (optional, keeps plot clean)
+    # Filter Data to only include models in DESIRED_ORDER
     df = df[df['Model'].isin(DESIRED_ORDER)].copy()
 
-    # Define Colors to maintain consistency
+    # Define Colors
     unique_categories = sorted(df['Category'].dropna().unique())
     default_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
     category_colors = {cat: default_cycle[i % len(default_cycle)] for i, cat in enumerate(unique_categories)}
 
-    # Setup Subplots (2 rows)
+    # Setup Subplots (2 rows) with slightly more height
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 14), sharex=True)
 
-    # --- PLOT 1: SCORES (Accuracy / IoU) - BAR CHART WITH MEANS ---
-    # Calculate mean scores for each Model-Category combination
+    # --- PLOT 1: SCORES (Accuracy / IoU) - BAR CHART ---
     df_means = df.groupby(['Model', 'Category'], as_index=False)['Score'].mean()
-    
+
     sns.barplot(
         data=df_means,
         x='Model',
@@ -122,21 +136,27 @@ def plot_benchmark_boxplot(df):
         order=DESIRED_ORDER,
         palette=category_colors,
         ax=ax1,
-        errorbar=None  # No error bars, just show means
+        edgecolor='white',
+        linewidth=1.0,
+        errorbar=None
     )
 
-    # Add mean values on top of bars
+    # Add labels
     for container in ax1.containers:
-        ax1.bar_label(container, fmt='%.1f', padding=3, fontsize=12)
+        # Only show labels > 0
+        labels = [f'{v.get_height():.1f}' if v.get_height() > 0 else '' for v in container]
+        ax1.bar_label(container, labels=labels, padding=3, fontsize=12, fontweight='bold')
 
-    ax1.set_title('Model Mean Accuracy', fontsize=18, fontweight='bold', pad=15)
-    ax1.set_ylabel('Mean Accuracy (%) / IoU (%)', fontsize=16)
-    ax1.tick_params(axis='both', which='major', labelsize=14)
-    ax1.legend(loc='upper left', framealpha=1, facecolor='white', fontsize=14)
+    ax1.set_title('Model Mean Accuracy / IoU', pad=20)
+    ax1.set_ylabel('Score (%)', labelpad=15)
+
+    # Legend outside
+    ax1.legend(bbox_to_anchor=(1.01, 1), loc='upper left', frameon=True, facecolor='white', framealpha=1)
+
     ax1.grid(True, axis='y', linestyle='--', alpha=0.6)
+    ax1.set_ylim(0, 110)  # Fix Y axis
 
-    # --- PLOT 2: DISTANCE (Error) ---
-    # Filter out Classify for the distance plot (usually has no distance)
+    # --- PLOT 2: DISTANCE (Error) - BOXPLOT ---
     df_dist = df[df['Distance'].notna()]
 
     if not df_dist.empty:
@@ -148,45 +168,75 @@ def plot_benchmark_boxplot(df):
             order=DESIRED_ORDER,
             palette=category_colors,
             ax=ax2,
-            linewidth=1.2,
-            flierprops={"marker": "o", "markersize": 3, "alpha": 0.5},
-            showfliers = False
+            linewidth=1.5,  # Thicker lines
+            showfliers=False  # Hide outliers for cleaner presentation view
         )
 
         # Add median values on top of boxplot median lines
-        # Get unique categories and models for positioning
         medians_data = df_dist.groupby(['Model', 'Category'])['Distance'].median().reset_index()
-        
-        # Get the positions of the boxes
+
         categories = sorted(df_dist['Category'].dropna().unique())
         n_categories = len(categories)
-        
+
+        # Calculate width of a single hue-bar group in seaborn (approx 0.8 total width)
+        # Seaborn dodge logic places them centered around integer indices
+        total_width = 0.8
+        bar_width = total_width / n_categories
+
         for i, model in enumerate(DESIRED_ORDER):
             for j, category in enumerate(categories):
-                median_val = medians_data[(medians_data['Model'] == model) & 
-                                         (medians_data['Category'] == category)]['Distance']
-                if not median_val.empty:
-                    # Calculate x position (adjusted for grouped boxes)
-                    x_pos = i + (j - n_categories/2 + 0.5) * (0.8 / n_categories)
-                    y_pos = median_val.values[0]
-                    ax2.text(x_pos, y_pos, f'{y_pos:.1f}', 
-                            ha='center', va='bottom', fontsize=11, fontweight='bold')
+                median_val = medians_data[(medians_data['Model'] == model) &
+                                          (medians_data['Category'] == category)]['Distance']
 
-        ax2.set_title('Localization Error Distribution', fontsize=18, fontweight='bold', pad=15)
-        ax2.set_ylabel('Pixel Distance', fontsize=16)
-        ax2.tick_params(axis='both', which='major', labelsize=14)
-        ax2.legend(loc='upper left', framealpha=1, facecolor='white', fontsize=14)
+                if not median_val.empty:
+                    val = median_val.values[0]
+                    # Calculate offset: j=0 is leftmost, j=n-1 is rightmost relative to center
+                    offset = (j - (n_categories - 1) / 2) * bar_width
+                    x_pos = i + offset
+
+                    # Place text slightly above the median line
+                    ax2.text(x_pos, val, f'{val:.1f}',
+                             ha='center', va='bottom',
+                             fontsize=11, fontweight='bold',
+                             color='black',
+                             bbox=dict(facecolor='white', alpha=0.7, edgecolor='none', pad=1))
+
+        ax2.set_title('Localization Error Distribution (Lower is Better)', pad=20)
+        ax2.set_ylabel('Pixel Distance', labelpad=15)
+
+        # Legend outside
+        ax2.legend(bbox_to_anchor=(1.01, 1), loc='upper left', frameon=True, facecolor='white', framealpha=1)
+
         ax2.grid(True, axis='y', linestyle='--', alpha=0.6)
     else:
         ax2.text(0.5, 0.5, "No Distance Data Available", ha='center', va='center')
 
     # Final Layout
-    plt.xlabel('Model', fontsize=16, fontweight='bold', labelpad=10)
+    plt.xlabel('Model', labelpad=15)
     plt.tight_layout()
 
-    # Save as SVG
     plt.savefig(OUTPUT_FILE, format='svg', bbox_inches='tight')
     print(f"Plot saved to {OUTPUT_FILE}")
+
+    # --- CONSOLE TABLE ---
+    print("\n" + "=" * 50)
+    print("       BENCHMARK RESULTS: MEAN SCORES")
+    print("=" * 50)
+    pivot_scores = df.groupby(['Model', 'Category'])['Score'].mean().reset_index().pivot(index='Model',
+                                                                                         columns='Category',
+                                                                                         values='Score')
+    pivot_scores = pivot_scores.reindex(DESIRED_ORDER)
+    print(pivot_scores.round(2))
+
+    print("\n" + "=" * 50)
+    print("       BENCHMARK RESULTS: MEDIAN DISTANCE")
+    print("=" * 50)
+    pivot_dist = df.groupby(['Model', 'Category'])['Distance'].median().reset_index().pivot(index='Model',
+                                                                                            columns='Category',
+                                                                                            values='Distance')
+    pivot_dist = pivot_dist.reindex(DESIRED_ORDER)
+    print(pivot_dist.round(2))
+    print("=" * 50 + "\n")
 
 
 # --- EXECUTION ---
