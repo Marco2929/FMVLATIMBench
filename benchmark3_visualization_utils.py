@@ -268,7 +268,7 @@ def create_instruction_plot(data_dict, instruction_mapping, title, output_file,
         linewidth=1.0
     )
     
-    plt.title(title, pad=20)
+    # plt.title(title, pad=20)
     plt.xlabel('Model', labelpad=15)
     plt.ylabel(ylabel, labelpad=15)
     
@@ -276,11 +276,10 @@ def create_instruction_plot(data_dict, instruction_mapping, title, output_file,
     
     plt.legend(
         title='Instruction Type',
-        bbox_to_anchor=(1.02, 1),
-        loc='upper left',
+        loc='upper right',
         frameon=True,
         facecolor='white',
-        framealpha=1
+        framealpha=0.9
     )
     
     plt.grid(axis='y', linestyle='--', alpha=0.6)
