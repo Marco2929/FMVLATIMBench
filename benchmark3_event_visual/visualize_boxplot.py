@@ -99,11 +99,12 @@ def create_boxplot(df, output_file):
     # Define instruction type order
     instruction_order = ['Baseline', 'Parts List', 'Parts Descriptions']
     
-    # Define colors for instruction types
+    # Use colors from matplotlib's default color cycle (same as bar plots)
+    color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
     colors = {
-        'Baseline': '#1f77b4',
-        'Parts List': '#ff7f0e',
-        'Parts Descriptions': '#2ca02c'
+        'Baseline': color_cycle[0],
+        'Parts List': color_cycle[1],
+        'Parts Descriptions': color_cycle[2]
     }
     
     # Filter DESIRED_MODEL_ORDER to only include models present in the data
@@ -155,19 +156,14 @@ def create_boxplot(df, output_file):
                     )
     
     # Styling
-    ax.set_title(
-        'Localization Error Distribution: Event Visual Benchmark\n(Across Cause, Effect, and Outcome)',
-        pad=20
-    )
     ax.set_xlabel('Model', labelpad=15)
     ax.set_ylabel('Distance (Pixels)', labelpad=15)
     ax.legend(
         title='Instruction Type',
-        bbox_to_anchor=(1.01, 1),
-        loc='upper left',
+        loc='upper right',
         frameon=True,
         facecolor='white',
-        framealpha=1
+        framealpha=0.9
     )
     ax.grid(axis='y', linestyle='--', alpha=0.6)
     
